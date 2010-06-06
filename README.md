@@ -102,7 +102,7 @@ contain entries with [canonical pathnames] [canon]. To enable this option
 (which I strongly suggest doing when you run UNIX and use symbolic links)
 execute the following Vim command:
 
-    :let easytags_resolve_links = 1
+    :let g:easytags_resolve_links = 1
 
 ## Troubleshooting
 
