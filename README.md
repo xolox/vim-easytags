@@ -36,6 +36,12 @@ Additionally if the file you just opened is a C, Lua, PHP, Python or Vim source
 file you should also notice that the function and type names defined in the
 file have been syntax highlighted.
 
+If the plug-in warns you that `ctags` isn't installed you can download it from
+its [homepage] [exuberant_ctags], or if you're running Debian/Ubuntu you can
+install it by executing the following shell command:
+
+    sudo apt-get install exuberant-ctags
+
 ## Configuration
 
 The plug-in is intended to work without configuration but can be customized by
