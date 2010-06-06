@@ -95,28 +95,13 @@ function! easytags#highlight_cmd() " {{{1
       endif
       let matches = filter(copy(taglist), tagkind.filter)
       call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
-      let pattern = tagkind.pattern_prefix . '\%(' . join(s:unique(matches), '\|') . '\)' . tagkind.pattern_suffix
+      let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
       let command = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
       execute printf(command, hlgroup_tagged, escape(pattern, '/'))
     endfor
     redraw
     call xolox#timer#stop(start, "easytags.vim: Highlighted tags in %s second(s)")
   endif
-endfunction
-
-function! s:unique(list)
-	let index = 0
-	while index < len(a:list)
-		let value = a:list[index]
-		let match = index(a:list, value, index+1)
-		if match >= 0
-			call remove(a:list, match)
-		else
-			let index += 1
-		endif
-		unlet value
-	endwhile
-	return a:list
 endfunction
 
 function! easytags#get_tagsfile() " {{{1
