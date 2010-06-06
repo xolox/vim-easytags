@@ -15,7 +15,7 @@ syntax highlighting for [over 500 file types] [vim_support] (!) and Exuberant
 Ctags can generate tags for [over 40 file types] [ctags_support] as well...
 
 There's just one problem: You have to manually keep your tags files up-to-date
-and this turns about to be a royal pain in the ass! So I set out to write a Vim
+and this turns out to be a royal pain in the ass! So I set out to write a Vim
 plug-in that would do this boring work for me. When I finished the plug-in's
 basic functionality (one automatic command and a call to `system()`) I became
 interested in dynamic syntax highlighting, so I added that as well to see if it
