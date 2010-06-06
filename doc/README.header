@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <title>easytags.vim - Automated tag generation and syntax highlighting in Vim</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+   body { font-family: sans-serif; padding: 1em 30% 4em 1em; }
+   a:link, a:visited { color: #000080; }
+   a:hover, a:active { color: #8B0000; }
+   pre, code, tt { font-family: Monaco, Consolas, monospace; }
+   pre { margin-left: 2em; }
+   code { background: #F6F6F6; padding: .1em .3em; }
+   p { text-align: justify; line-height: 1.75em; }
+   h1 { padding: 0 30% 0 0; }
+   h2, h3 { border-bottom: 2px solid #F6F6F6; margin: 2em 0 -0.5em 0; padding-left: 0.5em; }
+   hr { height: 0; border: none; border: 1px solid #F6F6F6; }
+  </style>
+ </head>
+ <body>
