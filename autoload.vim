@@ -60,7 +60,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         let filtered = filter(copy(lines), filter)
         if lines != filtered
           if writefile(filtered, tagsfile) != 0
-            throw "Failed to filter tags file!"
+            throw "Failed to write filtered tags file!"
           endif
         endif
         call xolox#timer#stop(start_filter, "easytags.vim: Filtered tags file in %s second(s)")
@@ -100,7 +100,12 @@ function! easytags#highlight_cmd() " {{{1
   try
     if exists('g:syntax_on') && has_key(s:tagkinds, &ft)
       let start = xolox#timer#start()
-      let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
+      if !has_key(s:aliases, &ft)
+        let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
+      else
+        let aliases = s:aliases[&ft]
+        let taglist = filter(taglist('.'), "has_key(aliases, tolower(get(v:val, 'language', '')))")
+      endif
       for tagkind in s:tagkinds[&ft]
         let hlgroup_tagged = tagkind.hlgroup . 'Tag'
         if hlexists(hlgroup_tagged)
@@ -149,6 +154,28 @@ function! easytags#map_filetypes(vim_ft, ctags_ft) " {{{1
   call add(s:ctags_filetypes, a:ctags_ft)
 endfunction
 
+function! easytags#alias_filetypes(...) " {{{1
+  for type in a:000
+    if !has_key(s:aliases, type)
+      let s:aliases[type] = {}
+    endif
+  endfor
+  for i in range(a:0)
+    for j in range(a:0)
+      let vimft1 = a:000[i]
+      let ctagsft1 = easytags#to_ctags_ft(vimft1)
+      let vimft2 = a:000[j]
+      let ctagsft2 = easytags#to_ctags_ft(vimft2)
+      if !has_key(s:aliases[vimft1], ctagsft2)
+        let s:aliases[vimft1][ctagsft2] = 1
+      endif
+      if !has_key(s:aliases[vimft2], ctagsft1)
+        let s:aliases[vimft2][ctagsft1] = 1
+      endif
+    endfor
+  endfor
+endfunction
+
 function! easytags#to_vim_ft(ctags_ft) " {{{1
   let type = tolower(a:ctags_ft)
   let index = index(s:ctags_filetypes, type)
@@ -170,6 +197,9 @@ if !exists('s:tagkinds')
   call easytags#map_filetypes('cpp', 'c++')
   call easytags#map_filetypes('cs', 'c#')
   call easytags#map_filetypes(exists('filetype_asp') ? filetype_asp : 'aspvbs', 'asp')
+
+  let s:aliases = {}
+  call easytags#alias_filetypes('c', 'cpp', 'objc', 'objcpp')
 
   let s:tagkinds = {}
 
