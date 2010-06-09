@@ -1,6 +1,6 @@
 " Vim plug-in
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 6, 2010
+" Last Change: June 8, 2010
 " URL: http://peterodding.com/code/vim/easytags
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
@@ -34,6 +34,10 @@ endif
 
 if !exists('g:easytags_on_cursorhold')
   let g:easytags_on_cursorhold = 1
+endif
+
+if !exists('g:easytags_ignored_filetypes')
+  let g:easytags_ignored_filetypes = '^tex$'
 endif
 
 " Before sourcing the rest of the plug-in first check that the location of the

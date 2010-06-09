@@ -1,6 +1,6 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 6, 2010
+" Last Change: June 9, 2010
 " URL: http://peterodding.com/code/vim/easytags
 
 function! easytags#autoload() " {{{1
@@ -34,8 +34,9 @@ endfunction
 
 function! easytags#update_cmd(filter_invalid_tags) " {{{1
   try
-    let supported_filetype = index(easytags#supported_filetypes(), &ft) >= 0
-    if supported_filetype || a:filter_invalid_tags
+    let ft_supported = index(easytags#supported_filetypes(), &ft) >= 0
+    let ft_ignored = g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
+    if (ft_supported && !ft_ignored) || a:filter_invalid_tags
       let start = xolox#timer#start()
       let tagsfile = easytags#get_tagsfile()
       let filename = expand('%:p')
@@ -48,7 +49,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         let start_filter = xolox#timer#start()
         let lines = readfile(tagsfile)
         let filters = []
-        if supported_filetype
+        if ft_supported && !ft_ignored
           let filename_pattern = '\s' . xolox#escape#pattern(filename) . '\s'
           call add(filters, 'v:val !~ filename_pattern')
         endif
@@ -64,12 +65,12 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         endif
         call xolox#timer#stop(start_filter, "easytags.vim: Filtered tags file in %s second(s)")
       endif
-      if supported_filetype
+      if ft_supported && !ft_ignored
         call add(command, '--language-force=' . easytags#to_ctags_ft(&ft))
         call add(command, shellescape(filename))
         let listing = system(join(command))
         if v:shell_error
-          throw "Failed to update tags file!"
+          throw "Failed to update tags file! (Ctags output: `" . listing . "')"
         endif
       endif
       call xolox#timer#stop(start, "easytags.vim: Updated tags in %s second(s)")
