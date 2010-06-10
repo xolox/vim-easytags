@@ -1,6 +1,7 @@
 DEPENDS=autoload/xolox.vim \
 		autoload/xolox/escape.vim \
-		autoload/xolox/timer.vim
+		autoload/xolox/timer.vim \
+		autoload/xolox/option.vim
 VIMDOC=doc/easytags.txt
 HTMLDOC=doc/readme.html
 ZIPDIR := $(shell mktemp -d)
