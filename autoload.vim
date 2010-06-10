@@ -41,11 +41,8 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
     if (ft_supported && !ft_ignored) || a:filter_invalid_tags
       let start = xolox#timer#start()
       let tagsfile = easytags#get_tagsfile()
-      let filename = expand('%:p')
-      if g:easytags_resolve_links
-        let filename = resolve(filename)
-      endif
-      let command = [g:easytags_cmd, '-f', shellescape(tagsfile)]
+      let filename = s:resolve(expand('%:p'))
+      let command = [g:easytags_cmd, '-f', shellescape(tagsfile), '--fields=+l']
       if filereadable(tagsfile)
         call add(command, '-a')
         let start_filter = xolox#timer#start()
