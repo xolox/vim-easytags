@@ -1,6 +1,6 @@
 " Vim plug-in
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 10, 2010
+" Last Change: June 11, 2010
 " URL: http://peterodding.com/code/vim/easytags
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
@@ -90,7 +90,7 @@ if index(s:expanded, expand(g:easytags_file)) == -1
   let &tags = xolox#option#join_tags(insert(s:tagfiles, s:entry, 0))
 endif
 
-unlet s:tagfiles s:expanded s:entry
+unlet! s:tagfiles s:expanded s:entry
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
