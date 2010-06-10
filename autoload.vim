@@ -1,13 +1,15 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 9, 2010
+" Last Change: June 10, 2010
 " URL: http://peterodding.com/code/vim/easytags
 
 function! easytags#autoload() " {{{1
   try
     " Update the entries for the current file in the global tags file?
     let start = xolox#timer#start()
-    if getftime(expand('%')) > getftime(easytags#get_tagsfile())
+    let pathname = expand('%')
+    let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
+    if tags_outdated || !easytags#file_has_tags(pathname)
       UpdateTags
       call xolox#timer#stop(start, "easytags.vim: Automatically updated tags in %s second(s)")
     endif
@@ -48,6 +50,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         call add(command, '-a')
         let start_filter = xolox#timer#start()
         let lines = readfile(tagsfile)
+        call s:update_tagged_files(lines)
         let filters = []
         if ft_supported && !ft_ignored
           let filename_pattern = '\s' . xolox#escape#pattern(filename) . '\s'
@@ -72,6 +75,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         if v:shell_error
           throw "Failed to update tags file! (Ctags output: `" . listing . "')"
         endif
+        call easytags#add_tagged_file(filename)
       endif
       call xolox#timer#stop(start, "easytags.vim: Updated tags in %s second(s)")
       return 1
@@ -188,6 +192,48 @@ function! easytags#to_ctags_ft(vim_ft) " {{{1
   let type = tolower(a:vim_ft)
   let index = index(s:vim_filetypes, type)
   return index >= 0 ? s:ctags_filetypes[index] : type
+endfunction
+
+" Miscellaneous script-local functions. {{{1
+
+function! s:resolve(pathname) " {{{2
+  if g:easytags_resolve_links
+    return resolve(a:pathname)
+  else
+    return a:pathname
+  endif
+endfunction
+
+function! s:cache_tagged_files() " {{{2
+  if !exists('s:tagged_files')
+    let tagsfile = easytags#get_tagsfile()
+    call s:update_tagged_files(readfile(tagsfile))
+  endif
+endfunction
+
+function! easytags#file_has_tags(pathname) " {{{2
+  call s:cache_tagged_files()
+  return has_key(s:tagged_files, s:resolve(a:pathname))
+endfunction
+
+function! easytags#add_tagged_file(pathname) " {{{2
+  call s:cache_tagged_files()
+  let pathname = s:resolve(a:pathname)
+  let s:tagged_files[pathname] = 1
+endfunction
+
+function! s:update_tagged_files(lines) " {{{2
+  " Update the dictionary of 
+  let s:tagged_files = {}
+  for line in a:lines
+    if line !~ '^!_TAG_'
+      let pathname = matchstr(line, '^[^\t]\+\t\zs[^\t]\+')
+      if pathname != ''
+        let pathname = s:resolve(pathname)
+        let s:tagged_files[pathname] = 1
+      endif
+    endif
+  endfor
 endfunction
 
 " Built-in file type & tag kind definitions. {{{1
