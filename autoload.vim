@@ -53,7 +53,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         call s:update_tagged_files(lines)
         let filters = []
         if ft_supported && !ft_ignored
-          let filename_pattern = '\s' . xolox#escape#pattern(filename) . '\s'
+          let filename_pattern = '\t' . xolox#escape#pattern(filename) . '\t'
           call add(filters, 'v:val !~ filename_pattern')
         endif
         if a:filter_invalid_tags
@@ -61,7 +61,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{1
         endif
         let filter = 'v:val =~ "^!_TAG_" || (' . join(filters, ' && ') . ')'
         let filtered = filter(copy(lines), filter)
-        if lines != filtered
+        if len(lines) != len(filtered)
           if writefile(filtered, tagsfile) != 0
             throw "Failed to write filtered tags file!"
           endif
