@@ -1,10 +1,10 @@
 " Vim plug-in
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 9, 2010
+" Last Change: June 10, 2010
 " URL: http://peterodding.com/code/vim/easytags
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 1.7
+" Version: 1.8
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -18,7 +18,7 @@ endif
 
 if !exists('g:easytags_file')
   if has('win32') || has('win64')
-    let g:easytags_file = '~/_vimtags'
+    let g:easytags_file = '~\_vimtags'
   else
     let g:easytags_file = '~/.vimtags'
   endif
@@ -57,6 +57,7 @@ else
       break
     endif
   endfor
+  unlet s:command
 endif
 
 if !exists('s:ctags_installed')
@@ -70,6 +71,26 @@ if !exists('s:ctags_installed')
   endif
   finish
 endif
+unlet s:ctags_installed
+
+" Let Vim know about the global tags file created by this plug-in.
+
+" Parse the &tags option and get a list of all configured tags files including
+" non-existing files (this is why we can't just call the tagfiles() function).
+let s:tagfiles = []
+let s:expanded = []
+for s:entry in split(&tags, '[^\\]\zs,')
+  call add(s:tagfiles, s:entry)
+  call add(s:expanded, expand(substitute(s:entry, '\\\([\\, ]\)', '\1', 'g')))
+endfor
+
+" Add the tags file to the &tags option when the user hasn't done so already.
+if index(s:expanded, expand(g:easytags_file)) == -1
+  let s:entry = substitute(expand(g:easytags_file), '[, ]', '\\\0', 'g')
+  let &tags = join(insert(s:tagfiles, s:entry, 0), ',')
+endif
+
+unlet s:tagfiles s:expanded s:entry
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
