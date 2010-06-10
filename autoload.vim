@@ -335,6 +335,21 @@ if !exists('s:tagkinds')
 
   highlight def link pythonMethodTag pythonFunction
 
+  " Java. {{{2
+
+  call easytags#define_tagkind({
+        \ 'filetype': 'java',
+        \ 'hlgroup': 'javaClass',
+        \ 'filter': 'get(v:val, "kind") ==# "c"'})
+
+  call easytags#define_tagkind({
+        \ 'filetype': 'java',
+        \ 'hlgroup': 'javaMethod',
+        \ 'filter': 'get(v:val, "kind") ==# "m"'})
+
+  highlight def link javaClass Identifier
+  highlight def link javaMethod Function
+
   " Restore "cpoptions".
   let &cpo = s:cpo_save
   unlet s:cpo_save
