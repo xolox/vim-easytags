@@ -77,20 +77,15 @@ unlet s:ctags_installed
 
 " Parse the &tags option and get a list of all configured tags files including
 " non-existing files (this is why we can't just call the tagfiles() function).
-let s:tagfiles = []
-let s:expanded = []
-for s:entry in split(&tags, '[^\\]\zs,')
-  call add(s:tagfiles, s:entry)
-  call add(s:expanded, expand(substitute(s:entry, '\\\([\\, ]\)', '\1', 'g')))
-endfor
+let s:tagfiles = xolox#option#split_tags(&tags)
+let s:expanded = map(copy(s:tagfiles), 'expand(v:val)')
 
 " Add the tags file to the &tags option when the user hasn't done so already.
 if index(s:expanded, expand(g:easytags_file)) == -1
-  let s:entry = substitute(expand(g:easytags_file), '[, ]', '\\\0', 'g')
-  let &tags = join(insert(s:tagfiles, s:entry, 0), ',')
+  let &tags = xolox#option#join_tags(insert(s:tagfiles, g:easytags_file, 0))
 endif
 
-unlet s:tagfiles s:expanded s:entry
+unlet s:tagfiles s:expanded
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
