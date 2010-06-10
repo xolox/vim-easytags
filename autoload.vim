@@ -114,10 +114,12 @@ function! easytags#highlight_cmd() " {{{1
           execute 'highlight def link' hlgroup_tagged tagkind.hlgroup
         endif
         let matches = filter(copy(taglist), tagkind.filter)
-        call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
-        let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
-        let command = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
-        execute printf(command, hlgroup_tagged, escape(pattern, '/'))
+        if matches != []
+          call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
+          let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
+          let command = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
+          execute printf(command, hlgroup_tagged, escape(pattern, '/'))
+        endif
       endfor
       redraw
       call xolox#timer#stop(start, "easytags.vim: Highlighted tags in %s second(s)")
