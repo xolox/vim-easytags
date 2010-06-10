@@ -82,10 +82,15 @@ let s:expanded = map(copy(s:tagfiles), 'expand(v:val)')
 
 " Add the tags file to the &tags option when the user hasn't done so already.
 if index(s:expanded, expand(g:easytags_file)) == -1
-  let &tags = xolox#option#join_tags(insert(s:tagfiles, g:easytags_file, 0))
+  let s:entry = g:easytags_file
+  if (has('win32') || has('win64')) && s:entry =~ '^\~[\\/]'
+    " On UNIX you can use ~/ in &tags but on Windows that doesn't work.
+    let s:entry = expand(s:entry)
+  endif
+  let &tags = xolox#option#join_tags(insert(s:tagfiles, s:entry, 0))
 endif
 
-unlet s:tagfiles s:expanded
+unlet s:tagfiles s:expanded s:entry
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
