@@ -6,6 +6,11 @@
  * Use separate tags files for each language stored in ~/.vim/tags/ to increase
    performance because a single, global tags file quickly grows to a megabyte?
 
+ * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is
+   running because Vim opens a command prompt window. Also the CursorHold event
+   seems to fire repeatedly, contradicting my understanding of the autocmd and
+   its behavior on UNIX?!
+
  * I might have found a bug in Vim: The tag `easytags#highlight_cmd` was
    correctly being highlighted by my plug-in (and was indeed included in my
    tags file) even though I couldn't jump to it using `Ctrl-]`, which caused:
