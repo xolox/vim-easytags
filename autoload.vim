@@ -1,6 +1,6 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 13, 2010
+" Last Change: June 14, 2010
 " URL: http://peterodding.com/code/vim/easytags
 
 " Public interface through (automatic) commands. {{{1
@@ -246,8 +246,13 @@ endfunction
 function! s:cache_tagged_files() " {{{2
   if !exists('s:tagged_files')
     let tagsfile = easytags#get_tagsfile()
-    let [header, entries] = easytags#read_tagsfile(tagsfile)
-    call s:set_tagged_files(entries)
+    try
+      let [header, entries] = easytags#read_tagsfile(tagsfile)
+      call s:set_tagged_files(entries)
+    catch /\<E484\>/
+      " Ignore missing tags file.
+      call s:set_tagged_files([])
+    endtry
   endif
 endfunction
 
