@@ -47,6 +47,18 @@ install it by executing the following shell command:
 The plug-in is intended to work without configuration but can be customized by
 changing the following options:
 
+### The `easytags_cmd` option
+
+The plug-in will try to determine the location where Exuberant Ctags is
+installed on its own but this might not always work because any given
+executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags
+but some older, more primitive `ctags` implementation which doesn't support the
+same command-line options and thus breaks the `easytags.vim` plug-in. If this
+is the case you can set the global variable `g:easytags_cmd` to the location
+where you've installed Exuberant Ctags, e.g.:
+
+    :let g:easytags_cmd = '/usr/local/bin/ctags'
+
 ### The `easytags_file` option
 
 As mentioned above the plug-in will store your tags in `~/.vimtags` on UNIX and
@@ -105,6 +117,34 @@ execute the following Vim command:
     :let g:easytags_resolve_links = 1
 
 ## Troubleshooting
+
+### The plug-in complains that Exuberant Ctags isn't installed
+
+After a Mac OS X user found out the hard way that the `ctags` executable isn't
+always Exuberant Ctags and we spend a few hours debugging the problem I added
+proper version detection: The plug-in executes `ctags --version` when Vim is
+started to verify that Exuberant Ctags 5.5 or newer is installed. If it isn't
+Vim will show the following message on startup:
+
+    easytags.vim: Plug-in not loaded because Exuberant Ctags isn't installed!
+    Please download & install Exuberant Ctags from http://ctags.sf.net
+
+If the installed Exuberant Ctags version is too old the plug-in will complain:
+
+    easytags.vim: Plug-in not loaded because Exuberant Ctags 5.5
+    or newer is required while you have version %s installed!
+
+If you have the right version of Exuberant Ctags installed but the plug-in
+still complains, try executing the following command from inside Vim:
+
+    :!which ctags
+
+If this doesn't print the location where you installed Exuberant Ctags it means
+your system already had a `ctags` executable but it isn't compatible with
+Exuberant Ctags 5.5 and you'll need to set the `g:easytags_cmd` option (see
+above) so the plug-in knows which `ctags` to run.
+
+### Vim locks up while the plug-in is running
 
 Once or twice now in several years I've experienced Exuberant Ctags getting
 into an infinite loop when given garbage input. In my case this happened by
