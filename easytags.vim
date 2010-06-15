@@ -1,10 +1,10 @@
 " Vim plug-in
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 13, 2010
+" Last Change: June 15, 2010
 " URL: http://peterodding.com/code/vim/easytags
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 1.9
+" Version: 1.9.3
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -40,38 +40,62 @@ if !exists('g:easytags_ignored_filetypes')
   let g:easytags_ignored_filetypes = '^tex$'
 endif
 
-" Before sourcing the rest of the plug-in first check that the location of the
-" "Exuberant Ctags" program has been configured or that the program exists in
-" one of its default locations.
-
-if exists('g:easytags_cmd') && executable(g:easytags_cmd)
-  let s:ctags_installed = 1
-else
+function! s:InitEasyTags(version)
+  " Check that the location of Exuberant Ctags has been configured or that the
+  " correct version of the program exists in one of its default locations.
+  if exists('g:easytags_cmd') && s:CheckCtags(g:easytags_cmd, a:version)
+    return 1
+  endif
   " On Ubuntu Linux, Exuberant Ctags is installed as `ctags'. On Debian Linux,
   " Exuberant Ctags is installed as `exuberant-ctags'. On Free-BSD, Exuberant
   " Ctags is installed as `exctags'. Finally there is `ctags.exe' on Windows.
-  for s:command in ['ctags', 'exuberant-ctags', 'esctags', 'ctags.exe']
-    if executable(s:command)
-      let g:easytags_cmd = s:command
-      let s:ctags_installed = 1
-      break
+  for name in ['ctags', 'exuberant-ctags', 'esctags']
+    if s:CheckCtags(name, a:version)
+      let g:easytags_cmd = name
+      return 1
     endif
   endfor
-  unlet s:command
-endif
+endfunction
 
-if !exists('s:ctags_installed')
-  echomsg "easytags.vim: Exuberant Ctags unavailable! Plug-in not loaded."
-  if executable('apt-get')
-    echomsg "On Ubuntu & Debian Linux, you can install Exuberant Ctags"
-    echomsg "by installing the package named `exuberant-ctags':"
-    echomsg "  sudo apt-get install exuberant-ctags"
+function! s:CheckCtags(name, version)
+  " Not every executable out there named `ctags' is in fact Exuberant Ctags.
+  " This function makes sure it is because the easytags plug-in requires the
+  " --list-languages option.
+  if executable(a:name)
+    let listing = system(a:name . ' --version')
+    let pattern = 'Exuberant Ctags \zs\d\+\(\.\d\+\)*'
+    let g:easytags_ctags_version = matchstr(listing, pattern)
+    return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+  endif
+endfunction
+
+function! s:VersionToNumber(s)
+  let values = split(a:s, '\.')
+  if len(values) == 1
+    return values[0] * 10
+  elseif len(values) >= 2
+    return values[0] * 10 + values[1][0]
+  endif
+endfunction
+
+if !s:InitEasyTags(55)
+  if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
+    let msg = "easytags.vim: Plug-in not loaded because Exuberant Ctags isn't installed!"
+    if executable('apt-get')
+      let msg ,= " On Ubuntu & Debian you can install Exuberant Ctags by"
+      let msg .= " installing the package named `exuberant-ctags':"
+      let msg .= " sudo apt-get install exuberant-ctags"
+    else
+      let msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
+    endif
+    echomsg msg
   else
-    echomsg "Please download & install Exuberant Ctags from http://ctags.sf.net"
+    let msg = "easytags.vim: Plug-in not loaded because Exuberant Ctags 5.5"
+    let msg .= " or newer is required while you have version %s installed!"
+    echomsg printf(msg, g:easytags_ctags_version)
   endif
   finish
 endif
-unlet s:ctags_installed
 
 " Let Vim know about the global tags file created by this plug-in.
 
@@ -106,6 +130,7 @@ augroup PluginEasyTags
   endif
   if g:easytags_on_cursorhold
     autocmd CursorHold,CursorHoldI * call easytags#autoload()
+    autocmd BufReadPost * unlet! b:easytags_last_highlighted
   endif
   autocmd User PublishPre HighlightTags
 augroup END

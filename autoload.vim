@@ -1,7 +1,9 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 14, 2010
+" Last Change: June 15, 2010
 " URL: http://peterodding.com/code/vim/easytags
+
+let s:script = expand('<sfile>:p:~')
 
 " Public interface through (automatic) commands. {{{1
 
@@ -28,7 +30,7 @@ function! easytags#autoload() " {{{2
       let b:easytags_last_highlighted = localtime()
     endif
   catch
-    call xolox#warning("easytags.vim: %s (at %s)", v:exception, v:throwpoint)
+    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -59,7 +61,8 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
           call filter(entries, join(filters, ' && '))
           if len(entries) != num_entries
             if !easytags#write_tagsfile(tagsfile, header, entries)
-              throw "Failed to write filtered tags file!"
+              let msg = "Failed to write filtered tags file %s!"
+              throw printf(msg, fnamemodify(tagsfile, ':~'))
             endif
           endif
         endif
@@ -69,16 +72,18 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
         call add(command, shellescape(filename))
         let listing = system(join(command))
         if v:shell_error
-          throw "Failed to update tags file! (Ctags output: `" . listing . "')"
+          let msg = "Failed to update tags file %s: %s!"
+          throw printf(msg, fnamemodify(tagsfile, ':~'), strtrans(v:exception))
         endif
         call easytags#add_tagged_file(filename)
       endif
-      call xolox#timer#stop(start, "easytags.vim: Updated tags in %s second(s)")
+      let msg = "%s: Updated tags for %s in %s."
+      call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
       return 1
     endif
     return 0
   catch
-    call xolox#warning("easytags.vim: %s (at %s)", v:exception, v:throwpoint)
+    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -108,10 +113,11 @@ function! easytags#highlight_cmd() " {{{2
         endif
       endfor
       redraw
-      call xolox#timer#stop(start, "easytags.vim: Highlighted tags in %s second(s)")
+      let msg = "%s: Highlighted tags in %s in %s."
+      call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
     endif
   catch
-    call xolox#warning("easytags.vim: %s (at %s)", v:exception, v:throwpoint)
+    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -122,11 +128,13 @@ function! easytags#supported_filetypes() " {{{2
     let start = xolox#timer#start()
     let listing = system(g:easytags_cmd . ' --list-languages')
     if v:shell_error
-      throw "Failed to get Exuberant Ctags language mappings!"
+      let msg = "Failed to get supported languages! (output: %s)"
+      throw printf(msg, strtrans(listing))
     endif
     let s:supported_filetypes = split(listing, '\n')
     call map(s:supported_filetypes, 'easytags#to_vim_ft(v:val)')
-    call xolox#timer#stop(start, "easytags.vim: Parsed language mappings in %s second(s)")
+    let msg = "%s: Retrieved supported languages in %s."
+    call xolox#timer#stop(msg, s:script, start)
   endif
   return s:supported_filetypes
 endfunction
@@ -173,8 +181,8 @@ endfunction
 function! easytags#get_tagsfile() " {{{2
   let tagsfile = expand(g:easytags_file)
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
-    let message = "The tags file isn't writable! (%s)"
-    throw printf(message, tagsfile)
+    let message = "The tags file %s isn't writable!"
+    throw printf(message, fnamemodify(tagsfile, ':~'))
   endif
   return tagsfile
 endfunction
