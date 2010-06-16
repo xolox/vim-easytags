@@ -1,6 +1,6 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 15, 2010
+" Last Change: June 16, 2010
 " URL: http://peterodding.com/code/vim/easytags
 
 let s:script = expand('<sfile>:p:~')
@@ -39,7 +39,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
     let filename = s:resolve(expand('%:p'))
     let ft_supported = index(easytags#supported_filetypes(), &ft) >= 0
     let ft_ignored = g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
-    if (ft_supported && !ft_ignored) || a:filter_invalid_tags
+    if (filename != '' && ft_supported && !ft_ignored) || a:filter_invalid_tags
       let start = xolox#timer#start()
       let tagsfile = easytags#get_tagsfile()
       let command = [g:easytags_cmd, '-f', shellescape(tagsfile), '--fields=+l']
