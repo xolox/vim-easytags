@@ -11,9 +11,11 @@ function! easytags#autoload() " {{{2
   try
     " Update the entries for the current file in the global tags file?
     let pathname = s:resolve(expand('%:p'))
-    let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
-    if tags_outdated || !easytags#file_has_tags(pathname)
-      UpdateTags
+    if pathname != ''
+      let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
+      if tags_outdated || !easytags#file_has_tags(pathname)
+        UpdateTags
+      endif
     endif
     " Apply highlighting of tags in global tags file to current buffer?
     if &eventignore !~? '\<syntax\>'
@@ -39,19 +41,20 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
     let filename = s:resolve(expand('%:p'))
     let ft_supported = index(easytags#supported_filetypes(), &ft) >= 0
     let ft_ignored = g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
-    if (filename != '' && ft_supported && !ft_ignored) || a:filter_invalid_tags
+    let update_tags = (filename != '') && ft_supported && !ft_ignored
+    if update_tags || a:filter_invalid_tags
       let start = xolox#timer#start()
       let tagsfile = easytags#get_tagsfile()
       let command = [g:easytags_cmd, '-f', shellescape(tagsfile), '--fields=+l']
       if filereadable(tagsfile)
         call add(command, '-a')
-        let filter_file_tags = easytags#file_has_tags(filename)
+        let filter_file_tags = update_tags && easytags#file_has_tags(filename)
         if a:filter_invalid_tags || filter_file_tags
           let [header, entries] = easytags#read_tagsfile(tagsfile)
           let num_entries = len(entries)
           call s:set_tagged_files(entries)
           let filters = []
-          if ft_supported && !ft_ignored && filter_file_tags
+          if filter_file_tags
             let filename_pattern = '\t' . xolox#escape#pattern(filename) . '\t'
             call add(filters, 'v:val !~ filename_pattern')
           endif
@@ -67,7 +70,7 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
           endif
         endif
       endif
-      if ft_supported && !ft_ignored
+      if update_tags
         call add(command, '--language-force=' . easytags#to_ctags_ft(&ft))
         call add(command, shellescape(filename))
         let listing = system(join(command))
@@ -76,9 +79,12 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
           throw printf(msg, fnamemodify(tagsfile, ':~'), strtrans(v:exception))
         endif
         call easytags#add_tagged_file(filename)
+        let msg = "%s: Updated tags for %s in %s."
+        call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
+      else
+        let msg = "%s: Filtered invalid tags in %s."
+        call xolox#timer#stop(msg, s:script, start)
       endif
-      let msg = "%s: Updated tags for %s in %s."
-      call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
       return 1
     endif
     return 0
@@ -113,8 +119,12 @@ function! easytags#highlight_cmd() " {{{2
         endif
       endfor
       redraw
+      let bufname = expand('%:p:~')
+      if bufname == ''
+        let bufname = 'unnamed buffer #' . bufnr('%')
+      endif
       let msg = "%s: Highlighted tags in %s in %s."
-      call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
+      call xolox#timer#stop(msg, s:script, bufname, start)
     endif
   catch
     call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
