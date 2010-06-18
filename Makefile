@@ -1,43 +1,25 @@
+PROJECT=easytags
+VIMDOC := $(shell mktemp -u)
+ZIPFILE := $(shell mktemp -u)
+ZIPDIR := $(shell mktemp -d)
 DEPENDS=autoload/xolox.vim \
 		autoload/xolox/escape.vim \
 		autoload/xolox/timer.vim \
 		autoload/xolox/option.vim
-VIMDOC=doc/easytags.txt
-HTMLDOC=doc/readme.html
-ZIPDIR := $(shell mktemp -d)
-ZIPFILE := $(shell mktemp -u)
 
 # NOTE: Make does NOT expand the following back ticks!
-VERSION=`grep '^" Version:' easytags.vim | awk '{print $$3}'`
+VERSION=`grep '^" Version:' $(PROJECT).vim | awk '{print $$3}'`
 
 # The main rule builds a ZIP that can be published to http://www.vim.org.
-archive: Makefile easytags.vim autoload.vim $(VIMDOC) $(HTMLDOC)
-	@echo "Creating \`easytags-$(VERSION).zip' .."
+archive: Makefile $(PROJECT).vim autoload.vim README.md
+	@echo "Creating \`$(PROJECT).txt' .."
+	@mkd2vimdoc.py $(PROJECT).txt < README.md > $(VIMDOC)
+	@echo "Creating \`$(PROJECT)-$(VERSION).zip' .."
 	@mkdir -p $(ZIPDIR)/plugin $(ZIPDIR)/autoload/xolox $(ZIPDIR)/doc
-	@cp easytags.vim $(ZIPDIR)/plugin
-	@cp autoload.vim $(ZIPDIR)/autoload/easytags.vim
+	@cp $(PROJECT).vim $(ZIPDIR)/plugin
+	@cp autoload.vim $(ZIPDIR)/autoload/$(PROJECT).vim
 	@for SCRIPT in $(DEPENDS); do cp $$HOME/.vim/$$SCRIPT $(ZIPDIR)/$$SCRIPT; done
-	@cp $(VIMDOC) $(ZIPDIR)/doc/easytags.txt
-	@cp $(HTMLDOC) $(ZIPDIR)/doc/easytags.html
+	@cp $(VIMDOC) $(ZIPDIR)/doc/$(PROJECT).txt
 	@cd $(ZIPDIR) && zip -r $(ZIPFILE) . >/dev/null
 	@rm -R $(ZIPDIR)
-	@mv $(ZIPFILE) easytags-$(VERSION).zip
-
-# This rule converts the Markdown README to Vim documentation.
-$(VIMDOC): Makefile README.md
-	@echo "Creating \`$(VIMDOC)' .."
-	@mkd2vimdoc.py `basename $(VIMDOC)` < README.md > $(VIMDOC)
-
-# This rule converts the Markdown README to HTML, which reads easier.
-$(HTMLDOC): Makefile README.md doc/README.header doc/README.footer
-	@echo "Creating \`$(HTMLDOC)' .."
-	@cat doc/README.header > $(HTMLDOC)
-	@cat README.md | markdown | SmartyPants >> $(HTMLDOC)
-	@cat doc/README.footer >> $(HTMLDOC)
-
-# This is only useful for myself, it uploads the latest README to my website.
-web: $(HTMLDOC)
-	@echo "Uploading homepage .."
-	@scp -q $(HTMLDOC) vps:/home/peterodding.com/public/files/code/vim/easytags/index.html
-
-all: archive web
+	@mv $(ZIPFILE) $(PROJECT)-$(VERSION).zip
