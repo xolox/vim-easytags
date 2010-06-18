@@ -184,7 +184,7 @@ This software is licensed under the [MIT license] [mit_license].
 [exuberant_ctags]: http://ctags.sourceforge.net/
 [hardlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
-[latest_zip]: http://peterodding.com/code/vim/download.php?script=easytags
+[latest_zip]: http://peterodding.com/code/vim/downloads/easytags
 [mit_license]: http://en.wikipedia.org/wiki/MIT_License
 [symlinks]: http://en.wikipedia.org/wiki/Symbolic_link
 [vim]: http://www.vim.org/
