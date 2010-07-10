@@ -1,10 +1,10 @@
 " Vim plug-in
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 15, 2010
+" Last Change: July 10, 2010
 " URL: http://peterodding.com/code/vim/easytags
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 1.9.3
+" Version: 1.9.6
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -102,19 +102,15 @@ endif
 " Parse the &tags option and get a list of all configured tags files including
 " non-existing files (this is why we can't just call the tagfiles() function).
 let s:tagfiles = xolox#option#split_tags(&tags)
-let s:expanded = map(copy(s:tagfiles), 'expand(v:val)')
+let s:expanded = map(copy(s:tagfiles), 'resolve(expand(v:val))')
 
 " Add the tags file to the &tags option when the user hasn't done so already.
-if index(s:expanded, expand(g:easytags_file)) == -1
-  let s:entry = g:easytags_file
-  if (has('win32') || has('win64')) && s:entry =~ '^\~[\\/]'
-    " On UNIX you can use ~/ in &tags but on Windows that doesn't work.
-    let s:entry = expand(s:entry)
-  endif
-  let &tags = xolox#option#join_tags(insert(s:tagfiles, s:entry, 0))
+if index(s:expanded, resolve(expand(g:easytags_file))) == -1
+  let s:value = substitute(expand(g:easytags_file), '[\\, ]', '\\\0', 'g')
+  execute 'set tags=' . s:value . ',' . &tags
 endif
 
-unlet! s:tagfiles s:expanded s:entry
+unlet! s:tagfiles s:expanded s:value
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
