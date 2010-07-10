@@ -6,7 +6,7 @@ from an [integrated development environment] [ide]. Exuberant Ctags is the
 latest incarnation of a [family of computer programs] [ctags] that scan
 source code files to create an index of identifiers (tags) and where they are
 defined. Vim uses this index (a so-called tags file) to enable you to jump to
-the definition of any identifier using the `Ctrl-]` mapping.
+the definition of any identifier using the [Control-\]][jump_to_tag] mapping.
 
 When you're familiar with integrated development environments you may recognize
 this feature as "Go-to definition". One advantage of the combination of Vim and
@@ -17,9 +17,9 @@ Ctags can generate tags for [over 40 file types] [ctags_support] as well...
 There's just one problem: You have to manually keep your tags files up-to-date
 and this turns out to be a royal pain in the ass! So I set out to write a Vim
 plug-in that would do this boring work for me. When I finished the plug-in's
-basic functionality (one automatic command and a call to `system()`) I became
-interested in dynamic syntax highlighting, so I added that as well to see if it
-would work -- surprisingly well I'm happy to report!
+basic functionality (one automatic command and a call to [system()][system]
+later) I became interested in dynamic syntax highlighting, so I added that as
+well to see if it would work -- surprisingly well I'm happy to report!
 
 ## Install & first use
 
@@ -40,14 +40,14 @@ If the plug-in warns you that `ctags` isn't installed you can download it from
 its [homepage] [exuberant_ctags], or if you're running Debian/Ubuntu you can
 install it by executing the following shell command:
 
-    sudo apt-get install exuberant-ctags
+    $ sudo apt-get install exuberant-ctags
 
 ## Configuration
 
 The plug-in is intended to work without configuration but can be customized by
 changing the following options:
 
-### The `easytags_cmd` option
+### The `g:easytags_cmd` option
 
 The plug-in will try to determine the location where Exuberant Ctags is
 installed on its own but this might not always work because any given
@@ -59,36 +59,37 @@ where you've installed Exuberant Ctags, e.g.:
 
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
-### The `easytags_file` option
+### The `g:easytags_file` option
 
 As mentioned above the plug-in will store your tags in `~/.vimtags` on UNIX and
 `~/_vimtags` on Windows. To change the location of this file, set the global
-variable `easytags_file`, e.g.:
+variable `g:easytags_file`, e.g.:
 
     :let g:easytags_file = '~/.vim/tags'
 
-A leading `~` in the `easytags_file` variable is expanded to your current home
+A leading `~` in the `g:easytags_file` variable is expanded to your current home
 directory (`$HOME` on UNIX, `%USERPROFILE%` on Windows).
 
-### The `easytags_always_enabled` option
+### The `g:easytags_always_enabled` option
 
 By default the plug-in automatically generates and highlights tags when you
-stop typing for a few seconds. This means that when you edit a file, the
-dynamic highlighting won't appear until you pause for a moment. If you don't
-want this you can configure the plug-in to always enable dynamic highlighting:
+stop typing for a few seconds (this works using the [CursorHold][cursorhold]
+automatic command). This means that when you edit a file, the dynamic
+highlighting won't appear until you pause for a moment. If you don't like this
+you can configure the plug-in to always enable dynamic highlighting:
 
     :let g:easytags_always_enabled = 1
 
 Be warned that after setting this option you'll probably notice why it's
 disabled by default: Every time you edit a file in Vim, the plug-in will first
-run Exuberant Ctags and then highlight the tags, which slows Vim down quite a
-lot. I have some ideas on how to improve this latency by executing Exuberant
-Ctags in the background, so stay tuned!
+run Exuberant Ctags and then highlight the tags, and this slows Vim down quite
+a lot. I have some ideas on how to improve this latency by running Exuberant
+Ctags in the background (see my [shell.vim][shell] plug-in) so stay tuned!
 
 Note: If you change this option it won't apply until you restart Vim, so you'll
-have to set this option in your `~/.vimrc` script (`~/_vimrc` on Windows).
+have to set this option in your [vimrc script][vimrc].
 
-### The `easytags_on_cursorhold` option
+### The `g:easytags_on_cursorhold` option
 
 As I explained above the plug-in by default doesn't update or highlight your
 tags until you stop typing for a moment. The plug-in tries hard to do the least
@@ -96,12 +97,12 @@ amount of work possible in this break but it might still interrupt your
 workflow. If it does you can disable the periodic update:
 
     :let g:easytags_on_cursorhold = 0
-    
-Note: Like the `easytags_always_enabled` option, if you change this option it
-won't apply until you restart Vim, so you'll have to set this option in your
-`~/.vimrc` script (`~/_vimrc` on Windows).
 
-### The `easytags_resolve_links` option
+Note: Like the `g:easytags_always_enabled` option, if you change this option it
+won't apply until you restart Vim, so you'll have to set this option in
+your [vimrc script][vimrc].
+
+### The `g:easytags_resolve_links` option
 
 UNIX has [symbolic links] [symlinks] and [hard links] [hardlinks], both of
 which conflict with the concept of having one unique location for every
@@ -150,10 +151,11 @@ Once or twice now in several years I've experienced Exuberant Ctags getting
 into an infinite loop when given garbage input. In my case this happened by
 accident a few days ago :-|. Because my plug-in executes `ctags` in the
 foreground this will block Vim indefinitely! If this happens you might be
-able to kill `ctags` by pressing `Ctrl-C` but if that doesn't work you can also
-kill it without stopping Vim using a task manager or the `pkill` command:
+able to kill `ctags` by pressing [Control-C][control_c] but if that doesn't
+work you can also kill it without stopping Vim using a task manager or the
+`pkill` command:
 
-    pkill -KILL ctags
+    $ pkill -KILL ctags
 
 If Vim seems very slow and you suspect this plug-in might be the one to blame,
 increase Vim's verbosity level:
@@ -162,13 +164,13 @@ increase Vim's verbosity level:
 
 Every time the plug-in executes it will time how long the execution takes and
 add the results to Vim's message history, which you can view by executing the
-`:messages` command.
+[:messages][messages] command.
 
 ## Contact
 
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at <peter@peterodding.com>. The latest version is available at
-<http://peterodding.com/code/vim/easytags> and
+<http://peterodding.com/code/vim/easytags/> and
 <http://github.com/xolox/vim-easytags>. If you like this plug-in please vote
 for it on [www.vim.org] [vim_scripts_entry].
 
@@ -179,14 +181,21 @@ This software is licensed under the [MIT license] [mit_license].
 
 
 [canon]: http://en.wikipedia.org/wiki/Canonicalization
+[control_c]: http://vimdoc.sourceforge.net/htmldoc/pattern.html#CTRL-C
 [ctags]: http://en.wikipedia.org/wiki/Ctags
 [ctags_support]: http://ctags.sourceforge.net/languages.html
+[cursorhold]: http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold
 [exuberant_ctags]: http://ctags.sourceforge.net/
 [hardlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
+[jump_to_tag]: http://vimdoc.sourceforge.net/htmldoc/tagsrch.html#CTRL-]
 [latest_zip]: http://peterodding.com/code/vim/downloads/easytags
+[messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
 [mit_license]: http://en.wikipedia.org/wiki/MIT_License
+[shell]: http://peterodding.com/code/vim/shell/
 [symlinks]: http://en.wikipedia.org/wiki/Symbolic_link
+[system]: http://vimdoc.sourceforge.net/htmldoc/eval.html#system()
 [vim]: http://www.vim.org/
 [vim_scripts_entry]: http://www.vim.org/scripts/script.php?script_id=3114
 [vim_support]: http://ftp.vim.org/vim/runtime/syntax/
+[vimrc]: http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc
