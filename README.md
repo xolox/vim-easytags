@@ -166,6 +166,28 @@ Every time the plug-in executes it will time how long the execution takes and
 add the results to Vim's message history, which you can view by executing the
 [:messages][messages] command.
 
+### Failed to highlight tags because pattern is too big!
+
+If the `easytags.vim` plug-in fails to highlight your tags and the error
+message mentions that the pattern is too big, your tags file has grown too
+large for Vim to be able to highlight all tagged identifiers! I've had this
+happen to me with 50 KB patterns because I added most of the headers in
+`/usr/include/` to my tags file. Internally Vim raises the error [E339: Pattern
+too long] [E339] and unfortunately the only way to avoid this problem once it
+occurs is to reduce the number of tagged identifiers...
+
+In my case the solution was to move most of the tags from `/usr/include/` over
+to project specific tags files which are automatically loaded by Vim when I
+edit files in different projects because I've set the ['tags' option]
+[tags_option] as follows:
+
+    :set tags=./.tags;,~/.vimtags
+
+Once you've executed the above command, Vim will automatically look for a file
+named `.tags` in the directory of the current file. Because of the `;` Vim also
+recurses upwards so that you can nest files arbitrarily deep under your project
+directories.
+
 ## Contact
 
 If you have questions, bug reports, suggestions, etc. the author can be
@@ -185,6 +207,7 @@ This software is licensed under the [MIT license] [mit_license].
 [ctags]: http://en.wikipedia.org/wiki/Ctags
 [ctags_support]: http://ctags.sourceforge.net/languages.html
 [cursorhold]: http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold
+[E339]: http://vimdoc.sourceforge.net/htmldoc/message.html#E339
 [exuberant_ctags]: http://ctags.sourceforge.net/
 [hardlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
@@ -195,6 +218,7 @@ This software is licensed under the [MIT license] [mit_license].
 [shell]: http://peterodding.com/code/vim/shell/
 [symlinks]: http://en.wikipedia.org/wiki/Symbolic_link
 [system]: http://vimdoc.sourceforge.net/htmldoc/eval.html#system()
+[tags_option]: http://vimdoc.sourceforge.net/htmldoc/options.html#'tags'
 [vim]: http://www.vim.org/
 [vim_scripts_entry]: http://www.vim.org/scripts/script.php?script_id=3114
 [vim_support]: http://ftp.vim.org/vim/runtime/syntax/

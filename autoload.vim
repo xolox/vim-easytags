@@ -1,6 +1,6 @@
 " Vim script
 " Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: June 16, 2010
+" Last Change: July 10, 2010
 " URL: http://peterodding.com/code/vim/easytags
 
 let s:script = expand('<sfile>:p:~')
@@ -114,8 +114,14 @@ function! easytags#highlight_cmd() " {{{2
         if matches != []
           call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
           let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
-          let command = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
-          execute printf(command, hlgroup_tagged, escape(pattern, '/'))
+          let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
+          let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
+          try
+            execute command
+          catch /^Vim\%((\a\+)\)\=:E339/
+            let msg = "easytags.vim: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
+            call xolox#warning(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
+          endtry
         endif
       endfor
       redraw
