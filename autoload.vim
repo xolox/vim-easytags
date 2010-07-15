@@ -1,7 +1,7 @@
 " Vim script
-" Maintainer: Peter Odding <peter@peterodding.com>
-" Last Change: July 10, 2010
-" URL: http://peterodding.com/code/vim/easytags
+" Author: Peter Odding <peter@peterodding.com>
+" Last Change: July 15, 2010
+" URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
 

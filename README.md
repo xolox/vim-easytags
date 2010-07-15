@@ -25,12 +25,13 @@ well to see if it would work -- surprisingly well I'm happy to report!
 
 Unzip the most recent [ZIP archive] [latest_zip] file inside your Vim profile
 directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on
-Windows), restart Vim and try it out: Edit any file type supported by Exuberant
-Ctags and within ten seconds the plug-in should create/update your tags file
-(`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the
-file you just edited! This means that whatever file you're editing in Vim (as
-long as its on the local file system), tags will always be available by the
-time you need them!
+Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use
+`:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit any file
+type supported by Exuberant Ctags and within ten seconds the plug-in should
+create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows)
+with the tags defined in the file you just edited! This means that whatever
+file you're editing in Vim (as long as its on the local file system), tags will
+always be available by the time you need them!
 
 Additionally if the file you just opened is a C, Lua, PHP, Python or Vim source
 file you should also notice that the function and type names defined in the
@@ -192,9 +193,8 @@ directories.
 
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at <peter@peterodding.com>. The latest version is available at
-<http://peterodding.com/code/vim/easytags/> and
-<http://github.com/xolox/vim-easytags>. If you like this plug-in please vote
-for it on [www.vim.org] [vim_scripts_entry].
+<http://peterodding.com/code/vim/easytags/> and <http://github.com/xolox/vim-easytags>.
+If you like this plug-in please vote for it on [www.vim.org] [vim_scripts_entry].
 
 ## License
 
