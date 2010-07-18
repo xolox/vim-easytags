@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 15, 2010
+" Last Change: July 18, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -46,7 +46,9 @@ function! easytags#update_cmd(filter_invalid_tags) " {{{2
       let start = xolox#timer#start()
       let tagsfile = easytags#get_tagsfile()
       let command = [g:easytags_cmd, '-f', shellescape(tagsfile), '--fields=+l']
-      if filereadable(tagsfile)
+      if !filereadable(tagsfile)
+        call add(command, '--sort=' . (&ic ? 'foldcase' : 'yes'))
+      else
         call add(command, '-a')
         let filter_file_tags = update_tags && easytags#file_has_tags(filename)
         if a:filter_invalid_tags || filter_file_tags
