@@ -309,7 +309,7 @@ let s:vim_filetypes = []
 let s:ctags_filetypes = []
 call easytags#map_filetypes('cpp', 'c++')
 call easytags#map_filetypes('cs', 'c#')
-call easytags#map_filetypes(exists('filetype_asp') ? filetype_asp : 'aspvbs', 'asp')
+call easytags#map_filetypes(exists('g:filetype_asp') ? g:filetype_asp : 'aspvbs', 'asp')
 
 " Define the Vim file-types that are aliased by default.
 let s:aliases = {}
