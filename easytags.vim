@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 12, 2010
+" Last Change: July 20, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 1.9.6
+" Version: 1.9.7
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -14,7 +14,7 @@ if &cp || exists('g:loaded_easytags')
   finish
 endif
 
-" Configuration defaults. {{{1
+" Configuration defaults and initialization. {{{1
 
 if !exists('g:easytags_file')
   if has('win32') || has('win64')
@@ -48,7 +48,7 @@ function! s:InitEasyTags(version)
   endif
   " On Ubuntu Linux, Exuberant Ctags is installed as `ctags'. On Debian Linux,
   " Exuberant Ctags is installed as `exuberant-ctags'. On Free-BSD, Exuberant
-  " Ctags is installed as `exctags'. Finally there is `ctags.exe' on Windows.
+  " Ctags is installed as `exctags'.
   for name in ['ctags', 'exuberant-ctags', 'esctags']
     if s:CheckCtags(name, a:version)
       let g:easytags_cmd = name
@@ -82,7 +82,7 @@ if !s:InitEasyTags(55)
   if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
     let msg = "easytags.vim: Plug-in not loaded because Exuberant Ctags isn't installed!"
     if executable('apt-get')
-      let msg ,= " On Ubuntu & Debian you can install Exuberant Ctags by"
+      let msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
       let msg .= " installing the package named `exuberant-ctags':"
       let msg .= " sudo apt-get install exuberant-ctags"
     else
@@ -97,20 +97,34 @@ if !s:InitEasyTags(55)
   finish
 endif
 
+function! s:RegisterTagsFile()
+  " Parse the &tags option and get a list of all tags files *including
+  " non-existing files* (this is why we can't just call tagfiles()).
+  let tagfiles = xolox#option#split_tags(&tags)
+  let expanded = map(copy(tagfiles), 'resolve(expand(v:val))')
+  " Add the filename to the &tags option when the user hasn't done so already.
+  if index(expanded, resolve(expand(g:easytags_file))) == -1
+    " This is a real mess because of bugs in Vim?! :let &tags = '...' doesn't
+    " work on UNIX and Windows, :set tags=... doesn't work on Windows. What I
+    " mean with "doesn't work" is that tagfiles() == [] after the :let/:set
+    " command even though the tags file exists! One easy way to confirm that
+    " this is a bug in Vim is to type :set tags= then press <Tab> followed by
+    " <CR>. Now you entered the exact same value that the code below also did
+    " but suddenly Vim sees the tags file and tagfiles() != [] :-S
+    call insert(tagfiles, g:easytags_file)
+    let value = xolox#option#join_tags(tagfiles)
+    let cmd = ':set tags=' . escape(value, '\ ')
+    if has('win32') || has('win64')
+      " TODO How to clear the expression from Vim's status line?
+      call feedkeys(":" . cmd . "|let &ro=&ro\<CR>", 'n')
+    else
+      execute cmd
+    endif
+  endif
+endfunction
+
 " Let Vim know about the global tags file created by this plug-in.
-
-" Parse the &tags option and get a list of all configured tags files including
-" non-existing files (this is why we can't just call the tagfiles() function).
-let s:tagfiles = xolox#option#split_tags(&tags)
-let s:expanded = map(copy(s:tagfiles), 'resolve(expand(v:val))')
-
-" Add the tags file to the &tags option when the user hasn't done so already.
-if index(s:expanded, resolve(expand(g:easytags_file))) == -1
-  let s:value = substitute(expand(g:easytags_file), '[\\, ]', '\\\0', 'g')
-  execute 'set tags=' . s:value . ',' . &tags
-endif
-
-unlet! s:tagfiles s:expanded s:value
+call s:RegisterTagsFile()
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
@@ -122,6 +136,7 @@ command! -bar HighlightTags call easytags#highlight_cmd()
 augroup PluginEasyTags
   autocmd!
   if g:easytags_always_enabled
+    " TODO Also on FocusGained because tags files might be updated externally?
     autocmd BufReadPost,BufWritePost * call easytags#autoload()
   endif
   if g:easytags_on_cursorhold

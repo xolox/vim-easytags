@@ -1,5 +1,7 @@
 # Long term plans
 
+ * Automatically index C headers when /usr/include/$name.h exists?
+
  * Integration with my unreleased project plug-in so that when you edit any
    file in a project, all related files are automatically scanned for tags?
 
