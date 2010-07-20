@@ -14,6 +14,8 @@ if &cp || exists('g:loaded_easytags')
   finish
 endif
 
+let s:script = expand('<sfile>:p:~')
+
 " Configuration defaults and initialization. {{{1
 
 if !exists('g:easytags_file')
@@ -80,20 +82,21 @@ endfunction
 
 if !s:InitEasyTags(55)
   if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
-    let msg = "easytags.vim: Plug-in not loaded because Exuberant Ctags isn't installed!"
+    let s:msg = "%s: Plug-in not loaded because Exuberant Ctags isn't installed!"
     if executable('apt-get')
-      let msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
-      let msg .= " installing the package named `exuberant-ctags':"
-      let msg .= " sudo apt-get install exuberant-ctags"
+      let s:msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
+      let s:msg .= " installing the package named `exuberant-ctags':"
+      let s:msg .= " sudo apt-get install exuberant-ctags"
     else
-      let msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
+      let s:msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
     endif
-    echomsg msg
+    echomsg printf(s:msg, s:script)
   else
-    let msg = "easytags.vim: Plug-in not loaded because Exuberant Ctags 5.5"
-    let msg .= " or newer is required while you have version %s installed!"
-    echomsg printf(msg, g:easytags_ctags_version)
+    let s:msg = "%s: Plug-in not loaded because Exuberant Ctags 5.5"
+    let s:msg .= " or newer is required while you have version %s installed!"
+    echomsg printf(s:msg, s:script, g:easytags_ctags_version)
   endif
+  unlet s:msg
   finish
 endif
 
