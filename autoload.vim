@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 20, 2010
+" Last Change: August 9, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -14,17 +14,17 @@ function! easytags#autoload() " {{{2
     if pathname != ''
       let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
       if tags_outdated || !easytags#file_has_tags(pathname)
-        UpdateTags
+        call easytags#update(1, 0)
       endif
     endif
     " Apply highlighting of tags in global tags file to current buffer?
     if &eventignore !~? '\<syntax\>'
       if !exists('b:easytags_last_highlighted')
-        HighlightTags
+        call easytags#highlight()
       else
         for tagfile in tagfiles()
           if getftime(tagfile) > b:easytags_last_highlighted
-            HighlightTags
+            call easytags#highlight()
             break
           endif
         endfor
@@ -36,68 +36,143 @@ function! easytags#autoload() " {{{2
   endtry
 endfunction
 
-function! easytags#update_cmd(filter_invalid_tags) " {{{2
+function! easytags#update(silent, filter_tags, ...) " {{{2
   try
-    let filename = s:resolve(expand('%:p'))
-    let ft_supported = index(easytags#supported_filetypes(), &ft) >= 0
-    let ft_ignored = g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
-    let update_tags = (filename != '') && ft_supported && !ft_ignored
-    if update_tags || a:filter_invalid_tags
-      let start = xolox#timer#start()
-      let tagsfile = easytags#get_tagsfile()
-      let command = [g:easytags_cmd, '-f', shellescape(tagsfile), '--fields=+l']
-      if !filereadable(tagsfile)
-        call add(command, '--sort=' . (&ic ? 'foldcase' : 'yes'))
-      else
-        call add(command, '-a')
-        let filter_file_tags = update_tags && easytags#file_has_tags(filename)
-        if a:filter_invalid_tags || filter_file_tags
-          let [header, entries] = easytags#read_tagsfile(tagsfile)
-          let num_entries = len(entries)
-          call s:set_tagged_files(entries)
-          let filters = []
-          if filter_file_tags
-            let filename_pattern = '\t' . xolox#escape#pattern(filename) . '\t'
-            call add(filters, 'v:val !~ filename_pattern')
-          endif
-          if a:filter_invalid_tags
-            call add(filters, 'filereadable(get(split(v:val, "\t"), 1))')
-          endif
-          call filter(entries, join(filters, ' && '))
-          if len(entries) != num_entries
-            if !easytags#write_tagsfile(tagsfile, header, entries)
-              let msg = "Failed to write filtered tags file %s!"
-              throw printf(msg, fnamemodify(tagsfile, ':~'))
-            endif
-          endif
-        endif
-      endif
-      if update_tags
-        call add(command, '--language-force=' . easytags#to_ctags_ft(&ft))
-        call add(command, shellescape(filename))
-        let listing = system(join(command))
-        if v:shell_error
-          let msg = "Failed to update tags file %s: %s!"
-          throw printf(msg, fnamemodify(tagsfile, ':~'), strtrans(listing))
-        endif
-        call easytags#add_tagged_file(filename)
+    let starttime = xolox#timer#start()
+    let cfile = s:check_cfile(a:silent, a:filter_tags, a:0 > 0)
+    let tagsfile = easytags#get_tagsfile()
+    let firstrun = !filereadable(tagsfile)
+    let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:000)
+    let output = s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline)
+    if !firstrun
+      let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
+      if cfile != ''
         let msg = "%s: Updated tags for %s in %s."
-        call xolox#timer#stop(msg, s:script, expand('%:p:~'), start)
+        call xolox#timer#stop(msg, s:script, expand('%:p:~'), starttime)
+      elseif a:0 > 0
+        let msg = "%s: Updated tags in %s."
+        call xolox#timer#stop(msg, s:script, starttime)
       else
-        let msg = "%s: Filtered invalid tags in %s."
-        call xolox#timer#stop(msg, s:script, start)
+        let msg = "%s: Filtered %i invalid tags in %s."
+        call xolox#timer#stop(msg, s:script, num_filtered, starttime)
       endif
-      return 1
     endif
-    return 0
+    return 1
   catch
     call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
-function! easytags#highlight_cmd() " {{{2
+function! s:check_cfile(silent, filter_tags, have_args) " {{{3
+  if a:have_args
+    return ''
+  endif
+  let cfile = s:resolve(expand('%:p'))
+  let silent = a:silent || a:filter_tags
+  if cfile == '' || !filereadable(cfile)
+    if silent | return '' | endif
+    throw "You'll need to save your file before using :UpdateTags!"
+  elseif g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
+    if silent | return '' | endif
+    throw "The " . string(&ft) . " file type is explicitly ignored."
+  elseif index(easytags#supported_filetypes(), &ft) == -1
+    if silent | return '' | endif
+    throw "Exuberant Ctags doesn't support the " . string(&ft) . " file type!"
+  endif
+  return cfile
+endfunction
+
+function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
+  let cmdline = [g:easytags_cmd, '--fields=+l']
+  if a:firstrun
+    call add(cmdline, shellescape('-f' . a:tagsfile))
+    call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
+  else
+    call add(cmdline, '--sort=no')
+    call add(cmdline, '-f-')
+  endif
+  if a:cfile != ''
+    let filetype = easytags#to_ctags_ft(&filetype)
+    call add(cmdline, shellescape('--language-force=' . filetype))
+    call add(cmdline, shellescape(a:cfile))
+  else
+    for fname in a:arguments
+      let matches = split(expand(fname), "\n")
+      call extend(cmdline, map(matches, 'shellescape(v:val)'))
+    endfor
+  endif
+  " No need to run Exuberant Ctags without any filename arguments!
+  return len(cmdline) > 4 ? join(cmdline) : ''
+endfunction
+
+function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
+  let output = ''
+  if a:cmdline != ''
+    let output = system(a:cmdline)
+    if v:shell_error
+      let msg = "Failed to update tags file %s: %s!"
+      throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(output))
+    elseif a:firstrun
+      if a:cfile != ''
+        call easytags#add_tagged_file(a:cfile)
+        call xolox#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
+      else
+        call xolox#timer#stop("%s: Created tags in %s.", s:script, a:starttime)
+      endif
+    endif
+  endif
+  return output
+endfunction
+
+function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
+  let [headers, entries] = easytags#read_tagsfile(a:tagsfile)
+  call s:set_tagged_files(entries)
+  let filters = []
+  let s:cached_filenames = {}
+  let new_entries = split(a:output, "\n")
+  let tagged_files = s:find_tagged_files(new_entries)
+  if !empty(tagged_files)
+    call add(filters, '!has_key(tagged_files, s:canonicalize(get(v:val, 1)))')
+  endif
+  if a:filter_tags
+    call add(filters, 'filereadable(get(v:val, 1))')
+  endif
+  let num_old_entries = len(entries)
+  if !empty(filters)
+    call filter(entries, join(filters, ' && '))
+  endif
+  unlet s:cached_filenames
+  let num_filtered = num_old_entries - len(entries)
+  call map(entries, 'join(v:val, "\t")')
+  call extend(entries, new_entries)
+  if !easytags#write_tagsfile(a:tagsfile, headers, entries)
+    let msg = "Failed to write filtered tags file %s!"
+    throw printf(msg, fnamemodify(a:tagsfile, ':~'))
+  endif
+  return num_filtered
+endfunction
+
+function! s:find_tagged_files(new_entries) " {{{3
+  let tagged_files = {}
+  for line in a:new_entries
+    " Never corrupt the tags file by merging an invalid line
+    " (probably an error message) with the existing tags!
+    if match(line, '^[^\t]\+\t[^\t]\+\t.\+$') == -1
+      throw "Exuberant Ctags returned invalid data: " . strtrans(line)
+    endif
+    let filename = matchstr(line, '^[^\t]\+\t\zs[^\t]\+')
+    if !has_key(tagged_files, filename)
+      let filename = s:canonicalize(filename)
+      let tagged_files[filename] = 1
+      call easytags#add_tagged_file(filename)
+    endif
+  endfor
+  return tagged_files
+endfunction
+
+function! easytags#highlight() " {{{2
   try
-    if exists('g:syntax_on') && has_key(s:tagkinds, &ft)
+    if exists('g:syntax_on') && has_key(s:tagkinds, &ft) && !exists('b:easytags_nohl')
       let start = xolox#timer#start()
       if !has_key(s:aliases, &ft)
         let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
@@ -133,6 +208,7 @@ function! easytags#highlight_cmd() " {{{2
       endif
       let msg = "%s: Highlighted tags in %s in %s."
       call xolox#timer#stop(msg, s:script, bufname, start)
+      return 1
     endif
   catch
     call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
@@ -158,28 +234,48 @@ function! easytags#supported_filetypes() " {{{2
 endfunction
 
 function! easytags#read_tagsfile(tagsfile) " {{{2
-  let lines = readfile(a:tagsfile)
-  let header = []
-  while lines != [] && lines[0] =~# '^!_TAG_'
-    call insert(header, remove(lines, 0))
-  endwhile
-  while lines != [] && lines[-1] == ''
-    call remove(lines, -1)
-  endwhile
-  return [header, lines]
+  " I'm not sure whether this is by design or an implementation detail but
+  " it's possible for the "!_TAG_FILE_SORTED" header to appear after one or
+  " more tags and Vim will apparently still use the header! For this reason
+  " the easytags#write_tagsfile() function should also recognize it, otherwise
+  " Vim might complain with "E432: Tags file not sorted".
+  let headers = []
+  let entries = []
+  let pattern = '^\([^\t]\+\)\t\([^\t]\+\)\t\(.\+\)$'
+  for line in readfile(a:tagsfile)
+    if line =~# '^!_TAG_'
+      call add(headers, line)
+    else
+      call add(entries, matchlist(line, pattern)[1:3])
+    endif
+  endfor
+  return [headers, entries]
 endfunction
 
-function! easytags#write_tagsfile(tagsfile, header, entries) " {{{2
+function! easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
+  " This function always sorts the tags file but understands "foldcase".
+  let sort_order = 1
+  for line in a:headers
+    if match(line, '^!_TAG_FILE_SORTED\t2') == 0
+      let sort_order = 2
+    endif
+  endfor
+  if sort_order == 1
+    call sort(a:entries)
+  else
+    call sort(a:entries, 1)
+  endif
   let lines = []
   if has('win32') || has('win64')
-    for line in a:header
+    " Exuberant Ctags on Windows requires \r\n but Vim's writefile() doesn't add them!
+    for line in a:headers
       call add(lines, line . "\r")
     endfor
-    for entry in a:entries
-      call add(lines, entry . "\r")
+    for line in a:entries
+      call add(lines, line . "\r")
     endfor
   else
-    call extend(lines, a:header)
+    call extend(lines, a:headers)
     call extend(lines, a:entries)
   endif
   return writefile(lines, a:tagsfile) == 0
@@ -269,11 +365,21 @@ function! s:resolve(filename) " {{{2
   endif
 endfunction
 
+function! s:canonicalize(filename) " {{{2
+  if has_key(s:cached_filenames, a:filename)
+    return s:cached_filenames[a:filename]
+  endif
+    let canonical = s:resolve(fnamemodify(a:filename, ':p'))
+    let s:cached_filenames[a:filename] = canonical
+    return canonical
+  endif
+endfunction
+
 function! s:cache_tagged_files() " {{{2
   if !exists('s:tagged_files')
     let tagsfile = easytags#get_tagsfile()
     try
-      let [header, entries] = easytags#read_tagsfile(tagsfile)
+      let [headers, entries] = easytags#read_tagsfile(tagsfile)
       call s:set_tagged_files(entries)
     catch /\<E484\>/
       " Ignore missing tags file.
@@ -287,10 +393,9 @@ function! s:set_tagged_files(entries) " {{{2
   " automatically used :-)
   let s:tagged_files = {}
   for entry in a:entries
-    let filename = matchstr(entry, '^[^\t]\+\t\zs[^\t]\+')
+    let filename = get(entry, 1, '')
     if filename != ''
-      let filename = s:resolve(filename)
-      let s:tagged_files[filename] = 1
+      let s:tagged_files[s:resolve(filename)] = 1
     endif
   endfor
 endfunction

@@ -34,10 +34,4 @@
    `~/Development/Vim/vim-easytags/autoload.vim`). I was already editing
    `~/.vim/autoload/easytags.vim` in another Vim buffer.
 
- * Convert `easytags#update_cmd()` to a function that can be executed on a
-   list of files and will only execute Exuberant Ctags once to do so, then
-   change `:UpdateTags` to accept an optional file glob, e.g. `:UpdateTags
-   /usr/include/lua5.1/*.h` and call `easytags#update_cmd()` on the matching
-   files.
-
 vim: ai nofen
