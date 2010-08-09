@@ -106,13 +106,19 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
 endfunction
 
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
-  let output = ''
+  let output = []
   if a:cmdline != ''
-    let output = system(a:cmdline)
-    if v:shell_error
-      let msg = "Failed to update tags file %s: %s!"
-      throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(output))
-    elseif a:firstrun
+    try
+      let output = xolox#shell#execute(a:cmdline, 1)
+    catch /^Vim\%((\a\+)\)\=:E117/
+      " Ignore missing shell.vim plug-in.
+      let output = split(system(a:cmdline), "\n")
+      if v:shell_error
+        let msg = "Failed to update tags file %s: %s!"
+        throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(join(output, "\n")))
+      endif
+    endtry
+    if a:firstrun
       if a:cfile != ''
         call easytags#add_tagged_file(a:cfile)
         call xolox#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
@@ -129,8 +135,7 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   call s:set_tagged_files(entries)
   let filters = []
   let s:cached_filenames = {}
-  let new_entries = split(a:output, "\n")
-  let tagged_files = s:find_tagged_files(new_entries)
+  let tagged_files = s:find_tagged_files(a:output)
   if !empty(tagged_files)
     call add(filters, '!has_key(tagged_files, s:canonicalize(get(v:val, 1)))')
   endif
@@ -144,7 +149,7 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   unlet s:cached_filenames
   let num_filtered = num_old_entries - len(entries)
   call map(entries, 'join(v:val, "\t")')
-  call extend(entries, new_entries)
+  call extend(entries, a:output)
   if !easytags#write_tagsfile(a:tagsfile, headers, entries)
     let msg = "Failed to write filtered tags file %s!"
     throw printf(msg, fnamemodify(a:tagsfile, ':~'))
@@ -173,7 +178,7 @@ endfunction
 function! easytags#highlight() " {{{2
   try
     if exists('g:syntax_on') && has_key(s:tagkinds, &ft) && !exists('b:easytags_nohl')
-      let start = xolox#timer#start()
+      let starttime = xolox#timer#start()
       if !has_key(s:aliases, &ft)
         let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
       else
@@ -207,7 +212,7 @@ function! easytags#highlight() " {{{2
         let bufname = 'unnamed buffer #' . bufnr('%')
       endif
       let msg = "%s: Highlighted tags in %s in %s."
-      call xolox#timer#stop(msg, s:script, bufname, start)
+      call xolox#timer#stop(msg, s:script, bufname, starttime)
       return 1
     endif
   catch
@@ -219,18 +224,31 @@ endfunction
 
 function! easytags#supported_filetypes() " {{{2
   if !exists('s:supported_filetypes')
-    let start = xolox#timer#start()
-    let listing = system(g:easytags_cmd . ' --list-languages')
-    if v:shell_error
-      let msg = "Failed to get supported languages! (output: %s)"
-      throw printf(msg, strtrans(listing))
-    endif
-    let s:supported_filetypes = split(listing, '\n')
-    call map(s:supported_filetypes, 'easytags#to_vim_ft(v:val)')
+    let starttime = xolox#timer#start()
+    let command = g:easytags_cmd . ' --list-languages'
+    try
+      let listing = xolox#shell#execute(command, 1)
+    catch /^Vim\%((\a\+)\)\=:E117/
+      " Ignore missing shell.vim plug-in.
+      let listing = split(system(command), "\n")
+      if v:shell_error
+        let msg = "Failed to get supported languages! (output: %s)"
+        throw printf(msg, strtrans(join(listing, "\n")))
+      endif
+    endtry
+    let s:supported_filetypes = map(copy(listing), 's:check_filetype(listing, v:val)')
     let msg = "%s: Retrieved %i supported languages in %s."
-    call xolox#timer#stop(msg, s:script, len(s:supported_filetypes), start)
+    call xolox#timer#stop(msg, s:script, len(s:supported_filetypes), starttime)
   endif
   return s:supported_filetypes
+endfunction
+
+function! s:check_filetype(listing, cline)
+  if a:cline !~ '^\w\S*$'
+    let msg = "Failed to get supported languages! (output: %s)"
+    throw printf(msg, strtrans(join(a:listing, "\n")))
+  endif
+  return easytags#to_vim_ft(a:cline)
 endfunction
 
 function! easytags#read_tagsfile(tagsfile) " {{{2

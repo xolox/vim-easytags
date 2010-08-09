@@ -64,7 +64,18 @@ function! s:CheckCtags(name, version)
   " This function makes sure it is because the easytags plug-in requires the
   " --list-languages option.
   if executable(a:name)
-    let listing = system(a:name . ' --version')
+    let command = a:name . ' --version'
+    try
+      let listing = join(xolox#shell#execute(command, 1), '\n')
+    catch /^Vim\%((\a\+)\)\=:E117/
+      " Ignore missing shell.vim plug-in.
+      let listing = system(command)
+    catch
+      " xolox#shell#execute() converts shell errors to exceptions and since
+      " we're checking whether one of several executables exists we don't want
+      " to throw an error when the first one doesn't!
+      return
+    endtry
     let pattern = 'Exuberant Ctags \zs\d\+\(\.\d\+\)*'
     let g:easytags_ctags_version = matchstr(listing, pattern)
     return s:VersionToNumber(g:easytags_ctags_version) >= a:version
