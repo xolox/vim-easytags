@@ -76,7 +76,7 @@ When the `:UpdateTags` command is executed automatically or without arguments, i
 
 You have to explicitly enable this option because it should only be used while navigating around small directory trees. Imagine always having this option enabled and then having to edit a file in e.g. the root of your home directory: The `easytags.vim` plug-in would freeze Vim for a long time while you'd have to wait for Exuberant Cags to scan thousands of files...
 
-Note that when you enable this option the `easytags.vim` might ignore other options like `g:easytags_resolve_links`. This is an implementation detail which I intend to fix.
+Note that when you enable this option the `easytags.vim` plug-in might ignore other options like `g:easytags_resolve_links`. This is an implementation detail which I intend to fix.
 
 ### The `g:easytags_resolve_links` option
 
