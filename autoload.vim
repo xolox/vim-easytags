@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 9, 2010
+" Last Change: August 10, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -177,7 +177,9 @@ endfunction
 
 function! easytags#highlight() " {{{2
   try
-    if exists('g:syntax_on') && has_key(s:tagkinds, &ft) && !exists('b:easytags_nohl')
+    let filetype = get(s:canonical_aliases, &ft, &ft)
+    let tagkinds = get(s:tagkinds, filetype, [])
+    if exists('g:syntax_on') && !empty(tagkinds) && !exists('b:easytags_nohl')
       let starttime = xolox#timer#start()
       if !has_key(s:aliases, &ft)
         let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
@@ -185,7 +187,7 @@ function! easytags#highlight() " {{{2
         let aliases = s:aliases[&ft]
         let taglist = filter(taglist('.'), "has_key(aliases, tolower(get(v:val, 'language', '')))")
       endif
-      for tagkind in s:tagkinds[&ft]
+      for tagkind in tagkinds
         let hlgroup_tagged = tagkind.hlgroup . 'Tag'
         if hlexists(hlgroup_tagged)
           execute 'syntax clear' hlgroup_tagged
@@ -341,6 +343,7 @@ endfunction
 
 function! easytags#alias_filetypes(...) " {{{2
   for type in a:000
+    let s:canonical_aliases[type] = a:1
     if !has_key(s:aliases, type)
       let s:aliases[type] = {}
     endif
@@ -436,6 +439,7 @@ call easytags#map_filetypes(exists('g:filetype_asp') ? g:filetype_asp : 'aspvbs'
 
 " Define the Vim file-types that are aliased by default.
 let s:aliases = {}
+let s:canonical_aliases = {}
 call easytags#alias_filetypes('c', 'cpp', 'objc', 'objcpp')
 
 " Enable line continuation.
