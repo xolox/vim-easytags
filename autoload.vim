@@ -67,8 +67,16 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   if a:have_args
     return ''
   endif
-  let cfile = s:resolve(expand('%:p'))
   let silent = a:silent || a:filter_tags
+  if g:easytags_autorecurse
+    let cdir = s:resolve(expand('%:p:h'))
+    if !isdirectory(cdir)
+      if silent | return '' | endif
+      throw "The directory of the current file doesn't exist yet!"
+    endif
+    return cdir
+  endif
+  let cfile = s:resolve(expand('%:p'))
   if cfile == '' || !filereadable(cfile)
     if silent | return '' | endif
     throw "You'll need to save your file before using :UpdateTags!"
@@ -92,9 +100,14 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
     call add(cmdline, '-f-')
   endif
   if a:cfile != ''
-    let filetype = easytags#to_ctags_ft(&filetype)
-    call add(cmdline, shellescape('--language-force=' . filetype))
-    call add(cmdline, shellescape(a:cfile))
+    if g:easytags_autorecurse
+      call add(cmdline, '-R')
+      call add(cmdline, shellescape(a:cfile))
+    else
+      let filetype = easytags#to_ctags_ft(&filetype)
+      call add(cmdline, shellescape('--language-force=' . filetype))
+      call add(cmdline, shellescape(a:cfile))
+    endif
   else
     for fname in a:arguments
       let matches = split(expand(fname), "\n")
@@ -108,6 +121,7 @@ endfunction
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   let output = []
   if a:cmdline != ''
+    call xolox#debug("%s: Executing %s", s:script, a:cmdline)
     try
       let output = xolox#shell#execute(a:cmdline, 1)
     catch /^Vim\%((\a\+)\)\=:E117/

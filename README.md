@@ -68,6 +68,16 @@ As I explained above the plug-in by default doesn't update or highlight your tag
 
 Note: Like the `g:easytags_always_enabled` option, if you change this option it won't apply until you restart Vim, so you'll have to set this option in your [vimrc script][vimrc].
 
+### The `g:easytags_autorecurse` option
+
+When the `:UpdateTags` command is executed automatically or without arguments, it defaults to updating just the tags for the current file. If you'd rather have it recursively scan everything below the directory of the current file then set this option to true (1):
+
+    :let g:easytags_autorecurse = 1
+
+You have to explicitly enable this option because it should only be used while navigating around small directory trees. Imagine always having this option enabled and then having to edit a file in e.g. the root of your home directory: The `easytags.vim` plug-in would freeze Vim for a long time while you'd have to wait for Exuberant Cags to scan thousands of files...
+
+Note that when you enable this option the `easytags.vim` might ignore other options like `g:easytags_resolve_links`. This is an implementation detail which I intend to fix.
+
 ### The `g:easytags_resolve_links` option
 
 UNIX has [symbolic links](http://en.wikipedia.org/wiki/Symbolic_link) and [hard links](http://en.wikipedia.org/wiki/Hard_link), both of which conflict with the concept of having one unique location for every identifier. With regards to hard links there's not much anyone can do, but because I use symbolic links quite a lot I've added this option. It's disabled by default since it has a small performance impact and might not do what unknowing users expect it to: When you enable this option the plug-in will resolve symbolic links in pathnames, which means your tags file will only contain entries with [canonical pathnames](http://en.wikipedia.org/wiki/Canonicalization). To enable this option (which I strongly suggest doing when you run UNIX and use symbolic links) execute the following Vim command:
