@@ -38,7 +38,7 @@ Note that this command will be executed automatically every once in a while, ass
 
 ### The `g:easytags_cmd` option
 
-The plug-in will try to determine the location where Exuberant Ctags is installed on its own but this might not always work because any given executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags but some older, more primitive `ctags` implementation which doesn't support the same command-line options and thus breaks the `easytags.vim` plug-in. If this is the case you can set the global variable `g:easytags_cmd` to the location where you've installed Exuberant Ctags, e.g.:
+The plug-in will try to determine the location where Exuberant Ctags is installed on its own but this might not always work because any given executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags but some older, more primitive `ctags` implementation which doesn't support the same command line options and thus breaks the `easytags.vim` plug-in. If this is the case you can set the global variable `g:easytags_cmd` to the location where you've installed Exuberant Ctags, e.g.:
 
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
@@ -77,6 +77,20 @@ When the `:UpdateTags` command is executed automatically or without arguments, i
 You have to explicitly enable this option because it should only be used while navigating around small directory trees. Imagine always having this option enabled and then having to edit a file in e.g. the root of your home directory: The `easytags.vim` plug-in would freeze Vim for a long time while you'd have to wait for Exuberant Cags to scan thousands of files...
 
 Note that when you enable this option the `easytags.vim` plug-in might ignore other options like `g:easytags_resolve_links`. This is an implementation detail which I intend to fix.
+
+### The `g:easytags_include_members` option
+
+Exuberant Ctags knows how to generate tags for struct/class members in C++ and Java source code but doesn't do so by default because it can more than double the size of your tags files, thus taking much longer to read/write the tags file. When you enable the `g:easytags_include_members` option from your [vimrc script][vimrc] (before the `easytags.vim` plug-in is loaded):
+
+    :let g:easytags_include_members = 1
+
+Exuberant Ctags will be instructed to include struct/class members using the `--extra=+q` command line argument and the `easytags.vim` plug-in will highlight them using the `cMember` highlighting group. Because most color schemes don't distinguish the [Identifier and Type](http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name) highlighting groups all members will now probably look like type definitions. You can change that by executing any of the following Vim commands (from your vimrc script, a file type plug-in, etc.):
+
+    " If you like one of the existing styles you can link them:
+    highlight link cMember Special
+
+    " You can also define your own style if you want:
+    highlight cMember gui=italic
 
 ### The `g:easytags_resolve_links` option
 

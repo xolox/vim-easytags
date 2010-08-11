@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 10, 2010
+" Last Change: August 11, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -99,6 +99,10 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
     call add(cmdline, '--sort=no')
     call add(cmdline, '-f-')
   endif
+  if g:easytags_include_members
+    call add(cmdline, '--extra=+q')
+  endif
+  let have_args = 0
   if a:cfile != ''
     if g:easytags_autorecurse
       call add(cmdline, '-R')
@@ -108,14 +112,18 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
       call add(cmdline, shellescape('--language-force=' . filetype))
       call add(cmdline, shellescape(a:cfile))
     endif
+    let have_args = 1
   else
     for fname in a:arguments
       let matches = split(expand(fname), "\n")
-      call extend(cmdline, map(matches, 'shellescape(v:val)'))
+      if !empty(matches)
+        call extend(cmdline, map(matches, 'shellescape(v:val)'))
+        let have_args = 1
+      endif
     endfor
   endif
   " No need to run Exuberant Ctags without any filename arguments!
-  return len(cmdline) > 4 ? join(cmdline) : ''
+  return have_args ? join(cmdline) : ''
 endfunction
 
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
@@ -476,6 +484,11 @@ call easytags#define_tagkind({
 
 call easytags#define_tagkind({
       \ 'filetype': 'c',
+      \ 'hlgroup': 'cEnum',
+      \ 'filter': 'get(v:val, "kind") ==# "e"'})
+
+call easytags#define_tagkind({
+      \ 'filetype': 'c',
       \ 'hlgroup': 'cPreProc',
       \ 'filter': 'get(v:val, "kind") ==# "d"'})
 
@@ -484,7 +497,16 @@ call easytags#define_tagkind({
       \ 'hlgroup': 'cFunction',
       \ 'filter': 'get(v:val, "kind") =~# "[fp]"'})
 
+highlight def link cEnum Identifier
 highlight def link cFunction Function
+
+if g:easytags_include_members
+  call easytags#define_tagkind({
+        \ 'filetype': 'c',
+        \ 'hlgroup': 'cMember',
+        \ 'filter': 'get(v:val, "kind") ==# "m"'})
+ highlight def link cMember Identifier
+endif
 
 " PHP. {{{2
 
