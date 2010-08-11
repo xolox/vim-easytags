@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.1.3
+" Version: 2.1.4
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -59,7 +59,7 @@ function! s:InitEasyTags(version)
   " On Ubuntu Linux, Exuberant Ctags is installed as `ctags'. On Debian Linux,
   " Exuberant Ctags is installed as `exuberant-ctags'. On Free-BSD, Exuberant
   " Ctags is installed as `exctags'.
-  for name in ['ctags', 'exuberant-ctags', 'esctags']
+  for name in ['ctags', 'exuberant-ctags', 'exctags']
     if s:CheckCtags(name, a:version)
       let g:easytags_cmd = name
       return 1
