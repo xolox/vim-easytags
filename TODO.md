@@ -2,20 +2,15 @@
 
  * Automatically index C headers when /usr/include/$name.h exists?
 
- * Integration with my unreleased project plug-in so that when you edit any
-   file in a project, all related files are automatically scanned for tags?
+ * It seems that Exuberant Ctags doesn't support Objective-C which makes the file type mapping between C and Objective-C useless. Maybe the plug-in should just treat Objective-C source code as C?
 
- * Use separate tags files for each language stored in ~/.vim/tags/ to increase
-   performance because a single, global tags file quickly grows to a megabyte?
+ * Integration with my unreleased project plug-in so that when you edit any file in a project, all related files are automatically scanned for tags?
 
- * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is
-   running because Vim opens a command prompt window. Also the CursorHold event
-   seems to fire repeatedly, contradicting my understanding of the autocmd and
-   its behavior on UNIX?!
+ * Use separate tags files for each language stored in ~/.vim/tags/ to increase performance because a single, global tags file quickly grows to a megabyte?
 
- * I might have found a bug in Vim: The tag `easytags#highlight_cmd` was
-   correctly being highlighted by my plug-in (and was indeed included in my
-   tags file) even though I couldn't jump to it using `Ctrl-]`, which caused:
+ * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is running because Vim opens a command prompt window. Also the CursorHold event seems to fire repeatedly, contradicting my understanding of the autocmd and its behavior on UNIX?!
+
+ * I might have found a bug in Vim: The tag `easytags#highlight_cmd` was correctly being highlighted by my plug-in (and was indeed included in my tags file) even though I couldn't jump to it using `Ctrl-]`, which caused:
 
     E426: tag not found: easytags#highlight_cmd
 
@@ -26,12 +21,6 @@
     \ 'name': 'easytags#highlight_cmd', 'language': 'Vim', 'kind': 'f',
     \ 'filename': '/home/peter/Development/Vim/vim-easytags/autoload.vim'}]
 
-   It just works?! Some relevant context:
-   I was editing `~/.vim/plugin/easytags.vim` at the time (a symbolic link to
-   `~/Development/Vim/vim-easytags/easytags.vim`) and wanted to jump to the
-   definition of the function `easytags#highlight_cmd` in
-   `~/.vim/autoload/easytags.vim` (a symbolic link to
-   `~/Development/Vim/vim-easytags/autoload.vim`). I was already editing
-   `~/.vim/autoload/easytags.vim` in another Vim buffer.
+   It just works?! Some relevant context: I was editing `~/.vim/plugin/easytags.vim` at the time (a symbolic link to `~/Development/Vim/vim-easytags/easytags.vim`) and wanted to jump to the definition of the function `easytags#highlight_cmd` in `~/.vim/autoload/easytags.vim` (a symbolic link to `~/Development/Vim/vim-easytags/autoload.vim`). I was already editing `~/.vim/autoload/easytags.vim` in another Vim buffer.
 
 vim: ai nofen

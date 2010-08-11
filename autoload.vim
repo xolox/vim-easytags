@@ -91,7 +91,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
 endfunction
 
 function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
-  let cmdline = [g:easytags_cmd, '--fields=+l']
+  let cmdline = [g:easytags_cmd, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
   if a:firstrun
     call add(cmdline, shellescape('-f' . a:tagsfile))
     call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
