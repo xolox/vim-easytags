@@ -24,7 +24,7 @@ On Windows the [system()] [system] function used by `easytags.vim` causes a comm
 
 ### The `:UpdateTags` command
 
-This command executes [Exuberant Ctags] [exuberant_ctags] from inside Vim to update the global tags file defined by `g:easytags_file`. When no arguments are given the tags for the current file are updated, otherwise the arguments are passed on to `ctags`. For example when you execute the Vim command `:UpdateTags -R ~/.vim` (or `:UpdateTags -R ~\vimfiles` on Windows) the plug-in will execute `ctags -R ~/.vim` for you (with some additional arguments).
+This command executes [Exuberant Ctags] [exuberant_ctags] from inside Vim to update the global tags file defined by `g:easytags_file`. When no arguments are given the tags for the current file are updated, otherwise the arguments are passed on to `ctags`. For example when you execute the Vim command `:UpdateTags -R ~/.vim` (or `:UpdateTags -R ~\vimfiles` on Windows) the plug-in will execute `ctags -R ~/.vim` for you (with some additional arguments, see the troubleshooting section "`:HighlightTags` only works for the tags file created by `:UpdateTags`" for more information).
 
 When you execute this command like `:UpdateTags!` (including the bang!) then all tags whose files are missing will be filtered from the global tags file.
 
@@ -99,6 +99,16 @@ UNIX has [symbolic links](http://en.wikipedia.org/wiki/Symbolic_link) and [hard 
     :let g:easytags_resolve_links = 1
 
 ## Troubleshooting
+
+### `:HighlightTags` only works for the tags file created by `:UpdateTags`
+
+If you want to create tags files and have their tags highlighted by the `easytags.vim` plug-in then you'll have to create the tags file with certain arguments to Exuberant Ctags:
+
+    $ ctags --fields=+l --c-kinds=+p --c++-kinds=+p ...
+
+The `--fields=+l` argument makes sure that Exuberant Ctags includes a `language:...` property with each entry in the tags file. This is required by the `:HighlightTags` command so it can filter tags by their file type. The other two arguments make sure Exuberant Ctags generates tags for function prototypes in C/C++ source code.
+
+If you have the `g:easytags_include_members` option enabled (its off by default) then you'll also need to add the `--extra=+q` argument so that Exuberant Ctags generates tags for structure/class members.
 
 ### The plug-in complains that Exuberant Ctags isn't installed
 
