@@ -38,6 +38,7 @@ endfunction
 
 function! easytags#update(silent, filter_tags, filenames) " {{{2
   try
+    let s:cached_filenames = {}
     let starttime = xolox#timer#start()
     let cfile = s:check_cfile(a:silent, a:filter_tags, !empty(a:filenames))
     let tagsfile = easytags#get_tagsfile()
@@ -60,6 +61,8 @@ function! easytags#update(silent, filter_tags, filenames) " {{{2
     return 1
   catch
     call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+  finally
+    unlet s:cached_filenames
   endtry
 endfunction
 
@@ -114,11 +117,17 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
     endif
     let have_args = 1
   else
-    for fname in a:arguments
-      let matches = split(expand(fname), "\n")
-      if !empty(matches)
-        call extend(cmdline, map(matches, 'shellescape(v:val)'))
+    for arg in a:arguments
+      if arg =~ '^-'
+        call add(cmdline, arg)
         let have_args = 1
+      else
+        let matches = split(expand(arg), "\n")
+        if !empty(matches)
+          call map(matches, 'shellescape(s:canonicalize(v:val))')
+          call extend(cmdline, matches)
+          let have_args = 1
+        endif
       endif
     endfor
   endif
@@ -156,7 +165,6 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   let [headers, entries] = easytags#read_tagsfile(a:tagsfile)
   call s:set_tagged_files(entries)
   let filters = []
-  let s:cached_filenames = {}
   let tagged_files = s:find_tagged_files(a:output)
   if !empty(tagged_files)
     call add(filters, '!has_key(tagged_files, s:canonicalize(get(v:val, 1)))')
@@ -168,7 +176,6 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   if !empty(filters)
     call filter(entries, join(filters, ' && '))
   endif
-  unlet s:cached_filenames
   let num_filtered = num_old_entries - len(entries)
   call map(entries, 'join(v:val, "\t")')
   call extend(entries, a:output)
