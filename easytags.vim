@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.1.5
+" Version: 2.1.6
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -150,7 +150,7 @@ call s:RegisterTagsFile()
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
-command! -bar -bang -nargs=* -complete=file UpdateTags call easytags#update(0, <q-bang> == '!', <f-args>)
+command! -bar -bang -nargs=* -complete=file UpdateTags call easytags#update(0, <q-bang> == '!', [<f-args>])
 command! -bar HighlightTags call easytags#highlight()
 
 " Automatic commands. {{{1

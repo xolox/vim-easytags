@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 11, 2010
+" Last Change: September 6, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -14,7 +14,7 @@ function! easytags#autoload() " {{{2
     if pathname != ''
       let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
       if tags_outdated || !easytags#file_has_tags(pathname)
-        call easytags#update(1, 0)
+        call easytags#update(1, 0, [])
       endif
     endif
     " Apply highlighting of tags in global tags file to current buffer?
@@ -36,13 +36,13 @@ function! easytags#autoload() " {{{2
   endtry
 endfunction
 
-function! easytags#update(silent, filter_tags, ...) " {{{2
+function! easytags#update(silent, filter_tags, filenames) " {{{2
   try
     let starttime = xolox#timer#start()
-    let cfile = s:check_cfile(a:silent, a:filter_tags, a:0 > 0)
+    let cfile = s:check_cfile(a:silent, a:filter_tags, !empty(a:filenames))
     let tagsfile = easytags#get_tagsfile()
     let firstrun = !filereadable(tagsfile)
-    let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:000)
+    let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:filenames)
     let output = s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline)
     if !firstrun
       let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
