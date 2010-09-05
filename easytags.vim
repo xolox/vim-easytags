@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 11, 2010
+" Last Change: September 6, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.1.4
+" Version: 2.1.5
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -165,7 +165,6 @@ augroup PluginEasyTags
     autocmd CursorHold,CursorHoldI * call easytags#autoload()
     autocmd BufReadPost * unlet! b:easytags_last_highlighted
   endif
-  autocmd User PublishPre HighlightTags
 augroup END
 
 " }}}1
