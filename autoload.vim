@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 6, 2010
+" Last Change: October 23, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -227,7 +227,7 @@ function! easytags#highlight() " {{{2
         if matches != []
           call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
           let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
-          let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*'
+          let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
           let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
           try
             execute command

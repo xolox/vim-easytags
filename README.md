@@ -152,7 +152,7 @@ Once you've executed the above command, Vim will automatically look for a file n
 
 ## Contact
 
-If you have questions, bug reports, suggestions, etc. the author can be contacted at <peter@peterodding.com>. The latest version is available at <http://peterodding.com/code/vim/easytags/> and <http://github.com/xolox/vim-easytags>. If you like this plug-in please vote for it on [www.vim.org](http://www.vim.org/scripts/script.php?script_id=3114).
+If you have questions, bug reports, suggestions, etc. the author can be contacted at <peter@peterodding.com>. The latest version is available at <http://peterodding.com/code/vim/easytags/> and <http://github.com/xolox/vim-easytags>. If you like this plug-in please vote for it on [Vim Online](http://www.vim.org/scripts/script.php?script_id=3114).
 
 ## License
 
