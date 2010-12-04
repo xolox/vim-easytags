@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 23, 2010
+" Last Change: December 4, 2010
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -576,7 +576,13 @@ call easytags#define_tagkind({
       \ 'filter': 'get(v:val, "kind") ==# "m"',
       \ 'pattern_prefix': '\.\@<='})
 
+call easytags#define_tagkind({
+      \ 'filetype': 'python',
+      \ 'hlgroup': 'pythonClass',
+      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+
 highlight def link pythonMethodTag pythonFunction
+highlight def link pythonClassTag pythonFunction
 
 " Java. {{{2
 
