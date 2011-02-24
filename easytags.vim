@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: December 4, 2010
+" Last Change: February 24, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.1.9
+" Version: 2.1.10
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip

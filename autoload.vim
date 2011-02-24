@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: December 4, 2010
+" Last Change: February 24, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -206,12 +206,14 @@ endfunction
 
 function! easytags#highlight() " {{{2
   try
+    " Treat C++ and Objective-C as plain C.
     let filetype = get(s:canonical_aliases, &ft, &ft)
     let tagkinds = get(s:tagkinds, filetype, [])
     if exists('g:syntax_on') && !empty(tagkinds) && !exists('b:easytags_nohl')
       let starttime = xolox#timer#start()
-      if !has_key(s:aliases, &ft)
-        let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? &ft")
+      if !has_key(s:aliases, filetype)
+        let ctags_filetype = easytags#to_ctags_ft(filetype)
+        let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? ctags_filetype")
       else
         let aliases = s:aliases[&ft]
         let taglist = filter(taglist('.'), "has_key(aliases, tolower(get(v:val, 'language', '')))")
