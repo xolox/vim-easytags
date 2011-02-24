@@ -522,7 +522,8 @@ endif
 call easytags#define_tagkind({
       \ 'filetype': 'php',
       \ 'hlgroup': 'phpFunctions',
-      \ 'filter': 'get(v:val, "kind") ==# "f"'})
+      \ 'filter': 'get(v:val, "kind") ==# "f"',
+      \ 'pattern_suffix': '(\@='})
 
 call easytags#define_tagkind({
       \ 'filetype': 'php',
