@@ -602,6 +602,26 @@ call easytags#define_tagkind({
 highlight def link javaClass Identifier
 highlight def link javaMethod Function
 
+" C#. {{{2
+
+" TODO C# name spaces?
+" TODO C# interface names
+" TODO C# enumeration member names
+" TODO C# structure names?
+
+call easytags#define_tagkind({
+      \ 'filetype': 'cs',
+      \ 'hlgroup': 'csClassOrStruct',
+      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+
+call easytags#define_tagkind({
+      \ 'filetype': 'cs',
+      \ 'hlgroup': 'csMethod',
+      \ 'filter': 'get(v:val, "kind") =~# "[ms]"'})
+
+highlight def link csClass Identifier
+highlight def link csMethod Function
+
 " }}}
 
 " Restore "cpoptions".
