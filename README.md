@@ -84,7 +84,7 @@ Exuberant Ctags knows how to generate tags for struct/class members in C++ and J
 
     :let g:easytags_include_members = 1
 
-Exuberant Ctags will be instructed to include struct/class members using the `--extra=+q` command line argument and the `easytags.vim` plug-in will highlight them using the `cMember` highlighting group. Because most color schemes don't distinguish the [Identifier and Type](http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name) highlighting groups all members will now probably look like type definitions. You can change that by executing any of the following Vim commands (from your vimrc script, a file type plug-in, etc.):
+Exuberant Ctags will be instructed to include struct/class members using the `--extra=+q` command line argument and the `easytags.vim` plug-in will highlight them using the `cMember` highlighting group. Because most color schemes don't distinguish the [Identifier and Type](http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name) highlighting groups all members will now probably look like type definitions. You can change that by executing either of the following Vim commands (from your vimrc script, a file type plug-in, etc.):
 
     " If you like one of the existing styles you can link them:
     highlight link cMember Special
@@ -97,6 +97,20 @@ Exuberant Ctags will be instructed to include struct/class members using the `--
 UNIX has [symbolic links](http://en.wikipedia.org/wiki/Symbolic_link) and [hard links](http://en.wikipedia.org/wiki/Hard_link), both of which conflict with the concept of having one unique location for every identifier. With regards to hard links there's not much anyone can do, but because I use symbolic links quite a lot I've added this option. It's disabled by default since it has a small performance impact and might not do what unknowing users expect it to: When you enable this option the plug-in will resolve symbolic links in pathnames, which means your tags file will only contain entries with [canonical pathnames](http://en.wikipedia.org/wiki/Canonicalization). To enable this option (which I strongly suggest doing when you run UNIX and use symbolic links) execute the following Vim command:
 
     :let g:easytags_resolve_links = 1
+
+### How to customize the highlighting colors?
+
+The easytags plug-in defines new highlighting groups for dynamically highlighted tags. These groups are linked to Vim's default groups so that they're colored out of the box, but if you want you can change the styles. To do so use a `highlight` command such as the ones given a few paragraphs back. Of course you'll need to change the group name. Here are the group names used by the easytags plug-in:
+
+ * **Lua:** `luaFuncTag`
+ * **C:** `cTypeTag`, `cEnumTag`, `cPreProcTag`, `cFunctionTag`, `cMemberTag`
+ * **PHP:** `phpFunctionsTag`, `phpClassesTag`
+ * **Vim:** `vimAutoGroupTag`, `vimCommandTag`, `vimFuncNameTag`, `vimScriptFuncNameTag`
+ * **Python:** `pythonFunctionTag`, `pythonMethodTag`, `pythonClassTag`
+ * **Java:** `javaClassTag`, `javaMethodTag`
+ * **C#:** `csClassOrStructTag`, `csMethodTag`
+
+As you can see each of these names ends in `Tag` to avoid conflicts with the syntax modes shipped with Vim. And about the singular/plural confusion: I've tried to match the existing highlighting groups defined by popular syntax modes (except of course for the `Tag` suffix).
 
 ## Troubleshooting
 
