@@ -150,6 +150,10 @@ In my case the solution was to move most of the tags from `/usr/include/` over t
 
 Once you've executed the above command, Vim will automatically look for a file named `.tags` in the directory of the current file. Because of the `;` Vim also recurses upwards so that you can nest files arbitrarily deep under your project directories.
 
+### The plug-in doesn't seem to work in [Cygwin](http://en.wikipedia.org/wiki/Cygwin)
+
+If you want to use the plug-in with Vim under Cygwin, you need to have the Cygwin version of Ctags installed instead of the Windows version (thanks to Alex Zuroff for reporting this!).
+
 ## Contact
 
 If you have questions, bug reports, suggestions, etc. the author can be contacted at <peter@peterodding.com>. The latest version is available at <http://peterodding.com/code/vim/easytags/> and <http://github.com/xolox/vim-easytags>. If you like this plug-in please vote for it on [Vim Online](http://www.vim.org/scripts/script.php?script_id=3114).

@@ -1,8 +1,6 @@
-# Long term plans
+# Long term plans for the easytags Vim plug-in
 
  * Automatically index C headers when /usr/include/$name.h exists?
-
- * It seems that Exuberant Ctags doesn't support Objective-C which makes the file type mapping between C and Objective-C useless. Maybe the plug-in should just treat Objective-C source code as C?
 
  * Integration with my unreleased project plug-in so that when you edit any file in a project, all related files are automatically scanned for tags?
 
