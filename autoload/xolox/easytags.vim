@@ -1,30 +1,30 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: February 24, 2011
+" Last Change: March 15, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
 
 " Public interface through (automatic) commands. {{{1
 
-function! easytags#autoload() " {{{2
+function! xolox#easytags#autoload() " {{{2
   try
     " Update the entries for the current file in the global tags file?
     let pathname = s:resolve(expand('%:p'))
     if pathname != ''
-      let tags_outdated = getftime(pathname) > getftime(easytags#get_tagsfile())
-      if tags_outdated || !easytags#file_has_tags(pathname)
-        call easytags#update(1, 0, [])
+      let tags_outdated = getftime(pathname) > getftime(xolox#easytags#get_tagsfile())
+      if tags_outdated || !xolox#easytags#file_has_tags(pathname)
+        call xolox#easytags#update(1, 0, [])
       endif
     endif
     " Apply highlighting of tags in global tags file to current buffer?
     if &eventignore !~? '\<syntax\>'
       if !exists('b:easytags_last_highlighted')
-        call easytags#highlight()
+        call xolox#easytags#highlight()
       else
         for tagfile in tagfiles()
           if getftime(tagfile) > b:easytags_last_highlighted
-            call easytags#highlight()
+            call xolox#easytags#highlight()
             break
           endif
         endfor
@@ -32,16 +32,16 @@ function! easytags#autoload() " {{{2
       let b:easytags_last_highlighted = localtime()
     endif
   catch
-    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
-function! easytags#update(silent, filter_tags, filenames) " {{{2
+function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
   try
     let s:cached_filenames = {}
-    let starttime = xolox#timer#start()
+    let starttime = xolox#misc#timer#start()
     let cfile = s:check_cfile(a:silent, a:filter_tags, !empty(a:filenames))
-    let tagsfile = easytags#get_tagsfile()
+    let tagsfile = xolox#easytags#get_tagsfile()
     let firstrun = !filereadable(tagsfile)
     let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:filenames)
     let output = s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline)
@@ -49,18 +49,18 @@ function! easytags#update(silent, filter_tags, filenames) " {{{2
       let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
       if cfile != ''
         let msg = "%s: Updated tags for %s in %s."
-        call xolox#timer#stop(msg, s:script, expand('%:p:~'), starttime)
+        call xolox#misc#timer#stop(msg, s:script, expand('%:p:~'), starttime)
       elseif a:0 > 0
         let msg = "%s: Updated tags in %s."
-        call xolox#timer#stop(msg, s:script, starttime)
+        call xolox#misc#timer#stop(msg, s:script, starttime)
       else
         let msg = "%s: Filtered %i invalid tags in %s."
-        call xolox#timer#stop(msg, s:script, num_filtered, starttime)
+        call xolox#misc#timer#stop(msg, s:script, num_filtered, starttime)
       endif
     endif
     return 1
   catch
-    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   finally
     unlet s:cached_filenames
   endtry
@@ -86,7 +86,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   elseif g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
     if silent | return '' | endif
     throw "The " . string(&ft) . " file type is explicitly ignored."
-  elseif index(easytags#supported_filetypes(), &ft) == -1
+  elseif index(xolox#easytags#supported_filetypes(), &ft) == -1
     if silent | return '' | endif
     throw "Exuberant Ctags doesn't support the " . string(&ft) . " file type!"
   endif
@@ -111,7 +111,7 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
       call add(cmdline, '-R')
       call add(cmdline, shellescape(a:cfile))
     else
-      let filetype = easytags#to_ctags_ft(&filetype)
+      let filetype = xolox#easytags#to_ctags_ft(&filetype)
       call add(cmdline, shellescape('--language-force=' . filetype))
       call add(cmdline, shellescape(a:cfile))
     endif
@@ -138,7 +138,7 @@ endfunction
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   let output = []
   if a:cmdline != ''
-    call xolox#debug("%s: Executing %s", s:script, a:cmdline)
+    call xolox#misc#msg#debug("%s: Executing %s", s:script, a:cmdline)
     try
       let output = xolox#shell#execute(a:cmdline, 1)
     catch /^Vim\%((\a\+)\)\=:E117/
@@ -151,10 +151,10 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
     endtry
     if a:firstrun
       if a:cfile != ''
-        call easytags#add_tagged_file(a:cfile)
-        call xolox#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
+        call xolox#easytags#add_tagged_file(a:cfile)
+        call xolox#misc#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
       else
-        call xolox#timer#stop("%s: Created tags in %s.", s:script, a:starttime)
+        call xolox#misc#timer#stop("%s: Created tags in %s.", s:script, a:starttime)
       endif
     endif
   endif
@@ -162,7 +162,7 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
 endfunction
 
 function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
-  let [headers, entries] = easytags#read_tagsfile(a:tagsfile)
+  let [headers, entries] = xolox#easytags#read_tagsfile(a:tagsfile)
   call s:set_tagged_files(entries)
   let filters = []
   let tagged_files = s:find_tagged_files(a:output)
@@ -179,7 +179,7 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   let num_filtered = num_old_entries - len(entries)
   call map(entries, 'join(v:val, "\t")')
   call extend(entries, a:output)
-  if !easytags#write_tagsfile(a:tagsfile, headers, entries)
+  if !xolox#easytags#write_tagsfile(a:tagsfile, headers, entries)
     let msg = "Failed to write filtered tags file %s!"
     throw printf(msg, fnamemodify(a:tagsfile, ':~'))
   endif
@@ -198,21 +198,21 @@ function! s:find_tagged_files(new_entries) " {{{3
     if !has_key(tagged_files, filename)
       let filename = s:canonicalize(filename)
       let tagged_files[filename] = 1
-      call easytags#add_tagged_file(filename)
+      call xolox#easytags#add_tagged_file(filename)
     endif
   endfor
   return tagged_files
 endfunction
 
-function! easytags#highlight() " {{{2
+function! xolox#easytags#highlight() " {{{2
   try
     " Treat C++ and Objective-C as plain C.
     let filetype = get(s:canonical_aliases, &ft, &ft)
     let tagkinds = get(s:tagkinds, filetype, [])
     if exists('g:syntax_on') && !empty(tagkinds) && !exists('b:easytags_nohl')
-      let starttime = xolox#timer#start()
+      let starttime = xolox#misc#timer#start()
       if !has_key(s:aliases, filetype)
-        let ctags_filetype = easytags#to_ctags_ft(filetype)
+        let ctags_filetype = xolox#easytags#to_ctags_ft(filetype)
         let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? ctags_filetype")
       else
         let aliases = s:aliases[&ft]
@@ -227,15 +227,15 @@ function! easytags#highlight() " {{{2
         endif
         let matches = filter(copy(taglist), tagkind.filter)
         if matches != []
-          call map(matches, 'xolox#escape#pattern(get(v:val, "name"))')
-          let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
+          call map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))')
+          let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#misc#list#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
           let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
           let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
           try
             execute command
           catch /^Vim\%((\a\+)\)\=:E339/
             let msg = "easytags.vim: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
-            call xolox#warning(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
+            call xolox#misc#msg#warn(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
           endtry
         endif
       endfor
@@ -245,19 +245,19 @@ function! easytags#highlight() " {{{2
         let bufname = 'unnamed buffer #' . bufnr('%')
       endif
       let msg = "%s: Highlighted tags in %s in %s."
-      call xolox#timer#stop(msg, s:script, bufname, starttime)
+      call xolox#misc#timer#stop(msg, s:script, bufname, starttime)
       return 1
     endif
   catch
-    call xolox#warning("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
 endfunction
 
 " Public supporting functions (might be useful to others). {{{1
 
-function! easytags#supported_filetypes() " {{{2
+function! xolox#easytags#supported_filetypes() " {{{2
   if !exists('s:supported_filetypes')
-    let starttime = xolox#timer#start()
+    let starttime = xolox#misc#timer#start()
     let command = g:easytags_cmd . ' --list-languages'
     try
       let listing = xolox#shell#execute(command, 1)
@@ -271,7 +271,7 @@ function! easytags#supported_filetypes() " {{{2
     endtry
     let s:supported_filetypes = map(copy(listing), 's:check_filetype(listing, v:val)')
     let msg = "%s: Retrieved %i supported languages in %s."
-    call xolox#timer#stop(msg, s:script, len(s:supported_filetypes), starttime)
+    call xolox#misc#timer#stop(msg, s:script, len(s:supported_filetypes), starttime)
   endif
   return s:supported_filetypes
 endfunction
@@ -281,14 +281,14 @@ function! s:check_filetype(listing, cline)
     let msg = "Failed to get supported languages! (output: %s)"
     throw printf(msg, strtrans(join(a:listing, "\n")))
   endif
-  return easytags#to_vim_ft(a:cline)
+  return xolox#easytags#to_vim_ft(a:cline)
 endfunction
 
-function! easytags#read_tagsfile(tagsfile) " {{{2
+function! xolox#easytags#read_tagsfile(tagsfile) " {{{2
   " I'm not sure whether this is by design or an implementation detail but
   " it's possible for the "!_TAG_FILE_SORTED" header to appear after one or
   " more tags and Vim will apparently still use the header! For this reason
-  " the easytags#write_tagsfile() function should also recognize it, otherwise
+  " the xolox#easytags#write_tagsfile() function should also recognize it, otherwise
   " Vim might complain with "E432: Tags file not sorted".
   let headers = []
   let entries = []
@@ -303,7 +303,7 @@ function! easytags#read_tagsfile(tagsfile) " {{{2
   return [headers, entries]
 endfunction
 
-function! easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
+function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
   " This function always sorts the tags file but understands "foldcase".
   let sort_order = 1
   for line in a:headers
@@ -332,18 +332,18 @@ function! easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
   return writefile(lines, a:tagsfile) == 0
 endfunction
 
-function! easytags#file_has_tags(filename) " {{{2
+function! xolox#easytags#file_has_tags(filename) " {{{2
   call s:cache_tagged_files()
   return has_key(s:tagged_files, s:resolve(a:filename))
 endfunction
 
-function! easytags#add_tagged_file(filename) " {{{2
+function! xolox#easytags#add_tagged_file(filename) " {{{2
   call s:cache_tagged_files()
   let filename = s:resolve(a:filename)
   let s:tagged_files[filename] = 1
 endfunction
 
-function! easytags#get_tagsfile() " {{{2
+function! xolox#easytags#get_tagsfile() " {{{2
   let tagsfile = expand(g:easytags_file)
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
     let message = "The tags file %s isn't writable!"
@@ -354,7 +354,7 @@ endfunction
 
 " Public API for file-type specific dynamic syntax highlighting. {{{1
 
-function! easytags#define_tagkind(object) " {{{2
+function! xolox#easytags#define_tagkind(object) " {{{2
   if !has_key(a:object, 'pattern_prefix')
     let a:object.pattern_prefix = '\C\<'
   endif
@@ -367,12 +367,12 @@ function! easytags#define_tagkind(object) " {{{2
   call add(s:tagkinds[a:object.filetype], a:object)
 endfunction
 
-function! easytags#map_filetypes(vim_ft, ctags_ft) " {{{2
+function! xolox#easytags#map_filetypes(vim_ft, ctags_ft) " {{{2
   call add(s:vim_filetypes, a:vim_ft)
   call add(s:ctags_filetypes, a:ctags_ft)
 endfunction
 
-function! easytags#alias_filetypes(...) " {{{2
+function! xolox#easytags#alias_filetypes(...) " {{{2
   for type in a:000
     let s:canonical_aliases[type] = a:1
     if !has_key(s:aliases, type)
@@ -382,9 +382,9 @@ function! easytags#alias_filetypes(...) " {{{2
   for i in range(a:0)
     for j in range(a:0)
       let vimft1 = a:000[i]
-      let ctagsft1 = easytags#to_ctags_ft(vimft1)
+      let ctagsft1 = xolox#easytags#to_ctags_ft(vimft1)
       let vimft2 = a:000[j]
-      let ctagsft2 = easytags#to_ctags_ft(vimft2)
+      let ctagsft2 = xolox#easytags#to_ctags_ft(vimft2)
       if !has_key(s:aliases[vimft1], ctagsft2)
         let s:aliases[vimft1][ctagsft2] = 1
       endif
@@ -395,13 +395,13 @@ function! easytags#alias_filetypes(...) " {{{2
   endfor
 endfunction
 
-function! easytags#to_vim_ft(ctags_ft) " {{{2
+function! xolox#easytags#to_vim_ft(ctags_ft) " {{{2
   let type = tolower(a:ctags_ft)
   let index = index(s:ctags_filetypes, type)
   return index >= 0 ? s:vim_filetypes[index] : type
 endfunction
 
-function! easytags#to_ctags_ft(vim_ft) " {{{2
+function! xolox#easytags#to_ctags_ft(vim_ft) " {{{2
   let type = tolower(a:vim_ft)
   let index = index(s:vim_filetypes, type)
   return index >= 0 ? s:ctags_filetypes[index] : type
@@ -429,9 +429,9 @@ endfunction
 
 function! s:cache_tagged_files() " {{{2
   if !exists('s:tagged_files')
-    let tagsfile = easytags#get_tagsfile()
+    let tagsfile = xolox#easytags#get_tagsfile()
     try
-      let [headers, entries] = easytags#read_tagsfile(tagsfile)
+      let [headers, entries] = xolox#easytags#read_tagsfile(tagsfile)
       call s:set_tagged_files(entries)
     catch /\<E484\>/
       " Ignore missing tags file.
@@ -464,14 +464,14 @@ let s:tagkinds = {}
 " Define the built-in Vim <=> Ctags file-type mappings.
 let s:vim_filetypes = []
 let s:ctags_filetypes = []
-call easytags#map_filetypes('cpp', 'c++')
-call easytags#map_filetypes('cs', 'c#')
-call easytags#map_filetypes(exists('g:filetype_asp') ? g:filetype_asp : 'aspvbs', 'asp')
+call xolox#easytags#map_filetypes('cpp', 'c++')
+call xolox#easytags#map_filetypes('cs', 'c#')
+call xolox#easytags#map_filetypes(exists('g:filetype_asp') ? g:filetype_asp : 'aspvbs', 'asp')
 
 " Define the Vim file-types that are aliased by default.
 let s:aliases = {}
 let s:canonical_aliases = {}
-call easytags#alias_filetypes('c', 'cpp', 'objc', 'objcpp')
+call xolox#easytags#alias_filetypes('c', 'cpp', 'objc', 'objcpp')
 
 " Enable line continuation.
 let s:cpo_save = &cpo
@@ -479,29 +479,29 @@ set cpo&vim
 
 " Lua. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'lua',
       \ 'hlgroup': 'luaFunc',
       \ 'filter': 'get(v:val, "kind") ==# "f"'})
 
 " C. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cType',
       \ 'filter': 'get(v:val, "kind") =~# "[cgstu]"'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cEnum',
       \ 'filter': 'get(v:val, "kind") ==# "e"'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cPreProc',
       \ 'filter': 'get(v:val, "kind") ==# "d"'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cFunction',
       \ 'filter': 'get(v:val, "kind") =~# "[fp]"'})
@@ -510,7 +510,7 @@ highlight def link cEnum Identifier
 highlight def link cFunction Function
 
 if g:easytags_include_members
-  call easytags#define_tagkind({
+  call xolox#easytags#define_tagkind({
         \ 'filetype': 'c',
         \ 'hlgroup': 'cMember',
         \ 'filter': 'get(v:val, "kind") ==# "m"'})
@@ -519,27 +519,27 @@ endif
 
 " PHP. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'php',
       \ 'hlgroup': 'phpFunctions',
       \ 'filter': 'get(v:val, "kind") ==# "f"',
       \ 'pattern_suffix': '(\@='})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'php',
       \ 'hlgroup': 'phpClasses',
       \ 'filter': 'get(v:val, "kind") ==# "c"'})
 
 " Vim script. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimAutoGroup',
       \ 'filter': 'get(v:val, "kind") ==# "a"'})
 
 highlight def link vimAutoGroup vimAutoEvent
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimCommand',
       \ 'filter': 'get(v:val, "kind") ==# "c"',
@@ -551,13 +551,13 @@ call easytags#define_tagkind({
 " those search patterns to check which Vim script functions are defined
 " globally and which script local.
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimFuncName',
       \ 'filter': 'get(v:val, "kind") ==# "f" && get(v:val, "cmd") !~? ''<sid>\w\|\<s:\w''',
       \ 'pattern_prefix': '\C\%(\<s:\|<[sS][iI][dD]>\)\@<!\<'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimScriptFuncName',
       \ 'filter': 'get(v:val, "kind") ==# "f" && get(v:val, "cmd") =~? ''<sid>\w\|\<s:\w''',
@@ -567,19 +567,19 @@ highlight def link vimScriptFuncName vimFuncName
 
 " Python. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonFunction',
       \ 'filter': 'get(v:val, "kind") ==# "f"',
       \ 'pattern_prefix': '\%(\<def\s\+\)\@<!\<'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonMethod',
       \ 'filter': 'get(v:val, "kind") ==# "m"',
       \ 'pattern_prefix': '\.\@<='})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonClass',
       \ 'filter': 'get(v:val, "kind") ==# "c"'})
@@ -589,12 +589,12 @@ highlight def link pythonClassTag pythonFunction
 
 " Java. {{{2
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
       \ 'hlgroup': 'javaClass',
       \ 'filter': 'get(v:val, "kind") ==# "c"'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
       \ 'hlgroup': 'javaMethod',
       \ 'filter': 'get(v:val, "kind") ==# "m"'})
@@ -609,12 +609,12 @@ highlight def link javaMethod Function
 " TODO C# enumeration member names
 " TODO C# structure names?
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'cs',
       \ 'hlgroup': 'csClassOrStruct',
       \ 'filter': 'get(v:val, "kind") ==# "c"'})
 
-call easytags#define_tagkind({
+call xolox#easytags#define_tagkind({
       \ 'filetype': 'cs',
       \ 'hlgroup': 'csMethod',
       \ 'filter': 'get(v:val, "kind") =~# "[ms]"'})

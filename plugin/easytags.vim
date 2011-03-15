@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: February 24, 2011
+" Last Change: March 15, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
@@ -122,7 +122,7 @@ endif
 function! s:RegisterTagsFile()
   " Parse the &tags option and get a list of all tags files *including
   " non-existing files* (this is why we can't just call tagfiles()).
-  let tagfiles = xolox#option#split_tags(&tags)
+  let tagfiles = xolox#misc#option#split_tags(&tags)
   let expanded = map(copy(tagfiles), 'resolve(expand(v:val))')
   " Add the filename to the &tags option when the user hasn't done so already.
   if index(expanded, resolve(expand(g:easytags_file))) == -1
@@ -134,7 +134,7 @@ function! s:RegisterTagsFile()
     " <CR>. Now you entered the exact same value that the code below also did
     " but suddenly Vim sees the tags file and tagfiles() != [] :-S
     call insert(tagfiles, g:easytags_file)
-    let value = xolox#option#join_tags(tagfiles)
+    let value = xolox#misc#option#join_tags(tagfiles)
     let cmd = ':set tags=' . escape(value, '\ ')
     if has('win32') || has('win64')
       " TODO How to clear the expression from Vim's status line?
@@ -150,8 +150,8 @@ call s:RegisterTagsFile()
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
-command! -bar -bang -nargs=* -complete=file UpdateTags call easytags#update(0, <q-bang> == '!', [<f-args>])
-command! -bar HighlightTags call easytags#highlight()
+command! -bar -bang -nargs=* -complete=file UpdateTags call xolox#easytags#update(0, <q-bang> == '!', [<f-args>])
+command! -bar HighlightTags call xolox#easytags#highlight()
 
 " Automatic commands. {{{1
 
@@ -159,10 +159,10 @@ augroup PluginEasyTags
   autocmd!
   if g:easytags_always_enabled
     " TODO Also on FocusGained because tags files might be updated externally?
-    autocmd BufReadPost,BufWritePost * call easytags#autoload()
+    autocmd BufReadPost,BufWritePost * call xolox#easytags#autoload()
   endif
   if g:easytags_on_cursorhold
-    autocmd CursorHold,CursorHoldI * call easytags#autoload()
+    autocmd CursorHold,CursorHoldI * call xolox#easytags#autoload()
     autocmd BufReadPost * unlet! b:easytags_last_highlighted
   endif
 augroup END
