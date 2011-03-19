@@ -98,6 +98,12 @@ UNIX has [symbolic links](http://en.wikipedia.org/wiki/Symbolic_link) and [hard 
 
     :let g:easytags_resolve_links = 1
 
+### The `g:easytags_suppress_ctags_warning` option
+
+If this is set and not false, it will suppress the warning on startup if ctags is not found or not recent enough.
+
+    :let g:easytags_suppress_ctags_warning = 1
+
 ### How to customize the highlighting colors?
 
 The easytags plug-in defines new highlighting groups for dynamically highlighted tags. These groups are linked to Vim's default groups so that they're colored out of the box, but if you want you can change the styles. To do so use a `highlight` command such as the ones given a few paragraphs back. Of course you'll need to change the group name. Here are the group names used by the easytags plug-in:
