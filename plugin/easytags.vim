@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.1
+" Version: 2.2.2
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -84,9 +84,13 @@ function! s:CheckCtags(name, version)
       " to throw an error when the first one doesn't!
       return
     endtry
-    let pattern = 'Exuberant Ctags \zs\d\+\(\.\d\+\)*'
+    let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
     let g:easytags_ctags_version = matchstr(listing, pattern)
-    return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+    if g:easytags_ctags_version == 'Development'
+      return 1
+    else
+      return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+    endif
   endif
 endfunction
 
