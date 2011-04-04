@@ -142,7 +142,7 @@ function! s:RegisterTagsFile()
     " but suddenly Vim sees the tags file and tagfiles() != [] :-S
     call insert(tagfiles, g:easytags_file)
     let value = xolox#misc#option#join_tags(tagfiles)
-    let cmd = ':set tags=' . escape(value, '\ ')
+    let cmd = 'set tags=' . escape(value, '\ ')
     if has('win32') || has('win64')
       " TODO How to clear the expression from Vim's status line?
       call feedkeys(":" . cmd . "|let &ro=&ro\<CR>", 'n')
