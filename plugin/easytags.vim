@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: March 19, 2011
+" Last Change: April 11, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.2
+" Version: 2.2.3
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -48,6 +48,10 @@ endif
 
 if !exists('g:easytags_include_members')
   let g:easytags_include_members = 0
+endif
+
+if !exists('g:easytags_register_late')
+  let g:easytags_register_late = 0
 endif
 
 function! s:InitEasyTags(version)
@@ -152,8 +156,13 @@ function! s:RegisterTagsFile()
   endif
 endfunction
 
-" Let Vim know about the global tags file created by this plug-in.
-call s:RegisterTagsFile()
+" By default this plug-in initializes the &tags option as soon as possible so
+" that the global tags file is available when using "vim -t some_tag". If you
+" don't use "vim -t" and want to defer registering the global tags file until
+" the interface has been initialized you can set g:easytags_register_late=1.
+if !g:easytags_register_late
+  call s:RegisterTagsFile()
+endif
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
@@ -164,6 +173,12 @@ command! -bar HighlightTags call xolox#easytags#highlight()
 
 augroup PluginEasyTags
   autocmd!
+  if g:easytags_register_late
+    " This is the alternative way of registering the global tags file using
+    " the automatic command event "VimEnter". Apparently this makes the
+    " easytags plug-in behave better when used together with tplugin?
+    autocmd VimEnter * call s:RegisterTagsFile()
+  endif
   if g:easytags_always_enabled
     " TODO Also on FocusGained because tags files might be updated externally?
     autocmd BufReadPost,BufWritePost * call xolox#easytags#autoload()
