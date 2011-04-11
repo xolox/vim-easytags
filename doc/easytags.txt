@@ -361,7 +361,7 @@ References ~
 [3] http://en.wikipedia.org/wiki/Ctags
 [4] http://ftp.vim.org/vim/runtime/syntax/
 [5] http://ctags.sourceforge.net/languages.html
-[6] http://peterodding.com/code/vim/downloads/easytags
+[6] http://peterodding.com/code/vim/downloads/easytags.zip
 [7] http://peterodding.com/code/vim/shell/
 [8] http://en.wikipedia.org/wiki/Dynamic-link_library
 [9] http://en.wikipedia.org/wiki/Symbolic_link
