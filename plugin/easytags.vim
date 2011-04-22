@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 12, 2011
+" Last Change: April 23, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.4
+" Version: 2.2.5
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -143,7 +143,7 @@ function! s:RegisterTagsFile()
     call insert(tagfiles, g:easytags_file)
     let value = xolox#misc#option#join_tags(tagfiles)
     let cmd = 'set tags=' . escape(value, '\ ')
-    if has('win32') || has('win64')
+    if xolox#misc#os#is_win() && v:version < 703
       " TODO How to clear the expression from Vim's status line?
       call feedkeys(":" . cmd . "|let &ro=&ro\<CR>", 'n')
     else
