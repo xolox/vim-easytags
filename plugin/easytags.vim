@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.6
+" Version: 2.2.7
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -15,6 +15,16 @@ if &cp || exists('g:loaded_easytags')
 endif
 
 let s:script = expand('<sfile>:p:~')
+
+" Make sure the submodule with miscellaneous auto-load scripts is available.
+try
+  call xolox#misc#os#is_win()
+catch /^Vim\%((\a\+)\)\=:E117/
+  let s:msg = "It looks like the easytags plug-in wasn't correctly installed, if you're using"
+  let s:msg .= " git you should probably use 'git clone --recursive ...' to clone the repository!"
+  echoerr s:msg
+  finish
+endtry
 
 " Configuration defaults and initialization. {{{1
 
