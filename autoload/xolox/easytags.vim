@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: March 15, 2011
+" Last Change: April 23, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -344,6 +344,12 @@ function! xolox#easytags#add_tagged_file(filename) " {{{2
 endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
+  if g:easytags_dynamic_files
+    let files = tagfiles()
+    if len(files) > 0
+      return files[0]
+    endif
+  endif
   let tagsfile = expand(g:easytags_file)
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
     let message = "The tags file %s isn't writable!"

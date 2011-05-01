@@ -1,10 +1,10 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 23, 2011
+" Last Change: May 2, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.5
+" Version: 2.2.6
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -19,11 +19,15 @@ let s:script = expand('<sfile>:p:~')
 " Configuration defaults and initialization. {{{1
 
 if !exists('g:easytags_file')
-  if has('win32') || has('win64')
+  if xolox#misc#os#is_win()
     let g:easytags_file = '~\_vimtags'
   else
     let g:easytags_file = '~/.vimtags'
   endif
+endif
+
+if !exists('g:easytags_dynamic_files')
+  let g:easytags_dynamic_files = 0
 endif
 
 if !exists('g:easytags_resolve_links')
@@ -140,7 +144,7 @@ function! s:RegisterTagsFile()
     " this is a bug in Vim is to type :set tags= then press <Tab> followed by
     " <CR>. Now you entered the exact same value that the code below also did
     " but suddenly Vim sees the tags file and tagfiles() != [] :-S
-    call insert(tagfiles, g:easytags_file)
+    call add(tagfiles, g:easytags_file)
     let value = xolox#misc#option#join_tags(tagfiles)
     let cmd = 'set tags=' . escape(value, '\ ')
     if xolox#misc#os#is_win() && v:version < 703

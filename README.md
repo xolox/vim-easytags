@@ -1,6 +1,6 @@
 # Automated tag generation and syntax highlighting in Vim
 
-[Vim](http://www.vim.org/) has long been my favorite text editor and combined with [Exuberant Ctags] [exuberant_ctags] it has the potential to provide most of what I expect from an [integrated development environment](http://en.wikipedia.org/wiki/Integrated_development_environment). Exuberant Ctags is the latest incarnation of a [family of computer programs](http://en.wikipedia.org/wiki/Ctags) that scan source code files to create an index of identifiers (tags) and where they are defined. Vim uses this index (a so-called tags file) to enable you to jump to the definition of any identifier using the [Control-&#x5D;](http://vimdoc.sourceforge.net/htmldoc/tagsrch.html#CTRL-]) mapping.
+[Vim](http://www.vim.org/) has long been my favorite text editor and combined with [Exuberant Ctags] [exuberant_ctags] it has the potential to provide most of what I expect from an [integrated development environment](http://en.wikipedia.org/wiki/Integrated_development_environment). Exuberant Ctags is the latest incarnation of a [family of computer programs](http://en.wikipedia.org/wiki/Ctags) that scan source code files to create an index of identifiers (tags) and where they are defined. Vim uses this index (a so-called tags file) to enable you to jump to the definition of any identifier using the [Control-&#93;](http://vimdoc.sourceforge.net/htmldoc/tagsrch.html#CTRL-]) mapping.
 
 When you're familiar with integrated development environments you may recognize this feature as "Go-to definition". One advantage of the combination of Vim and Exuberant Ctags over integrated development environments is that Vim supports syntax highlighting for [over 500 file types](http://ftp.vim.org/vim/runtime/syntax/) (!) and Exuberant Ctags can generate tags for [over 40 file types](http://ctags.sourceforge.net/languages.html) as well...
 
@@ -32,7 +32,7 @@ Note that this command will be executed automatically every once in a while, ass
 
 ### The `:HighlightTags` command
 
-When you execute this command while editing one of the supported file types (see above) the relevant tags in the current file are highlighted. The tags to highlight are gathered from all tags files known to Vim (through the ['tags' option](http://vimdoc.sourceforge.net/htmldoc/options.html#'tags')).
+When you execute this command while editing one of the supported file types (see above) the relevant tags in the current file are highlighted. The tags to highlight are gathered from all tags files known to Vim (through the ['tags' option](http://vimdoc.sourceforge.net/htmldoc/options.html#%27tags%27)).
 
 Note that this command will be executed automatically every once in a while, assuming you haven't changed `g:easytags_on_cursorhold`.
 
@@ -49,6 +49,18 @@ As mentioned above the plug-in will store your tags in `~/.vimtags` on UNIX and 
     :let g:easytags_file = '~/.vim/tags'
 
 A leading `~` in the `g:easytags_file` variable is expanded to your current home directory (`$HOME` on UNIX, `%USERPROFILE%` on Windows).
+
+### The `g:easytags_dynamic_files` option
+
+By default `:UpdateTags` only writes to the global tags file. If you use the following setting to enable project specific tags files:
+
+    :set tags=./tags;
+
+You can enable this option so that the project specific tags files are written instead of the global tags file:
+
+    :let g:easytags_dynamic_files = 1
+
+When you enable this option, the easytags plug-in will use the first filename returned by [tagfiles()](http://vimdoc.sourceforge.net/htmldoc/eval.html#tagfiles%28%29) as the tags file to write. Note that `tagfiles()` is reevaluated every time the plug-in runs.
 
 ### The `g:easytags_always_enabled` option
 
@@ -164,7 +176,7 @@ Every time the plug-in executes it will time how long the execution takes and ad
 
 If the `easytags.vim` plug-in fails to highlight your tags and the error message mentions that the pattern is too big, your tags file has grown too large for Vim to be able to highlight all tagged identifiers! I've had this happen to me with 50 KB patterns because I added most of the headers in `/usr/include/` to my tags file. Internally Vim raises the error [E339: Pattern too long](http://vimdoc.sourceforge.net/htmldoc/message.html#E339) and unfortunately the only way to avoid this problem once it occurs is to reduce the number of tagged identifiers...
 
-In my case the solution was to move most of the tags from `/usr/include/` over to project specific tags files which are automatically loaded by Vim when I edit files in different projects because I've set the ['tags' option](http://vimdoc.sourceforge.net/htmldoc/options.html#'tags') as follows:
+In my case the solution was to move most of the tags from `/usr/include/` over to project specific tags files which are automatically loaded by Vim when I edit files in different projects because I've set the ['tags' option](http://vimdoc.sourceforge.net/htmldoc/options.html#%27tags%27) as follows:
 
     :set tags=./.tags;,~/.vimtags
 
