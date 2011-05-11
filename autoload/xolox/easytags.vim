@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 23, 2011
+" Last Change: May 6, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -317,7 +317,7 @@ function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
     call sort(a:entries, 1)
   endif
   let lines = []
-  if has('win32') || has('win64')
+  if xolox#misc#os#is_win()
     " Exuberant Ctags on Windows requires \r\n but Vim's writefile() doesn't add them!
     for line in a:headers
       call add(lines, line . "\r")
