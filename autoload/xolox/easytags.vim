@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 6, 2011
+" Last Change: May 23, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -627,6 +627,27 @@ call xolox#easytags#define_tagkind({
 
 highlight def link csClass Identifier
 highlight def link csMethod Function
+
+" Ruby. {{{2
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'ruby',
+      \ 'hlgroup': 'rubyModuleName',
+      \ 'filter': 'get(v:val, "kind") ==# "m"'})
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'ruby',
+      \ 'hlgroup': 'rubyClassName',
+      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'ruby',
+      \ 'hlgroup': 'rubyMethodName',
+      \ 'filter': 'get(v:val, "kind") =~# "[fF]"'})
+
+highlight def link rubyModuleName Type
+highlight def link rubyClassName Type
+highlight def link rubyMethodName Function
 
 " }}}
 

@@ -36,8 +36,8 @@ file you're editing in Vim (as long as it's on the local file system), tags
 will always be available by the time you need them!
 
 Additionally if the file you just opened is a C, C++, Objective-C, Java, Lua,
-Python, PHP or Vim source file you should also notice that the function and
-type names defined in the file have been syntax highlighted.
+Python, PHP, Ruby or Vim source file you should also notice that the function
+and type names defined in the file have been syntax highlighted.
 
 The 'easytags.vim' plug-in is intended to work automatically once it's
 installed, but if you want to change how it works there are several options
@@ -268,6 +268,8 @@ by the easytags plug-in:
  - Java: 'javaClassTag', 'javaMethodTag'
 
  - C#: 'csClassOrStructTag', 'csMethodTag'
+
+ - Ruby: 'rubyModuleNameTag', 'rubyClassNameTag', 'rubyMethodNameTag'
 
 As you can see each of these names ends in 'Tag' to avoid conflicts with the
 syntax modes shipped with Vim. And about the singular/plural confusion: I've
