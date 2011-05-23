@@ -625,7 +625,7 @@ call xolox#easytags#define_tagkind({
       \ 'hlgroup': 'csMethod',
       \ 'filter': 'get(v:val, "kind") =~# "[ms]"'})
 
-highlight def link csClass Identifier
+highlight def link csClassOrStruct Identifier
 highlight def link csMethod Function
 
 " Ruby. {{{2
