@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 23, 2011
+" Last Change: June 13, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 let s:script = expand('<sfile>:p:~')
@@ -57,6 +57,11 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
         let msg = "%s: Filtered %i invalid tags in %s."
         call xolox#misc#timer#stop(msg, s:script, num_filtered, starttime)
       endif
+    endif
+    " When :UpdateTags was executed manually we'll refresh the dynamic
+    " syntax highlighting so that new tags are immediately visible.
+    if !a:silent
+      HighlightTags
     endif
     return 1
   catch
