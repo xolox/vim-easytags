@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.11
+" Version: 2.2.12
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -34,12 +34,14 @@ if !exists('g:easytags_resolve_links')
   let g:easytags_resolve_links = 0
 endif
 
-if !exists('g:easytags_always_enabled')
-  let g:easytags_always_enabled = 0
-endif
-
-if !exists('g:easytags_on_cursorhold')
-  let g:easytags_on_cursorhold = 1
+if !exists('g:easytags_events')
+  let g:easytags_events = []
+  if !exists('g:easytags_on_cursorhold') || g:easytags_on_cursorhold
+    call extend(g:easytags_events, ['CursorHold', 'CursorHoldI'])
+  endif
+  if exists('g:easytags_always_enabled') && g:easytags_always_enabled
+    call extend(g:easytags_events, ['BufReadPost', 'BufWritePost', 'FocusGained', 'ShellCmdPost', 'ShellFilterPost'])
+  endif
 endif
 
 if !exists('g:easytags_ignored_filetypes')
@@ -174,14 +176,13 @@ augroup PluginEasyTags
   " the automatic command event "VimEnter". Apparently this makes the
   " plug-in behave better when used together with tplugin?
   autocmd VimEnter * call s:RegisterTagsFile()
-  if g:easytags_always_enabled
-    " TODO Also on FocusGained because tags files might be updated externally?
-    autocmd BufReadPost,BufWritePost * call xolox#easytags#autoload()
-  endif
-  if g:easytags_on_cursorhold
-    autocmd CursorHold,CursorHoldI * call xolox#easytags#autoload()
-    autocmd BufReadPost * unlet! b:easytags_last_highlighted
-  endif
+  " Define the automatic commands to perform updating/highlighting.
+  for s:eventname in g:easytags_events
+    execute 'autocmd'  s:eventname '* call xolox#easytags#autoload()'
+  endfor
+  " After reloading a buffer the dynamic syntax highlighting is lost. The
+  " following code makes sure the highlighting is refreshed afterwards.
+  autocmd BufReadPost * unlet! b:easytags_last_highlighted
 augroup END
 
 " }}}1
