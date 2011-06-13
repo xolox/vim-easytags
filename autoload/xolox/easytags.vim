@@ -349,13 +349,13 @@ function! xolox#easytags#add_tagged_file(filename) " {{{2
 endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
+  let tagsfile = expand(g:easytags_file)
   if g:easytags_dynamic_files
     let files = tagfiles()
     if len(files) > 0
-      return files[0]
+      let tagsfile = files[0]
     endif
   endif
-  let tagsfile = expand(g:easytags_file)
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
     let message = "The tags file %s isn't writable!"
     throw printf(message, fnamemodify(tagsfile, ':~'))

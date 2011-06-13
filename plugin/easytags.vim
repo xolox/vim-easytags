@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.12
+" Version: 2.2.13
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -76,7 +76,7 @@ endfunction
 function! s:CheckCtags(name, version)
   " Not every executable out there named `ctags' is in fact Exuberant Ctags.
   " This function makes sure it is because the easytags plug-in requires the
-  " --list-languages option.
+  " --list-languages option (and more).
   if executable(a:name)
     let command = a:name . ' --version'
     try
