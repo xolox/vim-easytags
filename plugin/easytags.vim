@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.15
+" Version: 2.3
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -28,6 +28,10 @@ endif
 
 if !exists('g:easytags_dynamic_files')
   let g:easytags_dynamic_files = 0
+endif
+
+if !exists('g:easytags_by_filetype')
+  let g:easytags_by_filetype = ''
 endif
 
 if !exists('g:easytags_resolve_links')
@@ -135,7 +139,7 @@ endif
 " The plug-in initializes the &tags option as soon as possible so that the
 " global tags file is available when using "vim -t some_tag". If &tags is
 " reset, we'll try again on the "VimEnter" automatic command event (below).
-call xolox#easytags#register()
+call xolox#easytags#register(1)
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
@@ -149,11 +153,15 @@ augroup PluginEasyTags
   " This is the alternative way of registering the global tags file using
   " the automatic command event "VimEnter". Apparently this makes the
   " plug-in behave better when used together with tplugin?
-  autocmd VimEnter * call xolox#easytags#register()
+  autocmd VimEnter * call xolox#easytags#register(1)
   " Define the automatic commands to perform updating/highlighting.
   for s:eventname in g:easytags_events
     execute 'autocmd'  s:eventname '* call xolox#easytags#autoload()'
   endfor
+  " Define an automatic command to register file type specific tags files?
+  if !empty(g:easytags_by_filetype)
+    autocmd FileType * call xolox#easytags#register(0)
+  endif
   " After reloading a buffer the dynamic syntax highlighting is lost. The
   " following code makes sure the highlighting is refreshed afterwards.
   autocmd BufReadPost * unlet! b:easytags_last_highlighted

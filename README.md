@@ -62,6 +62,12 @@ You can enable this option so that the project specific tags files are written i
 
 When you enable this option, the easytags plug-in will use the first filename returned by [tagfiles()](http://vimdoc.sourceforge.net/htmldoc/eval.html#tagfiles%28%29) as the tags file to write. Note that `tagfiles()` is reevaluated every time the plug-in runs.
 
+### The `g:easytags_by_filetype` option
+
+By default all tags are stored in a global tags file. When the tags file grows beyond a certain size Vim will be slowed down by the easytags plug-in because it has to read and process a large number of tags very frequently.
+
+To avoid this problem you can set `g:easytags_by_filetype` to the path of an existing directory. The easytags plug-in will create separate tags files for each file type in the configured directory. These tags files are automatically registered by the easytags plug-in when the file type of a buffer is set.
+
 ### The `g:easytags_always_enabled` option
 
 By default the plug-in automatically generates and highlights tags when you stop typing for a few seconds (this works using the [CursorHold](http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold) automatic command). This means that when you edit a file, the dynamic highlighting won't appear until you pause for a moment. If you don't like this you can configure the plug-in to always enable dynamic highlighting:

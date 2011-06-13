@@ -132,6 +132,18 @@ returned by |tagfiles()| as the tags file to write. Note that 'tagfiles()' is
 reevaluated every time the plug-in runs.
 
 -------------------------------------------------------------------------------
+The *g:easytags_by_filetype* option
+
+By default all tags are stored in a global tags file. When the tags file grows
+beyond a certain size Vim will be slowed down by the easytags plug-in because
+it has to read and process a large number of tags very frequently.
+
+To avoid this problem you can set |g:easytags_by_filetype| to the path of an
+existing directory. The easytags plug-in will create separate tags files for
+each file type in the configured directory. These tags files are automatically
+registered by the easytags plug-in when the file type of a buffer is set.
+
+-------------------------------------------------------------------------------
 The *g:easytags_always_enabled* option
 
 By default the plug-in automatically generates and highlights tags when you
