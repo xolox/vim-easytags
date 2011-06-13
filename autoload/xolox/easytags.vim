@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 13, 2011
+" Last Change: June 14, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let s:script = expand('<sfile>:p:~')
+let s:script = 'easytags.vim'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -94,8 +94,6 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     return 1
   catch
     call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
-  finally
-    unlet s:cached_filenames
   endtry
 endfunction
 
@@ -169,73 +167,67 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
 endfunction
 
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
-  let output = []
+  let lines = []
   if a:cmdline != ''
     call xolox#misc#msg#debug("%s: Executing %s", s:script, a:cmdline)
     try
-      let output = xolox#shell#execute(a:cmdline, 1)
+      let lines = xolox#shell#execute(a:cmdline, 1)
     catch /^Vim\%((\a\+)\)\=:E117/
       " Ignore missing shell.vim plug-in.
-      let output = split(system(a:cmdline), "\n")
+      let output = system(a:cmdline)
       if v:shell_error
         let msg = "Failed to update tags file %s: %s!"
-        throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(join(output, "\n")))
+        throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(output))
       endif
+      let lines = split(output, "\n")
     endtry
     if a:firstrun
       if a:cfile != ''
-        call xolox#easytags#add_tagged_file(a:cfile)
         call xolox#misc#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
       else
         call xolox#misc#timer#stop("%s: Created tags in %s.", s:script, a:starttime)
       endif
     endif
   endif
-  return output
+  return xolox#easytags#parse_entries(lines)
 endfunction
 
 function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   let [headers, entries] = xolox#easytags#read_tagsfile(a:tagsfile)
-  call s:set_tagged_files(entries)
   let filters = []
+  " Filter old tags that are to be replaced with the tags in {output}.
   let tagged_files = s:find_tagged_files(a:output)
   if !empty(tagged_files)
-    call add(filters, '!has_key(tagged_files, s:canonicalize(get(v:val, 1)))')
+    call add(filters, '!has_key(tagged_files, s:canonicalize(v:val[1]))')
   endif
+  " Filter tags for non-existing files?
   if a:filter_tags
-    call add(filters, 'filereadable(get(v:val, 1))')
+    call add(filters, 'filereadable(v:val[1]))')
   endif
   let num_old_entries = len(entries)
   if !empty(filters)
+    " Apply the filters.
     call filter(entries, join(filters, ' && '))
   endif
   let num_filtered = num_old_entries - len(entries)
+  " Merge old/new tags and write tags file.
   call extend(entries, a:output)
   if !xolox#easytags#write_tagsfile(a:tagsfile, headers, entries)
     let msg = "Failed to write filtered tags file %s!"
     throw printf(msg, fnamemodify(a:tagsfile, ':~'))
   endif
+  " We've already read the tags file, might as well cache the tagged files :-)
+  let fname = s:canonicalize(a:tagsfile)
+  call s:cache_tagged_files_in(fname, getftime(fname), entries)
   return num_filtered
 endfunction
 
-function! s:find_tagged_files(new_entries) " {{{3
-  " FIXME Don't parse tags files in multiple places!
+function! s:find_tagged_files(entries) " {{{3
   let tagged_files = {}
-  for entry in a:new_entries
-    if type(entry) == type([])
-      let filename = entry[1]
-    else
-      if match(entry, '^[^\t]\+\t[^\t]\+\t.\+$') == -1
-        " Never corrupt the tags file by merging an invalid line
-        " (probably an error message) with the existing tags!
-        throw "Exuberant Ctags returned invalid data: " . strtrans(entry)
-      endif
-      let filename = matchstr(entry, '^[^\t]\+\t\zs[^\t]\+')
-    endif
+  for entry in a:entries
+    let filename = s:canonicalize(entry[1])
     if !has_key(tagged_files, filename)
-      let filename = s:canonicalize(filename)
       let tagged_files[filename] = 1
-      call xolox#easytags#add_tagged_file(filename)
     endif
   endfor
   return tagged_files
@@ -292,10 +284,10 @@ endfunction
 
 function! xolox#easytags#by_filetype(undo) " {{{2
   try
-    let s:cached_filenames = {}
     if empty(g:easytags_by_filetype)
       throw "Please set g:easytags_by_filetype before running :TagsByFileType!"
     endif
+    let s:cached_filenames = {}
     let global_tagsfile = expand(g:easytags_file)
     let disabled_tagsfile = global_tagsfile . '.disabled'
     if !a:undo
@@ -316,8 +308,6 @@ function! xolox#easytags#by_filetype(undo) " {{{2
     endif
   catch
     call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
-  finally
-    unlet s:cached_filenames
   endtry
 endfunction
 
@@ -379,19 +369,27 @@ function! xolox#easytags#read_tagsfile(tagsfile) " {{{2
   " I'm not sure whether this is by design or an implementation detail but
   " it's possible for the "!_TAG_FILE_SORTED" header to appear after one or
   " more tags and Vim will apparently still use the header! For this reason
-  " the xolox#easytags#write_tagsfile() function should also recognize it, otherwise
-  " Vim might complain with "E432: Tags file not sorted".
+  " the xolox#easytags#write_tagsfile() function should also recognize it,
+  " otherwise Vim might complain with "E432: Tags file not sorted".
   let headers = []
   let entries = []
-  let pattern = '^\([^\t]\+\)\t\([^\t]\+\)\t\(.\+\)$'
   for line in readfile(a:tagsfile)
     if line =~# '^!_TAG_'
       call add(headers, line)
     else
-      call add(entries, matchlist(line, pattern)[1:3])
+      call add(entries, xolox#easytags#parse_entry(line))
     endif
   endfor
   return [headers, entries]
+endfunction
+
+function! xolox#easytags#parse_entry(line) " {{{2
+  return matchlist(a:line, '^\([^\t]\+\)\t\([^\t]\+\)\t\(.\+\)$')[1:3]
+endfunction
+
+function! xolox#easytags#parse_entries(lines) " {{{2
+  call map(a:lines, 'xolox#easytags#parse_entry(v:val)')
+  return a:lines
 endfunction
 
 function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
@@ -429,14 +427,43 @@ function! s:join_entry(value)
 endfunction
 
 function! xolox#easytags#file_has_tags(filename) " {{{2
+  " Check whether the given source file occurs in one of the tags files known
+  " to Vim. This function might not always give the right answer because of
+  " caching, but for the intended purpose that's no problem: When editing an
+  " existing file which has no tags defined the plug-in will run Exuberant
+  " Ctags to update the tags, *unless the file has already been tagged*.
   call s:cache_tagged_files()
   return has_key(s:tagged_files, s:resolve(a:filename))
 endfunction
 
-function! xolox#easytags#add_tagged_file(filename) " {{{2
-  call s:cache_tagged_files()
-  let filename = s:resolve(a:filename)
-  let s:tagged_files[filename] = 1
+if !exists('s:tagged_files')
+  let s:tagged_files = {}
+  let s:known_tagfiles = {}
+endif
+
+function! s:cache_tagged_files() " {{{3
+  if empty(s:tagged_files)
+    " Initialize the cache of tagged files on first use. After initialization
+    " we'll only update the cache when we're reading a tags file from disk for
+    " other purposes anyway (so the cache doesn't introduce too much overhead).
+    let starttime = xolox#misc#timer#start()
+    for tagsfile in tagfiles()
+      let fname = s:canonicalize(tagsfile)
+      let ftime = getftime(fname)
+      if get(s:known_tagfiles, fname, 0) != ftime
+        let [headers, entries] = xolox#easytags#read_tagsfile(fname)
+        call s:cache_tagged_files_in(fname, ftime, entries)
+      endif
+    endfor
+    call xolox#misc#timer#stop("%s: Initialized cache of tagged files in %s", s:script, starttime)
+  endif
+endfunction
+
+function! s:cache_tagged_files_in(fname, ftime, entries) " {{{3
+  for entry in a:entries
+    let s:tagged_files[s:canonicalize(entry[1])] = 1
+  endfor
+  let s:known_tagfiles[a:fname] = a:ftime
 endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
@@ -532,30 +559,7 @@ function! s:canonicalize(filename) " {{{2
   endif
 endfunction
 
-function! s:cache_tagged_files() " {{{2
-  if !exists('s:tagged_files')
-    let tagsfile = xolox#easytags#get_tagsfile()
-    try
-      let [headers, entries] = xolox#easytags#read_tagsfile(tagsfile)
-      call s:set_tagged_files(entries)
-    catch /\<E484\>/
-      " Ignore missing tags file.
-      call s:set_tagged_files([])
-    endtry
-  endif
-endfunction
-
-function! s:set_tagged_files(entries) " {{{2
-  " TODO use taglist() instead of readfile() so that all tag files are
-  " automatically used :-)
-  let s:tagged_files = {}
-  for entry in a:entries
-    let filename = get(entry, 1, '')
-    if filename != ''
-      let s:tagged_files[s:resolve(filename)] = 1
-    endif
-  endfor
-endfunction
+let s:cached_filenames = {}
 
 " Built-in file type & tag kind definitions. {{{1
 
