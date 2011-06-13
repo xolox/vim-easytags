@@ -76,7 +76,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
       if cfile != ''
         let msg = "%s: Updated tags for %s in %s."
         call xolox#misc#timer#stop(msg, s:script, expand('%:p:~'), starttime)
-      elseif a:0 > 0
+      elseif !empty(a:filenames)
         let msg = "%s: Updated tags in %s."
         call xolox#misc#timer#stop(msg, s:script, starttime)
       else

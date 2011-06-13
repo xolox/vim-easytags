@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.14
+" Version: 2.2.15
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
