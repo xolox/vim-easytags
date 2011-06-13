@@ -64,6 +64,7 @@ function! xolox#easytags#autoload() " {{{2
 endfunction
 
 function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
+  " TODO Use save_by_filetype() when --force-language is not in effect!
   try
     let s:cached_filenames = {}
     let starttime = xolox#misc#timer#start()
@@ -209,7 +210,6 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
     call filter(entries, join(filters, ' && '))
   endif
   let num_filtered = num_old_entries - len(entries)
-  call map(entries, 'join(v:val, "\t")')
   call extend(entries, a:output)
   if !xolox#easytags#write_tagsfile(a:tagsfile, headers, entries)
     let msg = "Failed to write filtered tags file %s!"
@@ -219,14 +219,19 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
 endfunction
 
 function! s:find_tagged_files(new_entries) " {{{3
+  " FIXME Don't parse tags files in multiple places!
   let tagged_files = {}
-  for line in a:new_entries
-    " Never corrupt the tags file by merging an invalid line
-    " (probably an error message) with the existing tags!
-    if match(line, '^[^\t]\+\t[^\t]\+\t.\+$') == -1
-      throw "Exuberant Ctags returned invalid data: " . strtrans(line)
+  for entry in a:new_entries
+    if type(entry) == type([])
+      let filename = entry[1]
+    else
+      if match(entry, '^[^\t]\+\t[^\t]\+\t.\+$') == -1
+        " Never corrupt the tags file by merging an invalid line
+        " (probably an error message) with the existing tags!
+        throw "Exuberant Ctags returned invalid data: " . strtrans(entry)
+      endif
+      let filename = matchstr(entry, '^[^\t]\+\t\zs[^\t]\+')
     endif
-    let filename = matchstr(line, '^[^\t]\+\t\zs[^\t]\+')
     if !has_key(tagged_files, filename)
       let filename = s:canonicalize(filename)
       let tagged_files[filename] = 1
@@ -283,6 +288,60 @@ function! xolox#easytags#highlight() " {{{2
   catch
     call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
   endtry
+endfunction
+
+function! xolox#easytags#by_filetype(undo) " {{{2
+  try
+    let s:cached_filenames = {}
+    if empty(g:easytags_by_filetype)
+      throw "Please set g:easytags_by_filetype before running :TagsByFileType!"
+    endif
+    let global_tagsfile = expand(g:easytags_file)
+    let disabled_tagsfile = global_tagsfile . '.disabled'
+    if !a:undo
+      let [headers, entries] = xolox#easytags#read_tagsfile(global_tagsfile)
+      call s:save_by_filetype(headers, entries)
+      call rename(global_tagsfile, disabled_tagsfile)
+      let msg = "Finished copying tags from %s to %s! Note that your old tags file has been renamed to %s instead of deleting it, should you want to restore it."
+      call xolox#misc#msg#info(msg, g:easytags_file, g:easytags_by_filetype, disabled_tagsfile)
+    else
+      let headers = []
+      let all_entries = []
+      for tagsfile in split(glob(g:easytags_by_filetype . '/*'), '\n')
+        let [headers, entries] = xolox#easytags#read_tagsfile(tagsfile)
+        call extend(all_entries, entries)
+      endfor
+      call xolox#easytags#write_tagsfile(global_tagsfile, headers, all_entries)
+      call xolox#misc#msg#info("Finished copying tags from %s to %s!", g:easytags_by_filetype, g:easytags_file)
+    endif
+  catch
+    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+  finally
+    unlet s:cached_filenames
+  endtry
+endfunction
+
+function! s:save_by_filetype(headers, entries)
+  let filetypes = {}
+  for entry in a:entries
+    let ctags_ft = matchstr(entry[2], '\tlanguage:\zs\S\+')
+    if !empty(ctags_ft)
+      let vim_ft = xolox#easytags#to_vim_ft(ctags_ft)
+      if !has_key(filetypes, vim_ft)
+        let filetypes[vim_ft] = []
+      endif
+      call add(filetypes[vim_ft], entry)
+    endif
+  endfor
+  let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
+  for vim_ft in keys(filetypes)
+    let tagsfile = xolox#misc#path#merge(directory, vim_ft)
+    if !filereadable(tagsfile)
+      call xolox#easytags#write_tagsfile(tagsfile, a:headers, filetypes[vim_ft])
+    else
+      call s:filter_merge_tags(0, tagsfile, filetypes[vim_ft])
+    endif
+  endfor
 endfunction
 
 " Public supporting functions (might be useful to others). {{{1
@@ -343,6 +402,7 @@ function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
       let sort_order = 2
     endif
   endfor
+  call map(a:entries, 's:join_entry(v:val)')
   if sort_order == 1
     call sort(a:entries)
   else
@@ -362,6 +422,10 @@ function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
     call extend(lines, a:entries)
   endif
   return writefile(lines, a:tagsfile) == 0
+endfunction
+
+function! s:join_entry(value)
+  return type(a:value) == type([]) ? join(a:value, "\t") : a:value
 endfunction
 
 function! xolox#easytags#file_has_tags(filename) " {{{2

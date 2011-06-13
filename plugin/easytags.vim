@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.3
+" Version: 2.3.1
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -145,6 +145,7 @@ call xolox#easytags#register(1)
 
 command! -bar -bang -nargs=* -complete=file UpdateTags call xolox#easytags#update(0, <q-bang> == '!', [<f-args>])
 command! -bar HighlightTags call xolox#easytags#highlight()
+command! -bang TagsByFileType call xolox#easytags#by_filetype(<q-bang> == '!')
 
 " Automatic commands. {{{1
 

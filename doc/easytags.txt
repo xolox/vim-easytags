@@ -143,6 +143,10 @@ existing directory. The easytags plug-in will create separate tags files for
 each file type in the configured directory. These tags files are automatically
 registered by the easytags plug-in when the file type of a buffer is set.
 
+Note that if you already have a global tags file you can create file type
+specific tags files from the global tags file using the command
+':TagsByFileType'.
+
 -------------------------------------------------------------------------------
 The *g:easytags_always_enabled* option
 

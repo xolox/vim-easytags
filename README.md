@@ -68,6 +68,8 @@ By default all tags are stored in a global tags file. When the tags file grows b
 
 To avoid this problem you can set `g:easytags_by_filetype` to the path of an existing directory. The easytags plug-in will create separate tags files for each file type in the configured directory. These tags files are automatically registered by the easytags plug-in when the file type of a buffer is set.
 
+Note that if you already have a global tags file you can create file type specific tags files from the global tags file using the command `:TagsByFileType`.
+
 ### The `g:easytags_always_enabled` option
 
 By default the plug-in automatically generates and highlights tags when you stop typing for a few seconds (this works using the [CursorHold](http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold) automatic command). This means that when you edit a file, the dynamic highlighting won't appear until you pause for a moment. If you don't like this you can configure the plug-in to always enable dynamic highlighting:
