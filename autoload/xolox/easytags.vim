@@ -7,6 +7,32 @@ let s:script = expand('<sfile>:p:~')
 
 " Public interface through (automatic) commands. {{{1
 
+function! xolox#easytags#register() " {{{2
+  " Parse the &tags option and get a list of all tags files *including
+  " non-existing files* (this is why we can't just call tagfiles()).
+  let tagfiles = xolox#misc#option#split_tags(&tags)
+  let expanded = map(copy(tagfiles), 'resolve(expand(v:val))')
+  " Add the filename to the &tags option when the user hasn't done so already.
+  if index(expanded, xolox#misc#path#absolute(g:easytags_file)) == -1
+    " This is a real mess because of bugs in Vim?! :let &tags = '...' doesn't
+    " work on UNIX and Windows, :set tags=... doesn't work on Windows. What I
+    " mean with "doesn't work" is that tagfiles() == [] after the :let/:set
+    " command even though the tags file exists! One easy way to confirm that
+    " this is a bug in Vim is to type :set tags= then press <Tab> followed by
+    " <CR>. Now you entered the exact same value that the code below also did
+    " but suddenly Vim sees the tags file and tagfiles() != [] :-S
+    call add(tagfiles, g:easytags_file)
+    let value = xolox#misc#option#join_tags(tagfiles)
+    let cmd = 'set tags=' . escape(value, '\ ')
+    if xolox#misc#os#is_win() && v:version < 703
+      " TODO How to clear the expression from Vim's status line?
+      call feedkeys(":" . cmd . "|let &ro=&ro\<CR>", 'n')
+    else
+      execute cmd
+    endif
+  endif
+endfunction
+
 function! xolox#easytags#autoload() " {{{2
   try
     " Update the entries for the current file in the global tags file?

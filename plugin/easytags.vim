@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.2.13
+" Version: 2.2.14
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -132,36 +132,10 @@ if !s:InitEasyTags(55)
   finish
 endif
 
-function! s:RegisterTagsFile()
-  " Parse the &tags option and get a list of all tags files *including
-  " non-existing files* (this is why we can't just call tagfiles()).
-  let tagfiles = xolox#misc#option#split_tags(&tags)
-  let expanded = map(copy(tagfiles), 'resolve(expand(v:val))')
-  " Add the filename to the &tags option when the user hasn't done so already.
-  if index(expanded, resolve(expand(g:easytags_file))) == -1
-    " This is a real mess because of bugs in Vim?! :let &tags = '...' doesn't
-    " work on UNIX and Windows, :set tags=... doesn't work on Windows. What I
-    " mean with "doesn't work" is that tagfiles() == [] after the :let/:set
-    " command even though the tags file exists! One easy way to confirm that
-    " this is a bug in Vim is to type :set tags= then press <Tab> followed by
-    " <CR>. Now you entered the exact same value that the code below also did
-    " but suddenly Vim sees the tags file and tagfiles() != [] :-S
-    call add(tagfiles, g:easytags_file)
-    let value = xolox#misc#option#join_tags(tagfiles)
-    let cmd = 'set tags=' . escape(value, '\ ')
-    if xolox#misc#os#is_win() && v:version < 703
-      " TODO How to clear the expression from Vim's status line?
-      call feedkeys(":" . cmd . "|let &ro=&ro\<CR>", 'n')
-    else
-      execute cmd
-    endif
-  endif
-endfunction
-
 " The plug-in initializes the &tags option as soon as possible so that the
 " global tags file is available when using "vim -t some_tag". If &tags is
 " reset, we'll try again on the "VimEnter" automatic command event (below).
-call s:RegisterTagsFile()
+call xolox#easytags#register()
 
 " The :UpdateTags and :HighlightTags commands. {{{1
 
@@ -175,7 +149,7 @@ augroup PluginEasyTags
   " This is the alternative way of registering the global tags file using
   " the automatic command event "VimEnter". Apparently this makes the
   " plug-in behave better when used together with tplugin?
-  autocmd VimEnter * call s:RegisterTagsFile()
+  autocmd VimEnter * call xolox#easytags#register()
   " Define the automatic commands to perform updating/highlighting.
   for s:eventname in g:easytags_events
     execute 'autocmd'  s:eventname '* call xolox#easytags#autoload()'
