@@ -134,7 +134,7 @@ The Vim script implementation of dynamic syntax highlighting is quite slow on la
 
 ### The `g:easytags_python_enabled` option
 
-To disable the Python implementation of dynamic syntax highlighting you can set this option to true (1).
+To disable the Python implementation of dynamic syntax highlighting you can set this option to false (0).
 
 ### The `g:easytags_python_script` option
 
