@@ -4,8 +4,6 @@
 
  * Integration with my unreleased project plug-in so that when you edit any file in a project, all related files are automatically scanned for tags?
 
- * Use separate tags files for each language stored in ~/.vim/tags/ to increase performance because a single, global tags file quickly grows to a megabyte?
-
  * Make `g:easytags_autorecurse` accept the following values: 0 (only scan the current file), 1 (always scan all files in the same directory) and 2 (always recurse down the current directory)?
 
  * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is running because Vim opens a command prompt window. Also the CursorHold event seems to fire repeatedly, contradicting my understanding of the automatic command and its behavior on UNIX?! This behavior doesn't occur when I use the integration with my `shell.vim` plug-in.
