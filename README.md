@@ -6,7 +6,7 @@ When you're familiar with integrated development environments you may recognize 
 
 There's just one problem: You have to manually keep your tags files up-to-date and this turns out to be a royal pain in the ass! So I set out to write a Vim plug-in that would do this boring work for me. When I finished the plug-in's basic functionality (one automatic command and a call to [system()] [system] later) I became interested in dynamic syntax highlighting, so I added that as well to see if it would work -- surprisingly well I'm happy to report!
 
-## Install & usage
+## Installation
 
 Unzip the most recent [ZIP archive](http://peterodding.com/code/vim/downloads/easytags.zip) file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit any file type supported by Exuberant Ctags and within ten seconds the plug-in should create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the file you just edited! This means that whatever file you're editing in Vim (as long as it's on the local file system), tags will always be available by the time you need them!
 
@@ -18,9 +18,11 @@ Note that if the plug-in warns you `ctags` isn't installed you'll have to downlo
 
     $ sudo apt-get install exuberant-ctags
 
-### If you're using Windows
+### A note about Windows
 
 On Windows the [system()] [system] function used by `easytags.vim` causes a command prompt window to pop up while Exuberant Ctags is executing. If this bothers you then you can install my [shell.vim](http://peterodding.com/code/vim/shell/) plug-in which includes a [DLL](http://en.wikipedia.org/wiki/Dynamic-link_library) that works around this issue. Once you've installed both plug-ins it should work out of the box! Please let me know if this doesn't work for you.
+
+## Commands
 
 ### The `:UpdateTags` command
 
@@ -36,9 +38,11 @@ When you execute this command while editing one of the supported file types (see
 
 Note that this command will be executed automatically every once in a while, assuming you haven't changed `g:easytags_on_cursorhold`.
 
+## Options
+
 ### The `g:easytags_cmd` option
 
-The plug-in will try to determine the location where Exuberant Ctags is installed on its own but this might not always work because any given executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags but some older, more primitive `ctags` implementation which doesn't support the same command line options and thus breaks the `easytags.vim` plug-in. If this is the case you can set the global variable `g:easytags_cmd` to the location where you've installed Exuberant Ctags, e.g.:
+The plug-in will try to determine the location where Exuberant Ctags is installed on its own but this might not always work because any given executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags but some older, more primitive `ctags` implementation which doesn't support the same command line options and thus breaks the easytags plug-in. If this is the case you can set the global variable `g:easytags_cmd` to the location where you've installed Exuberant Ctags, e.g.:
 
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
@@ -124,7 +128,19 @@ If this is set and not false, it will suppress the warning on startup if ctags i
 
     :let g:easytags_suppress_ctags_warning = 1
 
-### How to customize the highlighting colors?
+## Faster syntax highlighting using Python
+
+The Vim script implementation of dynamic syntax highlighting is quite slow on large tags files. When the Python Interface to Vim is enabled the easytags plug-in will therefor automatically use a Python script that performs dynamic syntax highlighting about twice as fast as the Vim script implementation. The following options are available to change the default configuration.
+
+### The `g:easytags_python_enabled` option
+
+To disable the Python implementation of dynamic syntax highlighting you can set this option to true (1).
+
+### The `g:easytags_python_script` option
+
+This option defines the pathname of the script that contains the Python implementation of dynamic syntax highlighting.
+
+## How to customize the highlighting colors?
 
 The easytags plug-in defines new highlighting groups for dynamically highlighted tags. These groups are linked to Vim's default groups so that they're colored out of the box, but if you want you can change the styles. To do so use a `highlight` command such as the ones given a few paragraphs back. Of course you'll need to change the group name. Here are the group names used by the easytags plug-in:
 

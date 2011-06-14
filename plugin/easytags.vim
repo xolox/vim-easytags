@@ -4,7 +4,7 @@
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 " License: MIT
-" Version: 2.3.2
+" Version: 2.4
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
@@ -58,6 +58,14 @@ endif
 
 if !exists('g:easytags_include_members')
   let g:easytags_include_members = 0
+endif
+
+if !exists('g:easytags_python_enabled')
+  let g:easytags_python_enabled = 1
+endif
+
+if !exists('g:easytags_python_script')
+  let g:easytags_python_script = expand('<sfile>:p:h') . '/../misc/easytags/highlight.py'
 endif
 
 function! s:InitEasyTags(version)

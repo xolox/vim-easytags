@@ -240,32 +240,50 @@ function! xolox#easytags#highlight() " {{{2
     let tagkinds = get(s:tagkinds, filetype, [])
     if exists('g:syntax_on') && !empty(tagkinds) && !exists('b:easytags_nohl')
       let starttime = xolox#misc#timer#start()
-      if !has_key(s:aliases, filetype)
-        let ctags_filetype = xolox#easytags#to_ctags_ft(filetype)
-        let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? ctags_filetype")
-      else
-        let aliases = s:aliases[&ft]
-        let taglist = filter(taglist('.'), "has_key(aliases, tolower(get(v:val, 'language', '')))")
-      endif
+      let used_python = 0
       for tagkind in tagkinds
         let hlgroup_tagged = tagkind.hlgroup . 'Tag'
-        if hlexists(hlgroup_tagged)
-          execute 'syntax clear' hlgroup_tagged
-        else
+        " Define style on first run, clear highlighting on later runs.
+        if !hlexists(hlgroup_tagged)
           execute 'highlight def link' hlgroup_tagged tagkind.hlgroup
+        else
+          execute 'syntax clear' hlgroup_tagged
         endif
-        let matches = filter(copy(taglist), tagkind.filter)
-        if matches != []
-          call map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))')
-          let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#misc#list#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
-          let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
-          let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
-          try
-            execute command
-          catch /^Vim\%((\a\+)\)\=:E339/
-            let msg = "easytags.vim: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
-            call xolox#misc#msg#warn(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
-          endtry
+        " Try to perform the highlighting using the fast Python script.
+        if s:highlight_with_python(hlgroup_tagged, tagkind)
+          let used_python = 1
+        else
+          " Fall back to the slow and naive Vim script implementation.
+          if !exists('taglist')
+            " Get the list of tags when we need it and remember the results.
+            if !has_key(s:aliases, filetype)
+              let ctags_filetype = xolox#easytags#to_ctags_ft(filetype)
+              let taglist = filter(taglist('.'), "get(v:val, 'language', '') ==? ctags_filetype")
+            else
+              let aliases = s:aliases[&ft]
+              let taglist = filter(taglist('.'), "has_key(aliases, tolower(get(v:val, 'language', '')))")
+            endif
+          endif
+          " Filter a copy of the list of tags to the relevant kinds.
+          if has_key(tagkind, 'tagkinds')
+            let filter = 'v:val.kind =~ tagkind.tagkinds'
+          else
+            let filter = tagkind.vim_filter
+          endif
+          let matches = filter(copy(taglist), filter)
+          if matches != []
+            " Convert matched tags to :syntax command and execute it.
+            call map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))')
+            let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#misc#list#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
+            let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
+            let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
+            try
+              execute command
+            catch /^Vim\%((\a\+)\)\=:E339/
+              let msg = "easytags.vim: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
+              call xolox#misc#msg#warn(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
+            endtry
+          endif
         endif
       endfor
       redraw
@@ -273,8 +291,8 @@ function! xolox#easytags#highlight() " {{{2
       if bufname == ''
         let bufname = 'unnamed buffer #' . bufnr('%')
       endif
-      let msg = "%s: Highlighted tags in %s in %s."
-      call xolox#misc#timer#stop(msg, s:script, bufname, starttime)
+      let msg = "%s: Highlighted tags in %s in %s%s."
+      call xolox#misc#timer#stop(msg, s:script, bufname, starttime, used_python ? " (using Python)" : "")
       return 1
     endif
   catch
@@ -561,6 +579,49 @@ endfunction
 
 let s:cached_filenames = {}
 
+function! s:python_available() " {{{2
+  if !exists('s:is_python_available')
+    try
+      execute 'pyfile' fnameescape(g:easytags_python_script)
+      redir => output
+        silent python easytags_ping()
+      redir END
+      let s:is_python_available = (output =~ 'it works!')
+    catch
+      let s:is_python_available = 0
+    endtry
+  endif
+  return s:is_python_available
+endfunction
+
+function! s:highlight_with_python(syntax_group, tagkind) " {{{2
+  if g:easytags_python_enabled && s:python_available()
+    " Gather arguments for Python function.
+    let context = {}
+    let context['tagsfiles'] = tagfiles()
+    let context['syntaxgroup'] = a:syntax_group
+    let context['filetype'] = xolox#easytags#to_ctags_ft(&ft)
+    let context['tagkinds'] = get(a:tagkind, 'tagkinds', '')
+    let context['prefix'] = get(a:tagkind, 'pattern_prefix', '')
+    let context['suffix'] = get(a:tagkind, 'pattern_suffix', '')
+    let context['filters'] = get(a:tagkind, 'python_filter', {})
+    " Call the Python function and intercept the output.
+    try
+      redir => commands
+      python import vim
+      silent python print easytags_gensyncmd(**vim.eval('context'))
+      redir END
+      execute commands
+      return 1
+    catch
+      redir END
+      " If the Python script raised an error, don't run it again.
+      let g:easytags_python_enabled = 0
+    endtry
+  endif
+  return 0
+endfunction
+
 " Built-in file type & tag kind definitions. {{{1
 
 " Don't bother redefining everything below when this script is sourced again.
@@ -591,29 +652,29 @@ set cpo&vim
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'lua',
       \ 'hlgroup': 'luaFunc',
-      \ 'filter': 'get(v:val, "kind") ==# "f"'})
+      \ 'tagkinds': 'f'})
 
 " C. {{{2
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cType',
-      \ 'filter': 'get(v:val, "kind") =~# "[cgstu]"'})
+      \ 'tagkinds': '[cgstu]'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cEnum',
-      \ 'filter': 'get(v:val, "kind") ==# "e"'})
+      \ 'tagkinds': 'e'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cPreProc',
-      \ 'filter': 'get(v:val, "kind") ==# "d"'})
+      \ 'tagkinds': 'd'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'c',
       \ 'hlgroup': 'cFunction',
-      \ 'filter': 'get(v:val, "kind") =~# "[fp]"'})
+      \ 'tagkinds': '[fp]'})
 
 highlight def link cEnum Identifier
 highlight def link cFunction Function
@@ -622,7 +683,7 @@ if g:easytags_include_members
   call xolox#easytags#define_tagkind({
         \ 'filetype': 'c',
         \ 'hlgroup': 'cMember',
-        \ 'filter': 'get(v:val, "kind") ==# "m"'})
+        \ 'tagkinds': 'm'})
  highlight def link cMember Identifier
 endif
 
@@ -631,27 +692,27 @@ endif
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'php',
       \ 'hlgroup': 'phpFunctions',
-      \ 'filter': 'get(v:val, "kind") ==# "f"',
+      \ 'tagkinds': 'f',
       \ 'pattern_suffix': '(\@='})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'php',
       \ 'hlgroup': 'phpClasses',
-      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+      \ 'tagkinds': 'c'})
 
 " Vim script. {{{2
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimAutoGroup',
-      \ 'filter': 'get(v:val, "kind") ==# "a"'})
+      \ 'tagkinds': 'a'})
 
 highlight def link vimAutoGroup vimAutoEvent
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimCommand',
-      \ 'filter': 'get(v:val, "kind") ==# "c"',
+      \ 'tagkinds': 'c',
       \ 'pattern_prefix': '\(\(^\|\s\):\?\)\@<=',
       \ 'pattern_suffix': '\(!\?\(\s\|$\)\)\@='})
 
@@ -663,13 +724,15 @@ call xolox#easytags#define_tagkind({
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimFuncName',
-      \ 'filter': 'get(v:val, "kind") ==# "f" && get(v:val, "cmd") !~? ''<sid>\w\|\<s:\w''',
+      \ 'vim_filter': 'v:val.kind ==# "f" && get(v:val, "cmd", "") !~? ''<sid>\w\|\<s:\w''',
+      \ 'python_filter': { 'kind': 'f', 'nomatch': '(?i)(<sid>\w|\bs:\w)' },
       \ 'pattern_prefix': '\C\%(\<s:\|<[sS][iI][dD]>\)\@<!\<'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'vim',
       \ 'hlgroup': 'vimScriptFuncName',
-      \ 'filter': 'get(v:val, "kind") ==# "f" && get(v:val, "cmd") =~? ''<sid>\w\|\<s:\w''',
+      \ 'vim_filter': 'v:val.kind ==# "f" && get(v:val, "cmd", "") =~? ''<sid>\w\|\<s:\w''',
+      \ 'python_filter': { 'kind': 'f', 'match': '(?i)(<sid>\w|\bs:\w)' },
       \ 'pattern_prefix': '\C\%(\<s:\|<[sS][iI][dD]>\)'})
 
 highlight def link vimScriptFuncName vimFuncName
@@ -679,19 +742,19 @@ highlight def link vimScriptFuncName vimFuncName
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonFunction',
-      \ 'filter': 'get(v:val, "kind") ==# "f"',
+      \ 'tagkinds': 'f',
       \ 'pattern_prefix': '\%(\<def\s\+\)\@<!\<'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonMethod',
-      \ 'filter': 'get(v:val, "kind") ==# "m"',
+      \ 'tagkinds': 'm',
       \ 'pattern_prefix': '\.\@<='})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'python',
       \ 'hlgroup': 'pythonClass',
-      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+      \ 'tagkinds': 'c'})
 
 highlight def link pythonMethodTag pythonFunction
 highlight def link pythonClassTag pythonFunction
@@ -701,12 +764,12 @@ highlight def link pythonClassTag pythonFunction
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
       \ 'hlgroup': 'javaClass',
-      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+      \ 'tagkinds': 'c'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
       \ 'hlgroup': 'javaMethod',
-      \ 'filter': 'get(v:val, "kind") ==# "m"'})
+      \ 'tagkinds': 'm'})
 
 highlight def link javaClass Identifier
 highlight def link javaMethod Function
@@ -721,12 +784,12 @@ highlight def link javaMethod Function
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'cs',
       \ 'hlgroup': 'csClassOrStruct',
-      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+      \ 'tagkinds': 'c'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'cs',
       \ 'hlgroup': 'csMethod',
-      \ 'filter': 'get(v:val, "kind") =~# "[ms]"'})
+      \ 'tagkinds': '[ms]'})
 
 highlight def link csClassOrStruct Identifier
 highlight def link csMethod Function
@@ -736,17 +799,17 @@ highlight def link csMethod Function
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'ruby',
       \ 'hlgroup': 'rubyModuleName',
-      \ 'filter': 'get(v:val, "kind") ==# "m"'})
+      \ 'tagkinds': 'm'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'ruby',
       \ 'hlgroup': 'rubyClassName',
-      \ 'filter': 'get(v:val, "kind") ==# "c"'})
+      \ 'tagkinds': 'c'})
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'ruby',
       \ 'hlgroup': 'rubyMethodName',
-      \ 'filter': 'get(v:val, "kind") =~# "[fF]"'})
+      \ 'tagkinds': '[fF]'})
 
 highlight def link rubyModuleName Type
 highlight def link rubyClassName Type

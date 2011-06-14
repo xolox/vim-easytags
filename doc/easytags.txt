@@ -22,8 +22,8 @@ became interested in dynamic syntax highlighting, so I added that as well to
 see if it would work -- surprisingly well I'm happy to report!
 
 ===============================================================================
-                                                        *easytags-install-usage*
-Install & usage ~
+                                                         *easytags-installation*
+Installation ~
 
 Unzip the most recent ZIP archive [6] file inside your Vim profile directory
 (usually this is '~/.vim' on UNIX and '%USERPROFILE%\vimfiles' on Windows),
@@ -51,14 +51,18 @@ install it by executing the following shell command:
     $ sudo apt-get install exuberant-ctags
 
 -------------------------------------------------------------------------------
-                                              *easytags-if-you-re-using-windows*
-If you're using Windows ~
+                                                 *easytags-a-note-about-windows*
+A note about Windows ~
 
 On Windows the |system()| function used by 'easytags.vim' causes a command
 prompt window to pop up while Exuberant Ctags is executing. If this bothers
 you then you can install my shell.vim [7] plug-in which includes a DLL [8]
 that works around this issue. Once you've installed both plug-ins it should
 work out of the box! Please let me know if this doesn't work for you.
+
+===============================================================================
+                                                             *easytags-commands*
+Commands ~
 
 -------------------------------------------------------------------------------
 The *:UpdateTags* command
@@ -89,6 +93,10 @@ option).
 Note that this command will be executed automatically every once in a while,
 assuming you haven't changed |g:easytags_on_cursorhold|.
 
+===============================================================================
+                                                              *easytags-options*
+Options ~
+
 -------------------------------------------------------------------------------
 The *g:easytags_cmd* option
 
@@ -96,9 +104,9 @@ The plug-in will try to determine the location where Exuberant Ctags is
 installed on its own but this might not always work because any given
 executable named 'ctags' in your '$PATH' might not in fact be Exuberant Ctags
 but some older, more primitive 'ctags' implementation which doesn't support
-the same command line options and thus breaks the 'easytags.vim' plug-in. If
-this is the case you can set the global variable |g:easytags_cmd| to the
-location where you've installed Exuberant Ctags, e.g.:
+the same command line options and thus breaks the easytags plug-in. If this is
+the case you can set the global variable |g:easytags_cmd| to the location
+where you've installed Exuberant Ctags, e.g.:
 >
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
@@ -249,7 +257,29 @@ is not found or not recent enough.
 >
     :let g:easytags_suppress_ctags_warning = 1
 
+===============================================================================
+                              *easytags-faster-syntax-highlighting-using-python*
+Faster syntax highlighting using Python ~
+
+The Vim script implementation of dynamic syntax highlighting is quite slow on
+large tags files. When the Python Interface to Vim is enabled the easytags
+plug-in will therefor automatically use a Python script that performs dynamic
+syntax highlighting about twice as fast as the Vim script implementation. The
+following options are available to change the default configuration.
+
 -------------------------------------------------------------------------------
+The *g:easytags_python_enabled* option
+
+To disable the Python implementation of dynamic syntax highlighting you can
+set this option to true (1).
+
+-------------------------------------------------------------------------------
+The *g:easytags_python_script* option
+
+This option defines the pathname of the script that contains the Python
+implementation of dynamic syntax highlighting.
+
+===============================================================================
 How to customize the highlighting colors? ~
 
 The easytags plug-in defines new highlighting groups for dynamically
