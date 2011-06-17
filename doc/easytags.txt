@@ -316,7 +316,6 @@ modes (except of course for the 'Tag' suffix).
 Troubleshooting ~
 
 -------------------------------------------------------------------------------
-                                                                *:HighlightTags*
 |:HighlightTags| only works for the tags file created by |:UpdateTags| ~
 
 If you want to create tags files and have their tags highlighted by the
@@ -427,7 +426,7 @@ If you like this plug-in please vote for it on Vim Online [13].
                                                               *easytags-license*
 License ~
 
-This software is licensed under the MIT license [14]. Copyright 2010 Peter
+This software is licensed under the MIT license [14]. Copyright 2011 Peter
 Odding <peter@peterodding.com>.
 
 ===============================================================================
