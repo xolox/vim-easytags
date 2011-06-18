@@ -1,20 +1,18 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 17, 2011
+" Last Change: June 18, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
-" License: MIT
-" Version: 2.4.2
 
 " Support for automatic update using the GLVS plug-in.
 " GetLatestVimScripts: 3114 1 :AutoInstall: easytags.zip
 
-" Don't source the plug-in when its already been loaded or &compatible is set.
+" Don't source the plug-in when it's already been loaded or &compatible is set.
 if &cp || exists('g:loaded_easytags')
   finish
 endif
 
-let s:script = expand('<sfile>:p:~')
+let g:easytags_version = '2.4.3'
 
 " Configuration defaults and initialization. {{{1
 
@@ -126,7 +124,7 @@ if !s:InitEasyTags(55)
     finish
   endif
   if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
-    let s:msg = "%s: Plug-in not loaded because Exuberant Ctags isn't installed!"
+    let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags isn't installed!"
     if executable('apt-get')
       let s:msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
       let s:msg .= " installing the package named `exuberant-ctags':"
@@ -134,11 +132,11 @@ if !s:InitEasyTags(55)
     else
       let s:msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
     endif
-    echomsg printf(s:msg, s:script)
+    echomsg printf(s:msg, g:easytags_version)
   else
-    let s:msg = "%s: Plug-in not loaded because Exuberant Ctags 5.5"
+    let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags 5.5"
     let s:msg .= " or newer is required while you have version %s installed!"
-    echomsg printf(s:msg, s:script, g:easytags_ctags_version)
+    echomsg printf(s:msg, g:easytags_version, g:easytags_ctags_version)
   endif
   unlet s:msg
   finish

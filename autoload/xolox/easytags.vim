@@ -1,9 +1,7 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 14, 2011
+" Last Change: June 18, 2011
 " URL: http://peterodding.com/code/vim/easytags/
-
-let s:script = 'easytags.vim'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -59,7 +57,7 @@ function! xolox#easytags#autoload() " {{{2
       let b:easytags_last_highlighted = localtime()
     endif
   catch
-    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:easytags_version, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -76,14 +74,14 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     if !firstrun
       let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
       if cfile != ''
-        let msg = "%s: Updated tags for %s in %s."
-        call xolox#misc#timer#stop(msg, s:script, expand('%:p:~'), starttime)
+        let msg = "easytags.vim %s: Updated tags for %s in %s."
+        call xolox#misc#timer#stop(msg, g:easytags_version, expand('%:p:~'), starttime)
       elseif !empty(a:filenames)
-        let msg = "%s: Updated tags in %s."
-        call xolox#misc#timer#stop(msg, s:script, starttime)
+        let msg = "easytags.vim %s: Updated tags in %s."
+        call xolox#misc#timer#stop(msg, g:easytags_version, starttime)
       else
-        let msg = "%s: Filtered %i invalid tags in %s."
-        call xolox#misc#timer#stop(msg, s:script, num_filtered, starttime)
+        let msg = "easytags.vim %s: Filtered %i invalid tags in %s."
+        call xolox#misc#timer#stop(msg, g:easytags_version, num_filtered, starttime)
       endif
     endif
     " When :UpdateTags was executed manually we'll refresh the dynamic
@@ -93,7 +91,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     endif
     return 1
   catch
-    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:easytags_version, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -169,7 +167,7 @@ endfunction
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   let lines = []
   if a:cmdline != ''
-    call xolox#misc#msg#debug("%s: Executing %s", s:script, a:cmdline)
+    call xolox#misc#msg#debug("easytags.vim %s: Executing %s.", g:easytags_version, a:cmdline)
     try
       let lines = xolox#shell#execute(a:cmdline, 1)
     catch /^Vim\%((\a\+)\)\=:E117/
@@ -183,9 +181,9 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
     endtry
     if a:firstrun
       if a:cfile != ''
-        call xolox#misc#timer#stop("%s: Created tags for %s in %s.", s:script, expand('%:p:~'), a:starttime)
+        call xolox#misc#timer#stop("easytags.vim %s: Created tags for %s in %s.", g:easytags_version, expand('%:p:~'), a:starttime)
       else
-        call xolox#misc#timer#stop("%s: Created tags in %s.", s:script, a:starttime)
+        call xolox#misc#timer#stop("easytags.vim %s: Created tags in %s.", g:easytags_version, a:starttime)
       endif
     endif
   endif
@@ -280,8 +278,8 @@ function! xolox#easytags#highlight() " {{{2
             try
               execute command
             catch /^Vim\%((\a\+)\)\=:E339/
-              let msg = "easytags.vim: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
-              call xolox#misc#msg#warn(printf(msg, len(matches), tagkind.hlgroup, len(pattern) / 1024))
+              let msg = "easytags.vim %s: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
+              call xolox#misc#msg#warn(msg, g:easytags_version, len(matches), tagkind.hlgroup, len(pattern) / 1024)
             endtry
           endif
         endif
@@ -291,12 +289,12 @@ function! xolox#easytags#highlight() " {{{2
       if bufname == ''
         let bufname = 'unnamed buffer #' . bufnr('%')
       endif
-      let msg = "%s: Highlighted tags in %s in %s%s."
-      call xolox#misc#timer#stop(msg, s:script, bufname, starttime, used_python ? " (using Python)" : "")
+      let msg = "easytags.vim %s: Highlighted tags in %s in %s%s."
+      call xolox#misc#timer#stop(msg, g:easytags_version, bufname, starttime, used_python ? " (using Python)" : "")
       return 1
     endif
   catch
-    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:easytags_version, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -312,8 +310,8 @@ function! xolox#easytags#by_filetype(undo) " {{{2
       let [headers, entries] = xolox#easytags#read_tagsfile(global_tagsfile)
       call s:save_by_filetype(headers, entries)
       call rename(global_tagsfile, disabled_tagsfile)
-      let msg = "Finished copying tags from %s to %s! Note that your old tags file has been renamed to %s instead of deleting it, should you want to restore it."
-      call xolox#misc#msg#info(msg, g:easytags_file, g:easytags_by_filetype, disabled_tagsfile)
+      let msg = "easytags.vim %s: Finished copying tags from %s to %s! Note that your old tags file has been renamed to %s instead of deleting it, should you want to restore it."
+      call xolox#misc#msg#info(msg, g:easytags_version, g:easytags_file, g:easytags_by_filetype, disabled_tagsfile)
     else
       let headers = []
       let all_entries = []
@@ -322,10 +320,10 @@ function! xolox#easytags#by_filetype(undo) " {{{2
         call extend(all_entries, entries)
       endfor
       call xolox#easytags#write_tagsfile(global_tagsfile, headers, all_entries)
-      call xolox#misc#msg#info("Finished copying tags from %s to %s!", g:easytags_by_filetype, g:easytags_file)
+      call xolox#misc#msg#info("easytags.vim %s: Finished copying tags from %s to %s!", g:easytags_version, g:easytags_by_filetype, g:easytags_file)
     endif
   catch
-    call xolox#misc#msg#warn("%s: %s (at %s)", s:script, v:exception, v:throwpoint)
+    call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:easytags_version, v:exception, v:throwpoint)
   endtry
 endfunction
 
@@ -369,8 +367,8 @@ function! xolox#easytags#supported_filetypes() " {{{2
       endif
     endtry
     let s:supported_filetypes = map(copy(listing), 's:check_filetype(listing, v:val)')
-    let msg = "%s: Retrieved %i supported languages in %s."
-    call xolox#misc#timer#stop(msg, s:script, len(s:supported_filetypes), starttime)
+    let msg = "easytags.vim %s: Retrieved %i supported languages in %s."
+    call xolox#misc#timer#stop(msg, g:easytags_version, len(s:supported_filetypes), starttime)
   endif
   return s:supported_filetypes
 endfunction
@@ -473,7 +471,7 @@ function! s:cache_tagged_files() " {{{3
         call s:cache_tagged_files_in(fname, ftime, entries)
       endif
     endfor
-    call xolox#misc#timer#stop("%s: Initialized cache of tagged files in %s", s:script, starttime)
+    call xolox#misc#timer#stop("easytags.vim %s: Initialized cache of tagged files in %s.", g:easytags_version, starttime)
   endif
 endfunction
 
