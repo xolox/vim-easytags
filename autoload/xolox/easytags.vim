@@ -62,21 +62,26 @@ function! xolox#easytags#autoload() " {{{2
 endfunction
 
 function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
-  " TODO Use save_by_filetype() when --force-language is not in effect!
   try
     let s:cached_filenames = {}
+    let have_args = !empty(a:filenames)
     let starttime = xolox#misc#timer#start()
-    let cfile = s:check_cfile(a:silent, a:filter_tags, !empty(a:filenames))
+    let cfile = s:check_cfile(a:silent, a:filter_tags, have_args)
     let tagsfile = xolox#easytags#get_tagsfile()
     let firstrun = !filereadable(tagsfile)
     let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:filenames)
     let output = s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline)
     if !firstrun
-      let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
+      if have_args && !empty(g:easytags_by_filetype)
+        " TODO Get the headers from somewhere?!
+        call s:save_by_filetype(a:filter_tags, [], output)
+      else
+        let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
+      endif
       if cfile != ''
         let msg = "easytags.vim %s: Updated tags for %s in %s."
         call xolox#misc#timer#stop(msg, g:easytags_version, expand('%:p:~'), starttime)
-      elseif !empty(a:filenames)
+      elseif have_args
         let msg = "easytags.vim %s: Updated tags in %s."
         call xolox#misc#timer#stop(msg, g:easytags_version, starttime)
       else
@@ -185,6 +190,7 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
       else
         call xolox#misc#timer#stop("easytags.vim %s: Created tags in %s.", g:easytags_version, a:starttime)
       endif
+      return []
     endif
   endif
   return xolox#easytags#parse_entries(lines)
@@ -200,7 +206,7 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
   endif
   " Filter tags for non-existing files?
   if a:filter_tags
-    call add(filters, 'filereadable(v:val[1]))')
+    call add(filters, 'filereadable(v:val[1])')
   endif
   let num_old_entries = len(entries)
   if !empty(filters)
@@ -308,7 +314,7 @@ function! xolox#easytags#by_filetype(undo) " {{{2
     let disabled_tagsfile = global_tagsfile . '.disabled'
     if !a:undo
       let [headers, entries] = xolox#easytags#read_tagsfile(global_tagsfile)
-      call s:save_by_filetype(headers, entries)
+      call s:save_by_filetype(0, headers, entries)
       call rename(global_tagsfile, disabled_tagsfile)
       let msg = "easytags.vim %s: Finished copying tags from %s to %s! Note that your old tags file has been renamed to %s instead of deleting it, should you want to restore it."
       call xolox#misc#msg#info(msg, g:easytags_version, g:easytags_file, g:easytags_by_filetype, disabled_tagsfile)
@@ -327,7 +333,7 @@ function! xolox#easytags#by_filetype(undo) " {{{2
   endtry
 endfunction
 
-function! s:save_by_filetype(headers, entries)
+function! s:save_by_filetype(filter_tags, headers, entries)
   let filetypes = {}
   for entry in a:entries
     let ctags_ft = matchstr(entry[2], '\tlanguage:\zs\S\+')
@@ -345,7 +351,7 @@ function! s:save_by_filetype(headers, entries)
     if !filereadable(tagsfile)
       call xolox#easytags#write_tagsfile(tagsfile, a:headers, filetypes[vim_ft])
     else
-      call s:filter_merge_tags(0, tagsfile, filetypes[vim_ft])
+      call s:filter_merge_tags(a:filter_tags, tagsfile, filetypes[vim_ft])
     endif
   endfor
 endfunction
