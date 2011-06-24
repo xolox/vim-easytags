@@ -389,23 +389,33 @@ function! xolox#easytags#read_tagsfile(tagsfile) " {{{2
   " otherwise Vim might complain with "E432: Tags file not sorted".
   let headers = []
   let entries = []
+  let num_invalid = 0
   for line in readfile(a:tagsfile)
     if line =~# '^!_TAG_'
       call add(headers, line)
     else
-      call add(entries, xolox#easytags#parse_entry(line))
+      let entry = xolox#easytags#parse_entry(line)
+      if !empty(entry)
+        call add(entries, entry)
+      else
+        let num_invalid += 1
+      endif
     endif
   endfor
+  if num_invalid > 0
+    call xolox#misc#msg#warn("easytags.vim %s: Ignored %i invalid line(s) in %s!", g:easytags_version, num_invalid, a:tagsfile)
+  endif
   return [headers, entries]
 endfunction
 
 function! xolox#easytags#parse_entry(line) " {{{2
-  return matchlist(a:line, '^\([^\t]\+\)\t\([^\t]\+\)\t\(.\+\)$')[1:3]
+  let fields = split(a:line, '\t')
+  return len(fields) >= 3 ? fields : []
 endfunction
 
 function! xolox#easytags#parse_entries(lines) " {{{2
   call map(a:lines, 'xolox#easytags#parse_entry(v:val)')
-  return a:lines
+  return filter(a:lines, '!empty(v:val)')
 endfunction
 
 function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2

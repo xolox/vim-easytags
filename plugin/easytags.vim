@@ -12,7 +12,7 @@ if &cp || exists('g:loaded_easytags')
   finish
 endif
 
-let g:easytags_version = '2.4.4'
+let g:easytags_version = '2.4.5'
 
 " Configuration defaults and initialization. {{{1
 
