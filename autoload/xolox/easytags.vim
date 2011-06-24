@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 18, 2011
+" Last Change: June 24, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 " Public interface through (automatic) commands. {{{1
@@ -483,16 +483,21 @@ function! s:cache_tagged_files_in(fname, ftime, entries) " {{{3
 endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
-  let tagsfile = expand(g:easytags_file)
-  if !empty(g:easytags_by_filetype) && !empty(&filetype)
-    let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
-    let tagsfile = xolox#misc#path#merge(directory, &filetype)
-  elseif g:easytags_dynamic_files
+  " Look for a writable project specific tags file?
+  if g:easytags_dynamic_files
     let files = tagfiles()
-    if len(files) > 0
-      let tagsfile = files[0]
+    if len(files) > 0 && filewritable(files[0]) == 1
+      return files[0]
     endif
   endif
+  " Default to the global tags file.
+  let tagsfile = expand(g:easytags_file)
+  " Check if a file type specific tags file is useful?
+  if !empty(g:easytags_by_filetype) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
+    let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
+    let tagsfile = xolox#misc#path#merge(directory, &filetype)
+  endif
+  " If the tags file exists, make sure it is writable!
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
     let message = "The tags file %s isn't writable!"
     throw printf(message, fnamemodify(tagsfile, ':~'))

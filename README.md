@@ -66,11 +66,15 @@ You can enable this option so that the project specific tags files are written i
 
 When you enable this option, the easytags plug-in will use the first filename returned by [tagfiles()](http://vimdoc.sourceforge.net/htmldoc/eval.html#tagfiles%28%29) as the tags file to write. Note that `tagfiles()` is reevaluated every time the plug-in runs.
 
+If you've also enabled `g:easytags_by_filetype` the project specific tags file must exist, even if it's empty; otherwise `g:easytags_by_filetype` will take precedence.
+
 ### The `g:easytags_by_filetype` option
 
 By default all tags are stored in a global tags file. When the tags file grows beyond a certain size Vim will be slowed down by the easytags plug-in because it has to read and process a large number of tags very frequently.
 
 To avoid this problem you can set `g:easytags_by_filetype` to the path of an existing directory. The easytags plug-in will create separate tags files for each file type in the configured directory. These tags files are automatically registered by the easytags plug-in when the file type of a buffer is set.
+
+If you've also enabled `g:easytags_dynamic_files` and the project specific tags file exists, and is writable, it will take precedence. If the project specific tags file doesn't exist you can indicate you want to use project specific tags by creating it.
 
 Note that if you already have a global tags file you can create file type specific tags files from the global tags file using the command `:TagsByFileType`.
 
