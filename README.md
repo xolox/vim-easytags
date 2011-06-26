@@ -96,6 +96,26 @@ As I explained above the plug-in by default doesn't update or highlight your tag
 
 Note: Like the `g:easytags_always_enabled` option, if you change this option it won't apply until you restart Vim, so you'll have to set this option in your [vimrc script][vimrc].
 
+### The `g:easytags_auto_update` option
+
+By default the plug-in automatically updates and highlights your tags when you stop typing for a moment. If you want to disable automatic updating while keeping automatic highlighting enabled you can set this option to false:
+
+    :let g:easytags_auto_update = 0
+
+If you want to disable automatic updating for a single file you can execute the following command while editing the file:
+
+    :let b:easytags_auto_update = 0
+
+### The `g:easytags_auto_highlight` option
+
+By default the plug-in automatically updates and highlights your tags when you stop typing for a moment. If you want to disable automatic highlighting while keeping automatic updating enabled you can set this option to false:
+
+    :let g:easytags_auto_highlight = 0
+
+If you want to disable automatic highlighting for a single file you can execute the following command while editing the file:
+
+    :let b:easytags_auto_highlight = 0
+
 ### The `g:easytags_autorecurse` option
 
 When the `:UpdateTags` command is executed automatically or without arguments, it defaults to updating just the tags for the current file. If you'd rather have it recursively scan everything below the directory of the current file then set this option to true (1):

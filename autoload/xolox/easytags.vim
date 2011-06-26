@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 24, 2011
+" Last Change: June 26, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 " Public interface through (automatic) commands. {{{1
@@ -35,26 +35,30 @@ endfunction
 function! xolox#easytags#autoload() " {{{2
   try
     " Update entries for current file in tags file?
-    let pathname = s:resolve(expand('%:p'))
-    if pathname != ''
-      let tags_outdated = getftime(pathname) > getftime(xolox#easytags#get_tagsfile())
-      if tags_outdated || !xolox#easytags#file_has_tags(pathname)
-        call xolox#easytags#update(1, 0, [])
+    if xolox#misc#option#get('easytags_auto_update', 1)
+      let pathname = s:resolve(expand('%:p'))
+      if pathname != ''
+        let tags_outdated = getftime(pathname) > getftime(xolox#easytags#get_tagsfile())
+        if tags_outdated || !xolox#easytags#file_has_tags(pathname)
+          call xolox#easytags#update(1, 0, [])
+        endif
       endif
     endif
     " Apply highlighting of tags to current buffer?
-    if &eventignore !~? '\<syntax\>'
-      if !exists('b:easytags_last_highlighted')
-        call xolox#easytags#highlight()
-      else
-        for tagfile in tagfiles()
-          if getftime(tagfile) > b:easytags_last_highlighted
-            call xolox#easytags#highlight()
-            break
-          endif
-        endfor
+    if xolox#misc#option#get('easytags_auto_highlight', 1)
+      if &eventignore !~? '\<syntax\>'
+        if !exists('b:easytags_last_highlighted')
+          call xolox#easytags#highlight()
+        else
+          for tagfile in tagfiles()
+            if getftime(tagfile) > b:easytags_last_highlighted
+              call xolox#easytags#highlight()
+              break
+            endif
+          endfor
+        endif
+        let b:easytags_last_highlighted = localtime()
       endif
-      let b:easytags_last_highlighted = localtime()
     endif
   catch
     call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:easytags_version, v:exception, v:throwpoint)
