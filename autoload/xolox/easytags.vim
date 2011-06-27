@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 26, 2011
+" Last Change: June 27, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 " Public interface through (automatic) commands. {{{1
@@ -109,7 +109,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
     return ''
   endif
   let silent = a:silent || a:filter_tags
-  if g:easytags_autorecurse
+  if xolox#misc#option#get('easytags_autorecurse', 0)
     let cdir = s:resolve(expand('%:p:h'))
     if !isdirectory(cdir)
       if silent | return '' | endif
@@ -132,7 +132,8 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
 endfunction
 
 function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
-  let cmdline = [g:easytags_cmd, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
+  let program = xolox#misc#option#get('easytags_cmd')
+  let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
   if a:firstrun
     call add(cmdline, shellescape('-f' . a:tagsfile))
     call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
@@ -140,12 +141,12 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
     call add(cmdline, '--sort=no')
     call add(cmdline, '-f-')
   endif
-  if g:easytags_include_members
+  if xolox#misc#option#get('easytags_include_members', 0)
     call add(cmdline, '--extra=+q')
   endif
   let have_args = 0
   if a:cfile != ''
-    if g:easytags_autorecurse
+    if xolox#misc#option#get('easytags_autorecurse', 0)
       call add(cmdline, '-R')
       call add(cmdline, shellescape(a:cfile))
     else
@@ -504,14 +505,14 @@ endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
   " Look for a writable project specific tags file?
-  if g:easytags_dynamic_files
+  if xolox#misc#option#get('easytags_dynamic_files', 0)
     let files = tagfiles()
     if len(files) > 0 && filewritable(files[0]) == 1
       return files[0]
     endif
   endif
   " Default to the global tags file.
-  let tagsfile = expand(g:easytags_file)
+  let tagsfile = expand(xolox#misc#option#get('easytags_file'))
   " Check if a file type specific tags file is useful?
   if !empty(g:easytags_by_filetype) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
     let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
@@ -583,7 +584,7 @@ endfunction
 " Miscellaneous script-local functions. {{{1
 
 function! s:resolve(filename) " {{{2
-  if g:easytags_resolve_links
+  if xolox#misc#option#get('easytags_resolve_links', 0)
     return resolve(a:filename)
   else
     return a:filename
@@ -618,7 +619,7 @@ function! s:python_available() " {{{2
 endfunction
 
 function! s:highlight_with_python(syntax_group, tagkind) " {{{2
-  if g:easytags_python_enabled && s:python_available()
+  if xolox#misc#option#get('easytags_python_enabled', 1) && s:python_available()
     " Gather arguments for Python function.
     let context = {}
     let context['tagsfiles'] = tagfiles()
@@ -702,7 +703,7 @@ call xolox#easytags#define_tagkind({
 highlight def link cEnum Identifier
 highlight def link cFunction Function
 
-if g:easytags_include_members
+if xolox#misc#option#get('easytags_include_members', 0)
   call xolox#easytags#define_tagkind({
         \ 'filetype': 'c',
         \ 'hlgroup': 'cMember',

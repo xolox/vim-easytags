@@ -40,6 +40,14 @@ Note that this command will be executed automatically every once in a while, ass
 
 ## Options
 
+The easytags plug-in should work out of the box but if you don't like the default configuration you can change how it works by setting the variables documented below. Most of these variables can also be changed for specific files by setting a buffer local variable instead of the global variable. For example to disable automatic highlighting (enabled by default) only in Python files you can add the following line to your [vimrc script] [vimrc]:
+
+    :autocmd FileType python let b:easytags_auto_highlight = 0
+
+Note that buffer local variables always override global variables, so if you want to undo this for a specific file you have to use [:unlet] [unlet]:
+
+    :unlet b:easytags_auto_highlight
+
 ### The `g:easytags_cmd` option
 
 The plug-in will try to determine the location where Exuberant Ctags is installed on its own but this might not always work because any given executable named `ctags` in your `$PATH` might not in fact be Exuberant Ctags but some older, more primitive `ctags` implementation which doesn't support the same command line options and thus breaks the easytags plug-in. If this is the case you can set the global variable `g:easytags_cmd` to the location where you've installed Exuberant Ctags, e.g.:
@@ -102,19 +110,11 @@ By default the plug-in automatically updates and highlights your tags when you s
 
     :let g:easytags_auto_update = 0
 
-If you want to disable automatic updating for a single file you can execute the following command while editing the file:
-
-    :let b:easytags_auto_update = 0
-
 ### The `g:easytags_auto_highlight` option
 
 By default the plug-in automatically updates and highlights your tags when you stop typing for a moment. If you want to disable automatic highlighting while keeping automatic updating enabled you can set this option to false:
 
     :let g:easytags_auto_highlight = 0
-
-If you want to disable automatic highlighting for a single file you can execute the following command while editing the file:
-
-    :let b:easytags_auto_highlight = 0
 
 ### The `g:easytags_autorecurse` option
 

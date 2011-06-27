@@ -97,6 +97,20 @@ assuming you haven't changed |g:easytags_on_cursorhold|.
                                                               *easytags-options*
 Options ~
 
+The easytags plug-in should work out of the box but if you don't like the
+default configuration you can change how it works by setting the variables
+documented below. Most of these variables can also be changed for specific
+files by setting a buffer local variable instead of the global variable. For
+example to disable automatic highlighting (enabled by default) only in Python
+files you can add the following line to your |vimrc| script:
+>
+    :autocmd FileType python let b:easytags_auto_highlight = 0
+
+Note that buffer local variables always override global variables, so if you
+want to undo this for a specific file you have to use |:unlet|:
+>
+    :unlet b:easytags_auto_highlight
+
 -------------------------------------------------------------------------------
 The *g:easytags_cmd* option
 
@@ -207,11 +221,6 @@ keeping automatic highlighting enabled you can set this option to false:
 >
     :let g:easytags_auto_update = 0
 
-If you want to disable automatic updating for a single file you can execute
-the following command while editing the file:
->
-    :let b:easytags_auto_update = 0
-
 -------------------------------------------------------------------------------
 The *g:easytags_auto_highlight* option
 
@@ -220,11 +229,6 @@ stop typing for a moment. If you want to disable automatic highlighting while
 keeping automatic updating enabled you can set this option to false:
 >
     :let g:easytags_auto_highlight = 0
-
-If you want to disable automatic highlighting for a single file you can
-execute the following command while editing the file:
->
-    :let b:easytags_auto_highlight = 0
 
 -------------------------------------------------------------------------------
 The *g:easytags_autorecurse* option
@@ -240,7 +244,7 @@ You have to explicitly enable this option because it should only be used while
 navigating around small directory trees. Imagine always having this option
 enabled and then having to edit a file in e.g. the root of your home
 directory: The 'easytags.vim' plug-in would freeze Vim for a long time while
-you'd have to wait for Exuberant Cags to scan thousands of files...
+you'd have to wait for Exuberant Ctags to scan thousands of files...
 
 Note that when you enable this option the 'easytags.vim' plug-in might ignore
 other options like |g:easytags_resolve_links|. This is an implementation
@@ -433,8 +437,8 @@ is to reduce the number of tagged identifiers...
 
 In my case the solution was to move most of the tags from '/usr/include/' over
 to project specific tags files which are automatically loaded by Vim when I
-edit files in different projects because I've set the |'tags'| option as
-follows:
+edit files in different projects because I've set the ['tags' option] ['tags']
+as follows:
 >
     :set tags=./.tags;,~/.vimtags
 
@@ -444,11 +448,11 @@ also recurses upwards so that you can nest files arbitrarily deep under your
 project directories.
 
 -------------------------------------------------------------------------------
-The plug-in doesn't seem to work in Cygwin [12] ~
+The plug-in doesn't seem to work in Cygwin ~
 
-If you want to use the plug-in with Vim under Cygwin, you need to have the
-Cygwin version of Ctags installed instead of the Windows version (thanks to
-Alex Zuroff for reporting this!).
+If you want to use the plug-in with Vim under Cygwin [12], you need to have
+the Cygwin version of Ctags installed instead of the Windows version (thanks
+to Alex Zuroff for reporting this!).
 
 ===============================================================================
                                                               *easytags-contact*

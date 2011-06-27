@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 26, 2011
+" Last Change: June 27, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -12,7 +12,7 @@ if &cp || exists('g:loaded_easytags')
   finish
 endif
 
-let g:easytags_version = '2.4.7'
+let g:easytags_version = '2.4.8'
 
 " Configuration defaults and initialization. {{{1
 
@@ -24,16 +24,8 @@ if !exists('g:easytags_file')
   endif
 endif
 
-if !exists('g:easytags_dynamic_files')
-  let g:easytags_dynamic_files = 0
-endif
-
 if !exists('g:easytags_by_filetype')
   let g:easytags_by_filetype = ''
-endif
-
-if !exists('g:easytags_resolve_links')
-  let g:easytags_resolve_links = 0
 endif
 
 if !exists('g:easytags_events')
@@ -48,18 +40,6 @@ endif
 
 if !exists('g:easytags_ignored_filetypes')
   let g:easytags_ignored_filetypes = '^tex$'
-endif
-
-if !exists('g:easytags_autorecurse')
-  let g:easytags_autorecurse = 0
-endif
-
-if !exists('g:easytags_include_members')
-  let g:easytags_include_members = 0
-endif
-
-if !exists('g:easytags_python_enabled')
-  let g:easytags_python_enabled = 1
 endif
 
 if !exists('g:easytags_python_script')
