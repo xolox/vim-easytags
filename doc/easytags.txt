@@ -437,8 +437,8 @@ is to reduce the number of tagged identifiers...
 
 In my case the solution was to move most of the tags from '/usr/include/' over
 to project specific tags files which are automatically loaded by Vim when I
-edit files in different projects because I've set the ['tags' option] ['tags']
-as follows:
+edit files in different projects because I've set the |'tags'| option as
+follows:
 >
     :set tags=./.tags;,~/.vimtags
 

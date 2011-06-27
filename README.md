@@ -225,7 +225,7 @@ Every time the plug-in executes it will time how long the execution takes and ad
 
 If the `easytags.vim` plug-in fails to highlight your tags and the error message mentions that the pattern is too big, your tags file has grown too large for Vim to be able to highlight all tagged identifiers! I've had this happen to me with 50 KB patterns because I added most of the headers in `/usr/include/` to my tags file. Internally Vim raises the error [E339: Pattern too long] [e339] and unfortunately the only way to avoid this problem once it occurs is to reduce the number of tagged identifiers...
 
-In my case the solution was to move most of the tags from `/usr/include/` over to project specific tags files which are automatically loaded by Vim when I edit files in different projects because I've set the ['tags' option] ['tags'] as follows:
+In my case the solution was to move most of the tags from `/usr/include/` over to project specific tags files which are automatically loaded by Vim when I edit files in different projects because I've set the ['tags' option] [tags_opt] as follows:
 
     :set tags=./.tags;,~/.vimtags
 
