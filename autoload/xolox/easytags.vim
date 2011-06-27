@@ -150,6 +150,8 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
       call add(cmdline, '-R')
       call add(cmdline, shellescape(a:cfile))
     else
+      " TODO Should --language-force distinguish between C and C++?
+      " TODO --language-force doesn't make sense for JavaScript tags in HTML files?
       let filetype = xolox#easytags#to_ctags_ft(&filetype)
       call add(cmdline, shellescape('--language-force=' . filetype))
       call add(cmdline, shellescape(a:cfile))
@@ -259,6 +261,8 @@ function! xolox#easytags#highlight() " {{{2
           execute 'syntax clear' hlgroup_tagged
         endif
         " Try to perform the highlighting using the fast Python script.
+        " TODO The tags files are read multiple times by the Python script
+        "      within one run of xolox#easytags#highlight()
         if s:highlight_with_python(hlgroup_tagged, tagkind)
           let used_python = 1
         else
@@ -526,7 +530,7 @@ function! xolox#easytags#get_tagsfile() " {{{2
   return tagsfile
 endfunction
 
-" Public API for file-type specific dynamic syntax highlighting. {{{1
+" Public API for definition of file type specific dynamic syntax highlighting. {{{1
 
 function! xolox#easytags#define_tagkind(object) " {{{2
   if !has_key(a:object, 'pattern_prefix')
@@ -547,6 +551,7 @@ function! xolox#easytags#map_filetypes(vim_ft, ctags_ft) " {{{2
 endfunction
 
 function! xolox#easytags#alias_filetypes(...) " {{{2
+  " TODO Simplify alias handling, this much complexity really isn't needed!
   for type in a:000
     let s:canonical_aliases[type] = a:1
     if !has_key(s:aliases, type)
@@ -800,10 +805,7 @@ highlight def link javaMethod Function
 
 " C#. {{{2
 
-" TODO C# name spaces?
-" TODO C# interface names
-" TODO C# enumeration member names
-" TODO C# structure names?
+" TODO C# name spaces, interface names, enumeration member names, structure names?
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'cs',

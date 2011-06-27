@@ -1,10 +1,18 @@
-# Long term plans for the easytags Vim plug-in
+# To-do list for the easytags plug-in for Vim
 
- * Automatically index C headers when /usr/include/$name.h exists?
+## New functionality
+
+ * Automatically index C headers when `/usr/include/$name.h` exists?
 
  * Integration with my unreleased project plug-in so that when you edit any file in a project, all related files are automatically scanned for tags?
 
  * Make `g:easytags_autorecurse` accept the following values: 0 (only scan the current file), 1 (always scan all files in the same directory) and 2 (always recurse down the current directory)?
+
+ * Several users have reported the plug-in locking Vim up and this was invariably caused by the plug-in trying to highlight the tags from a very large tags file. Maybe the plug-in should warn about this so the cause is immediately clear to users. It's also possible to temporarily change the `tags` option so that `taglist()` doesn't look at tags files that are bigger than a certain size but this feels like a hack and it may be better to go with the option below.
+ 
+ * The functionality of the Python highlight script can just as well be implemented in Vim script (using `readfile()` instead of `taglist()`), the only notable difference being that Vim cannot read files line wise. This would remove the duplication of code between Vim script and Python and would mean all users get to enjoy a faster plug-in! I'm not sure whether a Vim script implementation of the same code would be equally fast though, so I should implement and benchmark! This would also easily enable the plug-in to ignore tags files that are too large (see above).
+
+## Possible bugs
 
  * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is running because Vim opens a command prompt window. Also the CursorHold event seems to fire repeatedly, contradicting my understanding of the automatic command and its behavior on UNIX?! This behavior doesn't occur when I use the integration with my `shell.vim` plug-in.
 
