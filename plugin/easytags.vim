@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 27, 2011
+" Last Change: July 9, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -12,7 +12,7 @@ if &cp || exists('g:loaded_easytags')
   finish
 endif
 
-let g:easytags_version = '2.4.9'
+let g:easytags_version = '2.4.10'
 
 " Configuration defaults and initialization. {{{1
 

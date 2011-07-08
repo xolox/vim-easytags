@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 27, 2011
+" Last Change: July 9, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
 " Public interface through (automatic) commands. {{{1
@@ -34,19 +34,23 @@ endfunction
 
 function! xolox#easytags#autoload() " {{{2
   try
-    " Update entries for current file in tags file?
-    if xolox#misc#option#get('easytags_auto_update', 1)
-      let pathname = s:resolve(expand('%:p'))
-      if pathname != ''
-        let tags_outdated = getftime(pathname) > getftime(xolox#easytags#get_tagsfile())
-        if tags_outdated || !xolox#easytags#file_has_tags(pathname)
-          call xolox#easytags#update(1, 0, [])
+    let do_update = xolox#misc#option#get('easytags_auto_update', 1)
+    let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'
+    " Don't execute this function for unsupported file types (doesn't load
+    " the list of file types if updates and highlighting are both disabled).
+    if (do_update || do_highlight) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
+      " Update entries for current file in tags file?
+      if do_update
+        let pathname = s:resolve(expand('%:p'))
+        if pathname != ''
+          let tags_outdated = getftime(pathname) > getftime(xolox#easytags#get_tagsfile())
+          if tags_outdated || !xolox#easytags#file_has_tags(pathname)
+            call xolox#easytags#update(1, 0, [])
+          endif
         endif
       endif
-    endif
-    " Apply highlighting of tags to current buffer?
-    if xolox#misc#option#get('easytags_auto_highlight', 1)
-      if &eventignore !~? '\<syntax\>'
+      " Apply highlighting of tags to current buffer?
+      if do_highlight
         if !exists('b:easytags_last_highlighted')
           call xolox#easytags#highlight()
         else
