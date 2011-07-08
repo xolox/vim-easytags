@@ -179,6 +179,10 @@ The easytags plug-in defines new highlighting groups for dynamically highlighted
 
 As you can see each of these names ends in `Tag` to avoid conflicts with the syntax modes shipped with Vim. And about the singular/plural confusion: I've tried to match the existing highlighting groups defined by popular syntax modes (except of course for the `Tag` suffix).
 
+## Passing custom command line arguments to Exuberant Ctags
+
+You may want to run Exuberant Ctags with specific command line options, for example the [code_complete] [code_complete] plug-in requires the signature field to be present. To do this you can create a configuration file for Exuberant Ctags, e.g. `~/.ctags` on UNIX or `%USERPROFILE%\ctags.cnf` on Windows. The file should contain one command line option per line. See the [Exuberant Ctags manual] [ctags_cfg] for details.
+
 ## Troubleshooting
 
 ### `:HighlightTags` only works for the tags file created by `:UpdateTags`
@@ -246,7 +250,9 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 
 
 [canon]: http://en.wikipedia.org/wiki/Canonicalization
+[code_complete]: http://www.vim.org/scripts/script.php?script_id=1764
 [ctags]: http://en.wikipedia.org/wiki/Ctags
+[ctags_cfg]: http://ctags.sourceforge.net/ctags.html#FILES
 [ctags_fts]: http://ctags.sourceforge.net/languages.html
 [ctrl_c]: http://vimdoc.sourceforge.net/htmldoc/pattern.html#CTRL-C
 [ctrl_mapping]: http://vimdoc.sourceforge.net/htmldoc/tagsrch.html#CTRL-]

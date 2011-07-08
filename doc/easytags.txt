@@ -353,6 +353,16 @@ tried to match the existing highlighting groups defined by popular syntax
 modes (except of course for the 'Tag' suffix).
 
 ===============================================================================
+Passing custom command line arguments to Exuberant Ctags ~
+
+You may want to run Exuberant Ctags with specific command line options, for
+example the code_complete [12] plug-in requires the signature field to be
+present. To do this you can create a configuration file for Exuberant Ctags,
+e.g. '~/.ctags' on UNIX or '%USERPROFILE%\ctags.cnf' on Windows. The file
+should contain one command line option per line. See the Exuberant Ctags
+manual [13] for details.
+
+===============================================================================
                                                       *easytags-troubleshooting*
 Troubleshooting ~
 
@@ -450,7 +460,7 @@ project directories.
 -------------------------------------------------------------------------------
 The plug-in doesn't seem to work in Cygwin ~
 
-If you want to use the plug-in with Vim under Cygwin [12], you need to have
+If you want to use the plug-in with Vim under Cygwin [14], you need to have
 the Cygwin version of Ctags installed instead of the Windows version (thanks
 to Alex Zuroff for reporting this!).
 
@@ -461,13 +471,13 @@ Contact ~
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/easytags/ and http://github.com/xolox/vim-easytags.
-If you like this plug-in please vote for it on Vim Online [13].
+If you like this plug-in please vote for it on Vim Online [15].
 
 ===============================================================================
                                                               *easytags-license*
 License ~
 
-This software is licensed under the MIT license [14]. Copyright 2011 Peter
+This software is licensed under the MIT license [16]. Copyright 2011 Peter
 Odding <peter@peterodding.com>.
 
 ===============================================================================
@@ -485,8 +495,10 @@ References ~
 [9] http://en.wikipedia.org/wiki/Symbolic_link
 [10] http://en.wikipedia.org/wiki/Hard_link
 [11] http://en.wikipedia.org/wiki/Canonicalization
-[12] http://en.wikipedia.org/wiki/Cygwin
-[13] http://www.vim.org/scripts/script.php?script_id=3114
-[14] http://en.wikipedia.org/wiki/MIT_License
+[12] http://www.vim.org/scripts/script.php?script_id=1764
+[13] http://ctags.sourceforge.net/ctags.html#FILES
+[14] http://en.wikipedia.org/wiki/Cygwin
+[15] http://www.vim.org/scripts/script.php?script_id=3114
+[16] http://en.wikipedia.org/wiki/MIT_License
 
 vim: ft=help
