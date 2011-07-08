@@ -493,11 +493,15 @@ function! s:cache_tagged_files() " {{{3
     " other purposes anyway (so the cache doesn't introduce too much overhead).
     let starttime = xolox#misc#timer#start()
     for tagsfile in tagfiles()
-      let fname = s:canonicalize(tagsfile)
-      let ftime = getftime(fname)
-      if get(s:known_tagfiles, fname, 0) != ftime
-        let [headers, entries] = xolox#easytags#read_tagsfile(fname)
-        call s:cache_tagged_files_in(fname, ftime, entries)
+      if !filereadable(tagsfile)
+        call xolox#misc#msg#warn("easytags.vim %s: Skipping unreadable tags file %s!", fname)
+      else
+        let fname = s:canonicalize(tagsfile)
+        let ftime = getftime(fname)
+        if get(s:known_tagfiles, fname, 0) != ftime
+          let [headers, entries] = xolox#easytags#read_tagsfile(fname)
+          call s:cache_tagged_files_in(fname, ftime, entries)
+        endif
       endif
     endfor
     call xolox#misc#timer#stop("easytags.vim %s: Initialized cache of tagged files in %s.", g:easytags_version, starttime)
