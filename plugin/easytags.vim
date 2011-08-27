@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 9, 2011
+" Last Change: August 27, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -11,8 +11,6 @@
 if &cp || exists('g:loaded_easytags')
   finish
 endif
-
-let g:easytags_version = '2.4.11'
 
 " Configuration defaults and initialization. {{{1
 
@@ -112,11 +110,11 @@ if !s:InitEasyTags(55)
     else
       let s:msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
     endif
-    echomsg printf(s:msg, g:easytags_version)
+    echomsg printf(s:msg, g:xolox#easytags#version)
   else
     let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags 5.5"
     let s:msg .= " or newer is required while you have version %s installed!"
-    echomsg printf(s:msg, g:easytags_version, g:easytags_ctags_version)
+    echomsg printf(s:msg, g:xolox#easytags#version, g:easytags_ctags_version)
   endif
   unlet s:msg
   finish
