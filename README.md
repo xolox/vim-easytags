@@ -72,9 +72,9 @@ You can enable this option so that the project specific tags files are written i
 
     :let g:easytags_dynamic_files = 1
 
-When you enable this option, the easytags plug-in will use the first filename returned by [tagfiles()] [tagfiles_fun] as the tags file to write. Note that `tagfiles()` is reevaluated every time the plug-in runs.
+When you enable this option, the easytags plug-in will expand the ['tags' option] [tags_opt] and use the first filename (whether the file exists or not). The tags option is reevaluated each time the plug-in runs, so the results can differ depending on the location of the current buffer or working directory.
 
-If you've also enabled `g:easytags_by_filetype` the project specific tags file must exist, even if it's empty; otherwise `g:easytags_by_filetype` will take precedence.
+Note that this option takes precedence over `g:easytags_by_filetype`.
 
 ### The `g:easytags_by_filetype` option
 
@@ -82,9 +82,9 @@ By default all tags are stored in a global tags file. When the tags file grows b
 
 To avoid this problem you can set `g:easytags_by_filetype` to the path of an existing directory. The easytags plug-in will create separate tags files for each file type in the configured directory. These tags files are automatically registered by the easytags plug-in when the file type of a buffer is set.
 
-If you've also enabled `g:easytags_dynamic_files` and the project specific tags file exists, and is writable, it will take precedence. If the project specific tags file doesn't exist you can indicate you want to use project specific tags by creating it.
+Note that the `g:easytags_dynamic_files` option takes precedence over this option.
 
-Note that if you already have a global tags file you can create file type specific tags files from the global tags file using the command `:TagsByFileType`.
+If you already have a global tags file you can create file type specific tags files from the global tags file using the command `:TagsByFileType`.
 
 ### The `g:easytags_always_enabled` option
 
