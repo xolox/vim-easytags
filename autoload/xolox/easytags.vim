@@ -3,7 +3,7 @@
 " Last Change: September 4, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.3'
+let g:xolox#easytags#version = '2.5.4'
 
 " Public interface through (automatic) commands. {{{1
 
