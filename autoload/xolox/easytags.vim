@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 31, 2011
+" Last Change: September 4, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5'
+let g:xolox#easytags#version = '2.5.1'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -243,8 +243,10 @@ function! s:find_tagged_files(entries) " {{{3
   let tagged_files = {}
   for entry in a:entries
     let filename = s:canonicalize(entry[1])
-    if !has_key(tagged_files, filename)
-      let tagged_files[filename] = 1
+    if filename != ''
+      if !has_key(tagged_files, filename)
+        let tagged_files[filename] = 1
+      endif
     endif
   endfor
   return tagged_files
@@ -512,7 +514,10 @@ endfunction
 
 function! s:cache_tagged_files_in(fname, ftime, entries) " {{{3
   for entry in a:entries
-    let s:tagged_files[s:canonicalize(entry[1])] = 1
+    let filename = s:canonicalize(entry[1])
+    if filename != ''
+      let s:tagged_files[filename] = 1
+    endif
   endfor
   let s:known_tagfiles[a:fname] = a:ftime
 endfunction
@@ -607,13 +612,16 @@ function! s:resolve(filename) " {{{2
 endfunction
 
 function! s:canonicalize(filename) " {{{2
-  if has_key(s:cached_filenames, a:filename)
-    return s:cached_filenames[a:filename]
+  if a:filename != ''
+    if has_key(s:cached_filenames, a:filename)
+      return s:cached_filenames[a:filename]
+    endif
+      let canonical = s:resolve(fnamemodify(a:filename, ':p'))
+      let s:cached_filenames[a:filename] = canonical
+      return canonical
+    endif
   endif
-    let canonical = s:resolve(fnamemodify(a:filename, ':p'))
-    let s:cached_filenames[a:filename] = canonical
-    return canonical
-  endif
+  return ''
 endfunction
 
 let s:cached_filenames = {}
