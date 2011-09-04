@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 27, 2011
+" Last Change: September 4, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -141,7 +141,7 @@ augroup PluginEasyTags
   autocmd VimEnter * call xolox#easytags#register(1)
   " Define the automatic commands to perform updating/highlighting.
   for s:eventname in g:easytags_events
-    execute 'autocmd'  s:eventname '* call xolox#easytags#autoload()'
+    execute 'autocmd' s:eventname '* call xolox#easytags#autoload(' string(s:eventname) ')'
   endfor
   " Define an automatic command to register file type specific tags files?
   if !empty(g:easytags_by_filetype)

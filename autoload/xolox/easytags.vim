@@ -3,7 +3,7 @@
 " Last Change: September 4, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.1'
+let g:xolox#easytags#version = '2.5.2'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -34,8 +34,12 @@ function! xolox#easytags#register(global) " {{{2
   endif
 endfunction
 
-function! xolox#easytags#autoload() " {{{2
+function! xolox#easytags#autoload(event) " {{{2
   try
+    " Check for unreasonable &updatetime values.
+    if a:event =~? 'cursorhold' && &updatetime < 4000
+      call xolox#misc#msg#warn("easytags.vim %s: I'm being executed every %i milliseconds! Please set the 'updatetime' option to >= 4000 (4 seconds). To find where 'updatetime' was changed execute ':verbose set updatetime?'", g:xolox#easytags#version, &updatetime)
+    endif
     let do_update = xolox#misc#option#get('easytags_auto_update', 1)
     let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'
     " Don't execute this function for unsupported file types (doesn't load
