@@ -14,6 +14,8 @@
 
 ## Possible bugs
 
+ * Right now easytags is a messy combination of Vim script code and Python scripts. I plan to port the Python code back to Vim script.
+
  * On Microsoft Windows (tested on XP) GVim loses focus while `ctags` is running because Vim opens a command prompt window. Also the CursorHold event seems to fire repeatedly, contradicting my understanding of the automatic command and its behavior on UNIX?! This behavior doesn't occur when I use the integration with my `shell.vim` plug-in.
 
  * I might have found a bug in Vim: The tag `easytags#highlight_cmd` was correctly being highlighted by my plug-in (and was indeed included in my tags file) even though I couldn't jump to it using `Ctrl-]`, which caused:
