@@ -3,7 +3,7 @@
 " Last Change: September 4, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.2'
+let g:xolox#easytags#version = '2.5.3'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -472,7 +472,8 @@ function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
     call extend(lines, a:headers)
     call extend(lines, a:entries)
   endif
-  return writefile(lines, a:tagsfile) == 0
+  let tempname = a:tagsfile . '.easytags.tmp'
+  return writefile(lines, tempname) == 0 && rename(tempname, a:tagsfile) == 0
 endfunction
 
 function! s:join_entry(value)
