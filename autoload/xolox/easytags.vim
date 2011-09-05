@@ -3,7 +3,7 @@
 " Last Change: September 5, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.5'
+let g:xolox#easytags#version = '2.5.6'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -77,20 +77,20 @@ endfunction
 
 function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
   try
-    let s:cached_filenames = {}
+    let context = s:create_context()
     let have_args = !empty(a:filenames)
     let starttime = xolox#misc#timer#start()
     let cfile = s:check_cfile(a:silent, a:filter_tags, have_args)
     let tagsfile = xolox#easytags#get_tagsfile()
     let firstrun = !filereadable(tagsfile)
-    let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:filenames)
+    let cmdline = s:prep_cmdline(cfile, tagsfile, firstrun, a:filenames, context)
     let output = s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline)
     if !firstrun
       if have_args && !empty(g:easytags_by_filetype)
         " TODO Get the headers from somewhere?!
-        call s:save_by_filetype(a:filter_tags, [], output)
+        call s:save_by_filetype(a:filter_tags, [], output, context)
       else
-        let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output)
+        let num_filtered = s:filter_merge_tags(a:filter_tags, tagsfile, output, context)
       endif
       if cfile != ''
         let msg = "easytags.vim %s: Updated tags for %s in %s."
@@ -141,7 +141,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   return cfile
 endfunction
 
-function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
+function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   let program = xolox#misc#option#get('easytags_cmd')
   let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
   if a:firstrun
@@ -175,7 +175,7 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments) " {{{3
       else
         let matches = split(expand(arg), "\n")
         if !empty(matches)
-          call map(matches, 'shellescape(s:canonicalize(v:val))')
+          call map(matches, 'shellescape(s:canonicalize(v:val, a:context))')
           call extend(cmdline, matches)
           let have_args = 1
         endif
@@ -213,13 +213,13 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   return xolox#easytags#parse_entries(lines)
 endfunction
 
-function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
+function! s:filter_merge_tags(filter_tags, tagsfile, output, context) " {{{3
   let [headers, entries] = xolox#easytags#read_tagsfile(a:tagsfile)
   let filters = []
   " Filter old tags that are to be replaced with the tags in {output}.
-  let tagged_files = s:find_tagged_files(a:output)
+  let tagged_files = s:find_tagged_files(a:output, a:context)
   if !empty(tagged_files)
-    call add(filters, '!has_key(tagged_files, s:canonicalize(v:val[1]))')
+    call add(filters, '!has_key(tagged_files, s:canonicalize(v:val[1], a:context))')
   endif
   " Filter tags for non-existing files?
   if a:filter_tags
@@ -238,15 +238,15 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output) " {{{3
     throw printf(msg, fnamemodify(a:tagsfile, ':~'))
   endif
   " We've already read the tags file, might as well cache the tagged files :-)
-  let fname = s:canonicalize(a:tagsfile)
-  call s:cache_tagged_files_in(fname, getftime(fname), entries)
+  let fname = s:canonicalize(a:tagsfile, a:context)
+  call s:cache_tagged_files_in(fname, getftime(fname), entries, a:context)
   return num_filtered
 endfunction
 
-function! s:find_tagged_files(entries) " {{{3
+function! s:find_tagged_files(entries, context) " {{{3
   let tagged_files = {}
   for entry in a:entries
-    let filename = s:canonicalize(entry[1])
+    let filename = s:canonicalize(entry[1], a:context)
     if filename != ''
       if !has_key(tagged_files, filename)
         let tagged_files[filename] = 1
@@ -330,12 +330,12 @@ function! xolox#easytags#by_filetype(undo) " {{{2
     if empty(g:easytags_by_filetype)
       throw "Please set g:easytags_by_filetype before running :TagsByFileType!"
     endif
-    let s:cached_filenames = {}
+    let context = s:create_context()
     let global_tagsfile = expand(g:easytags_file)
     let disabled_tagsfile = global_tagsfile . '.disabled'
     if !a:undo
       let [headers, entries] = xolox#easytags#read_tagsfile(global_tagsfile)
-      call s:save_by_filetype(0, headers, entries)
+      call s:save_by_filetype(0, headers, entries, context)
       call rename(global_tagsfile, disabled_tagsfile)
       let msg = "easytags.vim %s: Finished copying tags from %s to %s! Note that your old tags file has been renamed to %s instead of deleting it, should you want to restore it."
       call xolox#misc#msg#info(msg, g:xolox#easytags#version, g:easytags_file, g:easytags_by_filetype, disabled_tagsfile)
@@ -354,7 +354,7 @@ function! xolox#easytags#by_filetype(undo) " {{{2
   endtry
 endfunction
 
-function! s:save_by_filetype(filter_tags, headers, entries)
+function! s:save_by_filetype(filter_tags, headers, entries, context)
   let filetypes = {}
   for entry in a:entries
     let ctags_ft = matchstr(entry[2], '\tlanguage:\zs\S\+')
@@ -372,7 +372,7 @@ function! s:save_by_filetype(filter_tags, headers, entries)
     if !filereadable(tagsfile)
       call xolox#easytags#write_tagsfile(tagsfile, a:headers, filetypes[vim_ft])
     else
-      call s:filter_merge_tags(a:filter_tags, tagsfile, filetypes[vim_ft])
+      call s:filter_merge_tags(a:filter_tags, tagsfile, filetypes[vim_ft], a:context)
     endif
   endfor
 endfunction
@@ -486,7 +486,7 @@ function! xolox#easytags#file_has_tags(filename) " {{{2
   " caching, but for the intended purpose that's no problem: When editing an
   " existing file which has no tags defined the plug-in will run Exuberant
   " Ctags to update the tags, *unless the file has already been tagged*.
-  call s:cache_tagged_files()
+  call s:cache_tagged_files(s:create_context())
   return has_key(s:tagged_files, s:resolve(a:filename))
 endfunction
 
@@ -495,7 +495,7 @@ if !exists('s:tagged_files')
   let s:known_tagfiles = {}
 endif
 
-function! s:cache_tagged_files() " {{{3
+function! s:cache_tagged_files(context) " {{{3
   if empty(s:tagged_files)
     " Initialize the cache of tagged files on first use. After initialization
     " we'll only update the cache when we're reading a tags file from disk for
@@ -505,11 +505,11 @@ function! s:cache_tagged_files() " {{{3
       if !filereadable(tagsfile)
         call xolox#misc#msg#warn("easytags.vim %s: Skipping unreadable tags file %s!", fname)
       else
-        let fname = s:canonicalize(tagsfile)
+        let fname = s:canonicalize(tagsfile, a:context)
         let ftime = getftime(fname)
         if get(s:known_tagfiles, fname, 0) != ftime
           let [headers, entries] = xolox#easytags#read_tagsfile(fname)
-          call s:cache_tagged_files_in(fname, ftime, entries)
+          call s:cache_tagged_files_in(fname, ftime, entries, a:context)
         endif
       endif
     endfor
@@ -517,9 +517,9 @@ function! s:cache_tagged_files() " {{{3
   endif
 endfunction
 
-function! s:cache_tagged_files_in(fname, ftime, entries) " {{{3
+function! s:cache_tagged_files_in(fname, ftime, entries, context) " {{{3
   for entry in a:entries
-    let filename = s:canonicalize(entry[1])
+    let filename = s:canonicalize(entry[1], a:context)
     if filename != ''
       let s:tagged_files[filename] = 1
     endif
@@ -608,6 +608,10 @@ endfunction
 
 " Miscellaneous script-local functions. {{{1
 
+function! s:create_context() " {{{2
+  return {'cache': {}}
+endfunction
+
 function! s:resolve(filename) " {{{2
   if xolox#misc#option#get('easytags_resolve_links', 0)
     return resolve(a:filename)
@@ -616,20 +620,18 @@ function! s:resolve(filename) " {{{2
   endif
 endfunction
 
-function! s:canonicalize(filename) " {{{2
+function! s:canonicalize(filename, context) " {{{2
   if a:filename != ''
-    if has_key(s:cached_filenames, a:filename)
-      return s:cached_filenames[a:filename]
+    if has_key(a:context.cache, a:filename)
+      return a:context.cache[a:filename]
     else
       let canonical = s:resolve(fnamemodify(a:filename, ':p'))
-      let s:cached_filenames[a:filename] = canonical
+      let a:context.cache[a:filename] = canonical
       return canonical
     endif
   endif
   return ''
 endfunction
-
-let s:cached_filenames = {}
 
 function! s:python_available() " {{{2
   if !exists('s:is_python_available')
