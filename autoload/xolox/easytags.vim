@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 4, 2011
+" Last Change: September 5, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.4'
+let g:xolox#easytags#version = '2.5.5'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -620,7 +620,7 @@ function! s:canonicalize(filename) " {{{2
   if a:filename != ''
     if has_key(s:cached_filenames, a:filename)
       return s:cached_filenames[a:filename]
-    endif
+    else
       let canonical = s:resolve(fnamemodify(a:filename, ':p'))
       let s:cached_filenames[a:filename] = canonical
       return canonical
