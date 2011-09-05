@@ -64,17 +64,16 @@ A leading `~` in the `g:easytags_file` variable is expanded to your current home
 
 ### The `g:easytags_dynamic_files` option
 
-By default `:UpdateTags` only writes to the global tags file. If you use the following setting to enable project specific tags files:
+By default `:UpdateTags` only writes to the global tags file, but it can be configured to look for project specific tags files by adding the following lines to your [vimrc script] [vimrc]:
 
     :set tags=./tags;
-
-You can enable this option so that the project specific tags files are written instead of the global tags file:
-
     :let g:easytags_dynamic_files = 1
 
-When you enable this option, the easytags plug-in will expand the ['tags' option] [tags_opt] and use the first filename (whether the file exists or not). The tags option is reevaluated each time the plug-in runs, so the results can differ depending on the location of the current buffer or working directory.
+You can change the name of the tags file, the important thing is that it's relative to your working directory or the buffer (using a leading `./`). When `g:easytags_dynamic_files` is set to 1 the easytags plug-in will write to the first existing tags file seen by Vim (based on the ['tags' option] [tags_opt]). In other words: If a project specific tags file is found it will be used, otherwise the plug-in falls back to the global tags file (or a file type specific tags file).
 
-Note that this option takes precedence over `g:easytags_by_filetype`.
+If you set `g:easytags_dynamic_files` to 2 the easytags plug-in will automatically create project specific tags based on the first name in the 'tags' option. This disables the global tags file and file type specific tags files.
+
+The ['tags' option] [tags_opt] is reevaluated each time the plug-in runs, so which tags file is selected can differ depending on the buffer and working directory.
 
 ### The `g:easytags_by_filetype` option
 

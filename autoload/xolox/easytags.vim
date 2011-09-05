@@ -3,7 +3,7 @@
 " Last Change: September 5, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.6'
+let g:xolox#easytags#version = '2.5.7'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -530,7 +530,10 @@ endfunction
 function! xolox#easytags#get_tagsfile() " {{{2
   let tagsfile = ''
   " Look for a suitable project specific tags file?
-  if xolox#misc#option#get('easytags_dynamic_files', 0)
+  let dynamic_files = xolox#misc#option#get('easytags_dynamic_files', 0)
+  if dynamic_files == 1
+    let tagsfile = get(tagfiles(), 0, '')
+  elseif dynamic_files == 2
     let tagsfile = xolox#misc#option#eval_tags(&tags, 1)
   endif
   " Check if a file type specific tags file is useful?
