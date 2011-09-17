@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 5, 2011
+" Last Change: September 17, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.5.7'
+let g:xolox#easytags#version = '2.5.8'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -36,9 +36,24 @@ endfunction
 
 function! xolox#easytags#autoload(event) " {{{2
   try
-    " Check for unreasonable &updatetime values.
-    if a:event =~? 'cursorhold' && &updatetime < 4000
-      call xolox#misc#msg#warn("easytags.vim %s: I'm being executed every %i milliseconds! Please set the 'updatetime' option to >= 4000 (4 seconds). To find where 'updatetime' was changed execute ':verbose set updatetime?'", g:xolox#easytags#version, &updatetime)
+    if a:event =~? 'cursorhold'
+      " Only for the CursorHold automatic command: check for unreasonable
+      " &updatetime values. The minimum value 4000 is kind of arbitrary
+      " (apart from being Vim's default) so I made it configurable:
+      let updatetime_min = xolox#misc#option#get('easytags_updatetime_min', 4000)
+      if &updatetime < updatetime_min
+        " Other plug-ins may lower &updatetime in certain contexts, e.g.
+        " insert mode in the case of the neocomplcache plug-in. The following
+        " option (disabled by default unless neocomplcache is loaded) silences
+        " the warning and makes the easytags plug-in skip the update and
+        " highlight. When the &updatetime is restored to a reasonable value
+        " the plug-in resumes.
+        if xolox#misc#option#get('easytags_updatetime_autodisable', exists('g:loaded_neocomplcache'))
+          return
+        else
+          call xolox#misc#msg#warn("easytags.vim %s: I'm being executed every %i milliseconds! Please :set updatetime=%i. To find where 'updatetime' was changed execute ':verb set ut?'", g:xolox#easytags#version, &updatetime, updatetime_min)
+        endif
+      endif
     endif
     let do_update = xolox#misc#option#get('easytags_auto_update', 1)
     let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'

@@ -103,6 +103,14 @@ As I explained above the plug-in by default doesn't update or highlight your tag
 
 Note: Like the `g:easytags_always_enabled` option, if you change this option it won't apply until you restart Vim, so you'll have to set this option in your [vimrc script] [vimrc].
 
+### The `g:easytags_updatetime_min` option
+
+Vim has a setting which influences how often the plug-in is automatically executed. When this setting is too low, the plug-in can break. For this reason the plug-in warns you when ['updatetime'][updatetime] is lower than 4000 milliseconds. If you really want the plug-in to be executed more than once every 4 seconds (without a warning) you can lower the minimum acceptable updatetime by setting this option (number of milliseconds).
+
+### The `g:easytags_updatetime_autodisable` option
+
+Other plug-ins may lower the ['updatetime'][updatetime] value in certain contexts, e.g. insert mode in the case of the [neocomplcache][neocomplcache] plug-in. By setting this option to 1 (true) you can configure the easytags plug-in so that it doesn't give warnings about the updatetime option but instead skip updating and highlighting while the updatetime is set too low. When the updatetime is restored to a reasonable value the plug-in resumes.
+
 ### The `g:easytags_auto_update` option
 
 By default the plug-in automatically updates and highlights your tags when you stop typing for a moment. If you want to disable automatic updating while keeping automatic highlighting enabled you can set this option to false:
@@ -264,6 +272,7 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [hlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
 [messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
+[neocomplcache]: http://www.vim.org/scripts/script.php?script_id=2620
 [shell]: http://peterodding.com/code/vim/shell/
 [slinks]: http://en.wikipedia.org/wiki/Symbolic_link
 [syn_groups]: http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name
@@ -271,6 +280,7 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [tagfiles_fun]: http://vimdoc.sourceforge.net/htmldoc/eval.html#tagfiles%28%29
 [tags_opt]: http://vimdoc.sourceforge.net/htmldoc/options.html#%27tags%27
 [unlet]: http://vimdoc.sourceforge.net/htmldoc/eval.html#:unlet
+[updatetime]: http://vimdoc.sourceforge.net/htmldoc/options.html#'updatetime'
 [vim]: http://www.vim.org/
 [vim_fts]: http://ftp.vim.org/vim/runtime/syntax/
 [vim_online]: http://www.vim.org/scripts/script.php?script_id=3114
