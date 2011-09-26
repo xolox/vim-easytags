@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 4, 2011
+" Last Change: September 26, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -50,15 +50,39 @@ function! s:InitEasyTags(version)
   if exists('g:easytags_cmd') && s:CheckCtags(g:easytags_cmd, a:version)
     return 1
   endif
-  " On Ubuntu Linux, Exuberant Ctags is installed as `ctags'. On Debian Linux,
-  " Exuberant Ctags is installed as `exuberant-ctags'. On Free-BSD, Exuberant
-  " Ctags is installed as `exctags'.
-  for name in ['ctags', 'exuberant-ctags', 'exctags']
-    if s:CheckCtags(name, a:version)
-      let g:easytags_cmd = name
+  if xolox#misc#os#is_win()
+    " FIXME The code below that searches the $PATH is not used on Windows at
+    " the moment because xolox#misc#path#which() generally produces absolute
+    " paths and on Windows these absolute paths tend to contain spaces which
+    " makes xolox#shell#execute() fail. I've tried quoting the program name
+    " with double quotes but it fails just the same (it works with system()
+    " though). Anyway the problem of having multiple conflicting versions of
+    " Exuberant Ctags installed is not that relevant to Windows since it
+    " doesn't have a package management system. I still want to fix
+    " xolox#shell#execute() though.
+    if s:CheckCtags('ctags', a:version)
+      let g:easytags_cmd = 'ctags'
       return 1
     endif
-  endfor
+  else
+    " Exuberant Ctags can be installed under multiple names:
+    "  - On Ubuntu Linux, Exuberant Ctags is installed as `ctags'.
+    "  - On Debian Linux, Exuberant Ctags is installed as `exuberant-ctags'.
+    "  - On Free-BSD, Exuberant Ctags is installed as `exctags'.
+    " IIUC on Mac OS X the program /usr/bin/ctags is installed by default but
+    " unusable and when the user installs Exuberant Ctags in an alternative
+    " location, it doesn't come before /usr/bin/ctags in the search path. To
+    " solve this problem in a general way and to save every Mac user out there
+    " some frustration the plug-in will search the path and consider every
+    " possible location, meaning that as long as Exuberant Ctags is installed
+    " in the $PATH the plug-in should find it automatically.
+    for program in xolox#misc#path#which('ctags', 'exuberant-ctags', 'exctags')
+      if s:CheckCtags(program, a:version)
+        let g:easytags_cmd = program
+        return 1
+      endif
+    endfor
+  endif
 endfunction
 
 function! s:CheckCtags(name, version)
