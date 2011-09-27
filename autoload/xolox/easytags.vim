@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 26, 2011
+" Last Change: September 27, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.6'
+let g:xolox#easytags#version = '2.6.1'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -518,7 +518,7 @@ function! s:cache_tagged_files(context) " {{{3
     let starttime = xolox#misc#timer#start()
     for tagsfile in tagfiles()
       if !filereadable(tagsfile)
-        call xolox#misc#msg#warn("easytags.vim %s: Skipping unreadable tags file %s!", fname)
+        call xolox#misc#msg#warn("easytags.vim %s: Skipping unreadable tags file %s!", g:xolox#easytags#version, tagsfile)
       else
         let fname = s:canonicalize(tagsfile, a:context)
         let ftime = getftime(fname)
