@@ -884,6 +884,33 @@ highlight def link rubyModuleName Type
 highlight def link rubyClassName Type
 highlight def link rubyMethodName Function
 
+" Awk. {{{2
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'awk',
+      \ 'hlgroup': 'awkFunctionTag',
+      \ 'tagkinds': '[f]'})
+
+highlight def link awkFunctionTag Function
+
+" Shell. {{{2
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'sh',
+      \ 'hlgroup': 'shFunctionTag',
+      \ 'tagkinds': '[f]'})
+
+highlight def link shFunctionTag Operator
+
+" Tcl. {{{2
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'tcl',
+      \ 'hlgroup': 'tclCommandTag',
+      \ 'tagkinds': '[p]'})
+
+highlight def link tclCommandTag Operator
+
 " }}}
 
 " Restore "cpoptions".
