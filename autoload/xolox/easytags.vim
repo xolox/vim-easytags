@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 27, 2011
+" Last Change: October 1, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.6.1'
+let g:xolox#easytags#version = '2.7'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -889,7 +889,7 @@ highlight def link rubyMethodName Function
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'awk',
       \ 'hlgroup': 'awkFunctionTag',
-      \ 'tagkinds': '[f]'})
+      \ 'tagkinds': 'f'})
 
 highlight def link awkFunctionTag Function
 
@@ -898,7 +898,7 @@ highlight def link awkFunctionTag Function
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'sh',
       \ 'hlgroup': 'shFunctionTag',
-      \ 'tagkinds': '[f]'})
+      \ 'tagkinds': 'f'})
 
 highlight def link shFunctionTag Operator
 
@@ -907,7 +907,7 @@ highlight def link shFunctionTag Operator
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'tcl',
       \ 'hlgroup': 'tclCommandTag',
-      \ 'tagkinds': '[p]'})
+      \ 'tagkinds': 'p'})
 
 highlight def link tclCommandTag Operator
 

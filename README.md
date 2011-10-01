@@ -10,7 +10,7 @@ There's just one problem: You have to manually keep your tags files up-to-date a
 
 Unzip the most recent [ZIP archive] [download] file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit any file type supported by Exuberant Ctags and within ten seconds the plug-in should create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the file you just edited! This means that whatever file you're editing in Vim (as long as it's on the local file system), tags will always be available by the time you need them!
 
-Additionally if the file you just opened is a C, C++, Objective-C, Java, Lua, Python, PHP, Ruby or Vim source file you should also notice that the function and type names defined in the file have been syntax highlighted.
+Additionally if the file you just opened is an AWK, C#, C, C++, Objective-C, Java, Lua, PHP, Python, Ruby, Shell, Tcl or Vim source file you should also notice that the function and type names defined in the file have been syntax highlighted.
 
 The `easytags.vim` plug-in is intended to work automatically once it's installed, but if you want to change how it works there are several options you can change and commands you can execute from your own mappings and/or automatic commands. These are all documented below.
 
@@ -175,14 +175,17 @@ This option defines the pathname of the script that contains the Python implemen
 
 The easytags plug-in defines new highlighting groups for dynamically highlighted tags. These groups are linked to Vim's default groups so that they're colored out of the box, but if you want you can change the styles. To do so use a `highlight` command such as the ones given a few paragraphs back. Of course you'll need to change the group name. Here are the group names used by the easytags plug-in:
 
- * **Lua:** `luaFuncTag`
- * **C:** `cTypeTag`, `cEnumTag`, `cPreProcTag`, `cFunctionTag`, `cMemberTag`
- * **PHP:** `phpFunctionsTag`, `phpClassesTag`
- * **Vim:** `vimAutoGroupTag`, `vimCommandTag`, `vimFuncNameTag`, `vimScriptFuncNameTag`
- * **Python:** `pythonFunctionTag`, `pythonMethodTag`, `pythonClassTag`
- * **Java:** `javaClassTag`, `javaMethodTag`
+ * **AWK**: `awkFunctionTag`
  * **C#:** `csClassOrStructTag`, `csMethodTag`
+ * **C, C++, Objective C:** `cTypeTag`, `cEnumTag`, `cPreProcTag`, `cFunctionTag`, `cMemberTag`
+ * **Java:** `javaClassTag`, `javaMethodTag`
+ * **Lua:** `luaFuncTag`
+ * **PHP:** `phpFunctionsTag`, `phpClassesTag`
+ * **Python:** `pythonFunctionTag`, `pythonMethodTag`, `pythonClassTag`
  * **Ruby:** `rubyModuleNameTag`, `rubyClassNameTag`, `rubyMethodNameTag`
+ * **Shell**: `shFunctionTag`
+ * **Tcl**: `tclCommandTag`
+ * **Vim:** `vimAutoGroupTag`, `vimCommandTag`, `vimFuncNameTag`, `vimScriptFuncNameTag`
 
 As you can see each of these names ends in `Tag` to avoid conflicts with the syntax modes shipped with Vim. And about the singular/plural confusion: I've tried to match the existing highlighting groups defined by popular syntax modes (except of course for the `Tag` suffix).
 
