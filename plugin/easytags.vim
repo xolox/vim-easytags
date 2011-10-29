@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 26, 2011
+" Last Change: October 29, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -38,6 +38,10 @@ endif
 
 if !exists('g:easytags_ignored_filetypes')
   let g:easytags_ignored_filetypes = '^tex$'
+endif
+
+if !exists('g:easytags_ignored_syntax_groups')
+  let g:easytags_ignored_syntax_groups = '.*String.*,.*Comment.*,cIncluded'
 endif
 
 if !exists('g:easytags_python_script')

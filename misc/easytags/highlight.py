@@ -5,7 +5,7 @@ syntax highlighting by reimplementing tag file reading and :syntax command
 generation in Python with a focus on doing the least amount of work.
 
 Author: Peter Odding <peter@peterodding.com>
-Last Change: June 14, 2011
+Last Change: October 29, 2011
 URL: http://peterodding.com/code/vim/easytags
 '''
 
@@ -18,7 +18,7 @@ import sys
 def easytags_ping():
     print 'it works!'
 
-def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffix, filters):
+def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffix, filters, ignoresyntax):
     # Get arguments from Vim.
     if filters:
         tagkinds = filters['kind']
@@ -43,13 +43,13 @@ def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffi
         patterns.append(escaped)
         counter += len(escaped)
         if counter > limit:
-            commands.append(_easytags_makecmd(syntaxgroup, prefix, suffix, patterns))
+            commands.append(_easytags_makecmd(syntaxgroup, prefix, suffix, patterns, ignoresyntax))
             patterns = []
             counter = 0
     if patterns:
-        commands.append(_easytags_makecmd(syntaxgroup, prefix, suffix, patterns))
+        commands.append(_easytags_makecmd(syntaxgroup, prefix, suffix, patterns, ignoresyntax))
     return ' | '.join(commands)
 
-def _easytags_makecmd(syntaxgroup, prefix, suffix, patterns):
-    template = r'syntax match %s /%s\%%(%s\)%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
-    return template % (syntaxgroup, prefix, r'\|'.join(patterns), suffix)
+def _easytags_makecmd(syntaxgroup, prefix, suffix, patterns, ignoresyntax):
+    template = r'syntax match %s /%s\%%(%s\)%s/ containedin=ALLBUT,%s'
+    return template % (syntaxgroup, prefix, r'\|'.join(patterns), suffix, ignoresyntax)

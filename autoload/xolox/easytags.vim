@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 1, 2011
+" Last Change: October 29, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7'
+let g:xolox#easytags#version = '2.7.1'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -315,8 +315,9 @@ function! xolox#easytags#highlight() " {{{2
             " Convert matched tags to :syntax command and execute it.
             call map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))')
             let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#misc#list#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
-            let template = 'syntax match %s /%s/ containedin=ALLBUT,.*String.*,.*Comment.*,cIncluded'
-            let command = printf(template, hlgroup_tagged, escape(pattern, '/'))
+            let template = 'syntax match %s /%s/ containedin=ALLBUT,%s'
+            let command = printf(template, hlgroup_tagged, escape(pattern, '/'), xolox#misc#option#get('easytags_ignored_syntax_groups'))
+            call xolox#misc#msg#debug("easytags.vim %s: Executing command '%s'.", g:xolox#easytags#version, command)
             try
               execute command
             catch /^Vim\%((\a\+)\)\=:E339/
@@ -677,6 +678,7 @@ function! s:highlight_with_python(syntax_group, tagkind) " {{{2
     let context['prefix'] = get(a:tagkind, 'pattern_prefix', '')
     let context['suffix'] = get(a:tagkind, 'pattern_suffix', '')
     let context['filters'] = get(a:tagkind, 'python_filter', {})
+    let context['ignoresyntax'] = xolox#misc#option#get('easytags_ignored_syntax_groups')
     " Call the Python function and intercept the output.
     try
       redir => commands

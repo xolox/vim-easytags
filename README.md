@@ -159,6 +159,10 @@ If this is set and not false, it will suppress the warning on startup if ctags i
 
     :let g:easytags_suppress_ctags_warning = 1
 
+### The `g:easytags_ignored_syntax_groups` option
+
+This variable is a string of comma separated names of syntax groups in which dynamic highlighting is not applied. It defaults to `.*String.*,.*Comment.*,cIncluded`.
+
 ## Faster syntax highlighting using Python
 
 The Vim script implementation of dynamic syntax highlighting is quite slow on large tags files. When the Python Interface to Vim is enabled the easytags plug-in will therefor automatically use a Python script that performs dynamic syntax highlighting about twice as fast as the Vim script implementation. The following options are available to change the default configuration.

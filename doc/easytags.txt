@@ -321,6 +321,12 @@ is not found or not recent enough.
 >
     :let g:easytags_suppress_ctags_warning = 1
 
+-------------------------------------------------------------------------------
+The *g:easytags_ignored_syntax_groups* option
+
+This variable is a string of comma separated names of syntax groups in which
+dynamic highlighting is not applied. It defaults to '.*String.*,.*Comment.*,cIncluded'.
+
 ===============================================================================
                               *easytags-faster-syntax-highlighting-using-python*
 Faster syntax highlighting using Python ~
