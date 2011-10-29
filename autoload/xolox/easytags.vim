@@ -3,7 +3,7 @@
 " Last Change: October 29, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7.1'
+let g:xolox#easytags#version = '2.7.2'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -900,7 +900,8 @@ highlight def link awkFunctionTag Function
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'sh',
       \ 'hlgroup': 'shFunctionTag',
-      \ 'tagkinds': 'f'})
+      \ 'tagkinds': 'f',
+      \ 'pattern_suffix': '\(\s*()\)\@!'})
 
 highlight def link shFunctionTag Operator
 
