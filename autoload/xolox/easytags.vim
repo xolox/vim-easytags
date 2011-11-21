@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 29, 2011
+" Last Change: November 21, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7.2'
+let g:xolox#easytags#version = '2.7.3'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -160,7 +160,7 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   let program = xolox#misc#option#get('easytags_cmd')
   let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
   if a:firstrun
-    call add(cmdline, shellescape('-f' . a:tagsfile))
+    call add(cmdline, xolox#misc#escape#shell('-f' . a:tagsfile))
     call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
   else
     call add(cmdline, '--sort=no')
@@ -173,13 +173,13 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   if a:cfile != ''
     if xolox#misc#option#get('easytags_autorecurse', 0)
       call add(cmdline, '-R')
-      call add(cmdline, shellescape(a:cfile))
+      call add(cmdline, xolox#misc#escape#shell(a:cfile))
     else
       " TODO Should --language-force distinguish between C and C++?
       " TODO --language-force doesn't make sense for JavaScript tags in HTML files?
       let filetype = xolox#easytags#to_ctags_ft(&filetype)
-      call add(cmdline, shellescape('--language-force=' . filetype))
-      call add(cmdline, shellescape(a:cfile))
+      call add(cmdline, xolox#misc#escape#shell('--language-force=' . filetype))
+      call add(cmdline, xolox#misc#escape#shell(a:cfile))
     endif
     let have_args = 1
   else
@@ -190,7 +190,7 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
       else
         let matches = split(expand(arg), "\n")
         if !empty(matches)
-          call map(matches, 'shellescape(s:canonicalize(v:val, a:context))')
+          call map(matches, 'xolox#misc#escape#shell(s:canonicalize(v:val, a:context))')
           call extend(cmdline, matches)
           let have_args = 1
         endif
