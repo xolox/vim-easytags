@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 21, 2011
+" Last Change: November 26, 2011
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7.3'
+let g:xolox#easytags#version = '2.7.4'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -372,9 +372,17 @@ endfunction
 
 function! s:save_by_filetype(filter_tags, headers, entries, context)
   let filetypes = {}
+  let num_invalid = 0
   for entry in a:entries
-    let ctags_ft = matchstr(entry[2], '\tlanguage:\zs\S\+')
-    if !empty(ctags_ft)
+    let ctags_ft = matchstr(entry[4], '^language:\zs\S\+$')
+    if empty(ctags_ft)
+      " TODO This triggers on entries where the pattern contains tabs. The interesting thing is that Vim reads these entries fine... Fix it in xolox#easytags#read_tagsfile()?
+      let num_invalid += 1
+      if &vbs >= 1
+        call xolox#misc#msg#debug("easytags.vim %s: Skipping tag without 'language:' field: %s",
+              \ g:xolox#easytags#version, string(entry))
+      endif
+    else
       let vim_ft = xolox#easytags#to_vim_ft(ctags_ft)
       if !has_key(filetypes, vim_ft)
         let filetypes[vim_ft] = []
@@ -382,10 +390,17 @@ function! s:save_by_filetype(filter_tags, headers, entries, context)
       call add(filetypes[vim_ft], entry)
     endif
   endfor
+  if num_invalid > 0
+    call xolox#misc#msg#warn("easytags.vim %s: Skipped %i lines without 'language:' tag!", g:xolox#easytags#version, num_invalid)
+  endif
   let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
   for vim_ft in keys(filetypes)
     let tagsfile = xolox#misc#path#merge(directory, vim_ft)
-    if !filereadable(tagsfile)
+    let existing = filereadable(tagsfile)
+    call xolox#misc#msg#debug("easytags.vim %s: Writing %s tags to %s tags file %s.",
+          \ g:xolox#easytags#version, len(filetypes[vim_ft]),
+          \ existing ? "existing" : "new", tagsfile)
+    if !existing
       call xolox#easytags#write_tagsfile(tagsfile, a:headers, filetypes[vim_ft])
     else
       call s:filter_merge_tags(a:filter_tags, tagsfile, filetypes[vim_ft], a:context)
