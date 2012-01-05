@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 26, 2011
+" Last Change: January 6, 2012
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7.5'
+let g:xolox#easytags#version = '2.7.6'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -272,6 +272,7 @@ function! s:find_tagged_files(entries, context) " {{{3
 endfunction
 
 function! xolox#easytags#highlight() " {{{2
+  " TODO This is a mess; Re-implement Python version in Vim script, benchmark, remove Python version.
   try
     " Treat C++ and Objective-C as plain C.
     let filetype = get(s:canonical_aliases, &ft, &ft)
@@ -313,8 +314,8 @@ function! xolox#easytags#highlight() " {{{2
           let matches = filter(copy(taglist), filter)
           if matches != []
             " Convert matched tags to :syntax command and execute it.
-            call map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))')
-            let pattern = tagkind.pattern_prefix . '\%(' . join(xolox#misc#list#unique(matches), '\|') . '\)' . tagkind.pattern_suffix
+            let matches = map(xolox#misc#list#unique(matches), 'xolox#misc#escape#pattern(get(v:val, "name"))')
+            let pattern = tagkind.pattern_prefix . '\%(' . join(matches, '\|') . '\)' . tagkind.pattern_suffix
             let template = 'syntax match %s /%s/ containedin=ALLBUT,%s'
             let command = printf(template, hlgroup_tagged, escape(pattern, '/'), xolox#misc#option#get('easytags_ignored_syntax_groups'))
             call xolox#misc#msg#debug("easytags.vim %s: Executing command '%s'.", g:xolox#easytags#version, command)
