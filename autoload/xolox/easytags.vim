@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: January 6, 2012
+" Last Change: January 15, 2012
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.7.6'
+let g:xolox#easytags#version = '2.8'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -489,7 +489,7 @@ function! xolox#easytags#write_tagsfile(tagsfile, headers, entries) " {{{2
   if sort_order == 1
     call sort(a:entries)
   else
-    call sort(a:entries, 1)
+    call sort(a:entries, function('s:foldcase_compare'))
   endif
   let lines = []
   if xolox#misc#os#is_win()
@@ -510,6 +510,12 @@ endfunction
 
 function! s:join_entry(value)
   return type(a:value) == type([]) ? join(a:value, "\t") : a:value
+endfunction
+
+function! s:foldcase_compare(a, b)
+  let a = toupper(a:a)
+  let b = toupper(a:b)
+  return a == b ? 0 : a ># b ? 1 : -1
 endfunction
 
 function! xolox#easytags#file_has_tags(filename) " {{{2
