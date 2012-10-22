@@ -120,7 +120,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     endif
     " When :UpdateTags was executed manually we'll refresh the dynamic
     " syntax highlighting so that new tags are immediately visible.
-    if !a:silent
+    if !a:silent && xolox#misc#option#get('easytags_auto_highlight', 1)
       HighlightTags
     endif
     return 1
