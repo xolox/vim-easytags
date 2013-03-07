@@ -157,28 +157,47 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
 endfunction
 
 function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
-  let program = xolox#misc#option#get('easytags_cmd')
-  let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
-  if a:firstrun
-    call add(cmdline, xolox#misc#escape#shell('-f' . a:tagsfile))
-    call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
+  let languages = xolox#misc#option#get('easytags_languages', {})
+  let ctags_language_name = xolox#easytags#to_ctags_ft(&filetype)
+  let language = get(languages, ctags_language_name, {})
+  if empty(language)
+    let program = xolox#misc#option#get('easytags_cmd')
+    let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
+    if a:firstrun
+      call add(cmdline, xolox#misc#escape#shell('-f' . a:tagsfile))
+      call add(cmdline, '--sort=' . (&ic ? 'foldcase' : 'yes'))
+    else
+      call add(cmdline, '--sort=no')
+      call add(cmdline, '-f-')
+    endif
+    if xolox#misc#option#get('easytags_include_members', 0)
+      call add(cmdline, '--extra=+q')
+    endif
   else
-    call add(cmdline, '--sort=no')
-    call add(cmdline, '-f-')
-  endif
-  if xolox#misc#option#get('easytags_include_members', 0)
-    call add(cmdline, '--extra=+q')
+    let program = get(language, 'cmd', xolox#misc#option#get('easytags_cmd'))
+    if empty(program)
+      call xolox#misc#msg#warn("easytags.vim %s: No 'cmd' defined for language '%s', and also no global default!", g:xolox#easytags#version, ctags_language_name)
+      return
+    endif
+    let cmdline = [program] + get(language, 'args', [])
+    if a:firstrun
+      call add(cmdline, xolox#misc#escape#shell(get(language, 'fileoutput_opt', '-f') . a:tagsfile))
+    else
+      call add(cmdline, xolox#misc#escape#shell(get(language, 'stdout_opt', '-f-')))
+    endif
   endif
   let have_args = 0
   if a:cfile != ''
     if xolox#misc#option#get('easytags_autorecurse', 0)
-      call add(cmdline, '-R')
+      call add(cmdline, empty(language) ? '-R' : xolox#misc#escape#shell(get(language, 'recurse_flag', '-R')))
       call add(cmdline, xolox#misc#escape#shell(a:cfile))
     else
-      " TODO Should --language-force distinguish between C and C++?
-      " TODO --language-force doesn't make sense for JavaScript tags in HTML files?
-      let filetype = xolox#easytags#to_ctags_ft(&filetype)
-      call add(cmdline, xolox#misc#escape#shell('--language-force=' . filetype))
+      if empty(language)
+        " TODO Should --language-force distinguish between C and C++?
+        " TODO --language-force doesn't make sense for JavaScript tags in HTML files?
+        let filetype = xolox#easytags#to_ctags_ft(&filetype)
+        call add(cmdline, xolox#misc#escape#shell('--language-force=' . filetype))
+      endif
       call add(cmdline, xolox#misc#escape#shell(a:cfile))
     endif
     let have_args = 1
@@ -414,18 +433,21 @@ endfunction
 function! xolox#easytags#supported_filetypes() " {{{2
   if !exists('s:supported_filetypes')
     let starttime = xolox#misc#timer#start()
-    let command = g:easytags_cmd . ' --list-languages'
-    try
-      let listing = xolox#shell#execute(command, 1)
-    catch /^Vim\%((\a\+)\)\=:E117/
-      " Ignore missing shell.vim plug-in.
-      let listing = split(system(command), "\n")
-      if v:shell_error
-        let msg = "Failed to get supported languages! (output: %s)"
-        throw printf(msg, strtrans(join(listing, "\n")))
-      endif
-    endtry
-    let s:supported_filetypes = map(copy(listing), 's:check_filetype(listing, v:val)')
+    let listing = []
+    if !empty(g:easytags_cmd)
+      let command = g:easytags_cmd . ' --list-languages'
+      try
+        let listing = xolox#shell#execute(command, 1)
+      catch /^Vim\%((\a\+)\)\=:E117/
+        " Ignore missing shell.vim plug-in.
+        let listing = split(system(command), "\n")
+        if v:shell_error
+          let msg = "Failed to get supported languages! (output: %s)"
+          throw printf(msg, strtrans(join(listing, "\n")))
+        endif
+      endtry
+    endif
+    let s:supported_filetypes = map(copy(listing) + keys(xolox#misc#option#get('easytags_languages', {})), 's:check_filetype(listing, v:val)')
     let msg = "easytags.vim %s: Retrieved %i supported languages in %s."
     call xolox#misc#timer#stop(msg, g:xolox#easytags#version, len(s:supported_filetypes), starttime)
   endif

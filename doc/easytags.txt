@@ -125,6 +125,33 @@ where you've installed Exuberant Ctags, e.g.:
 >
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
+If you entirely rely on language-specific configuration and don't have a
+general ctags program, set this to the empty string.
+
+-------------------------------------------------------------------------------
+The *g:easytags_languages* option
+
+The Exuberant Ctags tools supports many languages and can be extended via
+regexp patterns, but for some languages, separate tools with ctags-compatible
+output exist (e.g. jsctags for Javascript). To use these, the executable and
+its arguments must be configured. >
+
+    let g:easytags_languages = {
+    \   'language': {
+    \       'cmd': g:easytags_cmd,
+    \	    'args': [],
+    \	    'fileoutput_opt': '-f',
+    \	    'stdout_opt': '-f-',
+    \	    'recurse_flag': '-R'
+    \   }
+    \}
+
+Each key is a special language definition. The key is in the notation of
+ctags in lowercase; you still need to use xolox#easytags#map_filetypes() to
+map this to Vim's filetypes, if necessary.
+Above snippets shows the defaults; you only need to specify options that
+differ.
+
 -------------------------------------------------------------------------------
 The *g:easytags_file* option
 
