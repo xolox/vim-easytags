@@ -222,6 +222,11 @@ endif
 
 let s:fingerprints = {}
 function! s:has_updates(cfile, output)
+  if empty(a:cfile)
+    " The cache doesn't work when tags aren't created for the current file.
+    return 1
+  endif
+
   let fingerprint = s:get_fingerprint(a:cfile, a:output)
   if ! empty(fingerprint) && get(s:fingerprints, a:cfile, '') ==# fingerprint
     return 0
