@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: January 15, 2012
+" Last Change: April 18, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.8.1'
+let g:xolox#easytags#version = '2.8.2'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -923,7 +923,7 @@ call xolox#easytags#define_tagkind({
       \ 'filetype': 'sh',
       \ 'hlgroup': 'shFunctionTag',
       \ 'tagkinds': 'f',
-      \ 'pattern_suffix': '\(\s*()\)\@!'})
+      \ 'pattern_suffix': '\(\w\|\s*()\)\@!'})
 
 highlight def link shFunctionTag Operator
 

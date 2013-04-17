@@ -1,5 +1,49 @@
 *easytags.txt*  Automated tag generation and syntax highlighting in Vim
 
+===============================================================================
+                                                             *easytags-contents*
+Contents ~
+
+ 1. Introduction                                         |easytags-introduction|
+ 2. Installation                                         |easytags-installation|
+  1. A note about Windows                        |easytags-a-note-about-windows|
+ 3. Commands                                                 |easytags-commands|
+  1. The |:UpdateTags| command
+  2. The |:HighlightTags| command
+ 4. Options                                                   |easytags-options|
+  1. The |g:easytags_cmd| option
+  2. The |g:easytags_file| option
+  3. The |g:easytags_dynamic_files| option
+  4. The |g:easytags_by_filetype| option
+  5. The |g:easytags_always_enabled| option
+  6. The |g:easytags_on_cursorhold| option
+  7. The |g:easytags_updatetime_min| option
+  8. The |g:easytags_updatetime_autodisable| option
+  9. The |g:easytags_auto_update| option
+  10. The |g:easytags_auto_highlight| option
+  11. The |g:easytags_autorecurse| option
+  12. The |g:easytags_include_members| option
+  13. The |g:easytags_resolve_links| option
+  14. The |g:easytags_suppress_ctags_warning| option
+  15. The |g:easytags_ignored_syntax_groups| option
+ 5. Faster syntax highlighting using Python |easytags-faster-syntax-highlighting-using-python|
+  1. The |g:easytags_python_enabled| option
+  2. The |g:easytags_python_script| option
+ 6. How to customize the highlighting colors?
+ 7. Passing custom command line arguments to Exuberant Ctags
+ 8. Troubleshooting                                   |easytags-troubleshooting|
+  1. |:HighlightTags| only works for the tags file created by |:UpdateTags|
+  2. The plug-in complains that Exuberant Ctags isn't installed
+  3. Vim locks up while the plug-in is running
+  4. Failed to highlight tags because pattern is too big!
+  5. The plug-in doesn't seem to work in Cygwin
+ 9. Contact                                                   |easytags-contact|
+ 10. License                                                  |easytags-license|
+
+===============================================================================
+                                                         *easytags-introduction*
+Introduction ~
+
 Vim has long been my favorite text editor and combined with Exuberant Ctags
 [1] it has the potential to provide most of what I expect from an integrated
 development environment [2]. Exuberant Ctags is the latest incarnation of a
