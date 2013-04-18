@@ -54,6 +54,26 @@ The plug-in will try to determine the location where Exuberant Ctags is installe
 
     :let g:easytags_cmd = '/usr/local/bin/ctags'
 
+If you rely entirely on language-specific configuration and don't have a general ctags program, set this to the empty string.
+
+### The `g:easytags_languages` option
+
+Exuberant Ctags supports many languages and can be extended via regular expression patterns, but for some languages separate tools with ctags-compatible output exist (e.g. [jsctags] [jsctags] for Javascript). To use these, the executable and its arguments must be configured:
+
+    let g:easytags_languages = {
+    \   'language': {
+    \     'cmd': g:easytags_cmd,
+    \	    'args': [],
+    \	    'fileoutput_opt': '-f',
+    \	    'stdout_opt': '-f-',
+    \	    'recurse_flag': '-R'
+    \   }
+    \}
+
+Each key is a special language definition. The key is in the notation of ctags in lowercase; you still need to use `xolox#easytags#map_filetypes()` to map this to Vim's filetypes, if necessary.
+
+Above snippets shows the defaults; you only need to specify options that differ.
+
 ### The `g:easytags_file` option
 
 As mentioned above the plug-in will store your tags in `~/.vimtags` on UNIX and `~/_vimtags` on Windows. To change the location of this file, set the global variable `g:easytags_file`, e.g.:
@@ -278,6 +298,7 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [exctags]: http://ctags.sourceforge.net/
 [hlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
+[jsctags]: https://npmjs.org/package/jsctags
 [messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
 [neocomplcache]: http://www.vim.org/scripts/script.php?script_id=2620
 [shell]: http://peterodding.com/code/vim/shell/
