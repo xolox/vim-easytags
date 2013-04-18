@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 18, 2013
+" Last Change: April 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '2.8.2'
+let g:xolox#easytags#version = '2.9'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -204,38 +204,6 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   return have_args ? join(cmdline) : ''
 endfunction
 
-if exists('*sha256')
-function! s:get_fingerprint(cfile, output)
-  return sha256(a:output)
-endfunction
-else
-function! s:get_fingerprint(cfile, output)
-  " Don't want to re-implement a costly hashing function in Vimscript. Just
-  " handle files that never had any tags.
-  if empty(a:output)
-    return get(s:fingerprints, a:cfile, 1)
-  else
-    return ''
-  endif
-endfunction
-endif
-
-let s:fingerprints = {}
-function! s:has_updates(cfile, output)
-  if empty(a:cfile)
-    " The cache doesn't work when tags aren't created for the current file.
-    return 1
-  endif
-
-  let fingerprint = s:get_fingerprint(a:cfile, a:output)
-  if ! empty(fingerprint) && get(s:fingerprints, a:cfile, '') ==# fingerprint
-    return 0
-  endif
-
-  let s:fingerprints[a:cfile] = fingerprint
-  return 1
-endfunction
-
 function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   let lines = []
   let has_updates = 1
@@ -265,6 +233,44 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   endif
   return [xolox#easytags#parse_entries(lines), has_updates]
 endfunction
+
+" Vim 7.3 now has the sha256() function. We use it below to recognize when the
+" tags haven't changed from the last time we ran Exuberant Ctags on a file; in
+" this case the tags file doesn't have to be written to disk which makes the
+" plug-in much faster for a very common case.
+
+let s:fingerprints = {}
+
+function! s:has_updates(cfile, output)
+  if empty(a:cfile)
+    " The cache doesn't work when tags aren't created for the current file.
+    return 1
+  endif
+  let fingerprint = s:get_fingerprint(a:cfile, a:output)
+  call xolox#misc#msg#debug("easytags.vim %s: Fingerprint of tags in %s is %s.", g:xolox#easytags#version, a:cfile, string(fingerprint))
+  if !empty(fingerprint) && get(s:fingerprints, a:cfile, '') ==# fingerprint
+    call xolox#misc#msg#debug("easytags.vim %s: The fingerprint didn't change! We can take a shortcut :-)", g:xolox#easytags#version)
+    return 0
+  endif
+  let s:fingerprints[a:cfile] = fingerprint
+  return 1
+endfunction
+
+if exists('*sha256')
+  function! s:get_fingerprint(cfile, output)
+    return sha256(a:output)
+  endfunction
+else
+  function! s:get_fingerprint(cfile, output)
+    " Don't want to re-implement a costly hashing function in Vimscript. Just
+    " handle files that never had any tags.
+    if empty(a:output)
+      return get(s:fingerprints, a:cfile, 1)
+    else
+      return ''
+    endif
+  endfunction
+endif
 
 function! s:filter_merge_tags(filter_tags, tagsfile, output, context) " {{{3
   let [headers, entries] = xolox#easytags#read_tagsfile(a:tagsfile)
