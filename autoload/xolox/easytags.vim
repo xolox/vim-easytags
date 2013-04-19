@@ -3,7 +3,7 @@
 " Last Change: April 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1'
+let g:xolox#easytags#version = '3.1.1'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -33,7 +33,7 @@ function! xolox#easytags#register(global) " {{{2
     endif
   endif
 endfunction
- 
+
 " The localtime() when the CursorHold event last fired.
 let s:last_automatic_run = 0
 

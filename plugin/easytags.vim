@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 29, 2011
+" Last Change: April 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -70,7 +70,8 @@ function! s:InitEasyTags(version)
     endif
   else
     " Exuberant Ctags can be installed under multiple names:
-    "  - On Ubuntu Linux, Exuberant Ctags is installed as `ctags'.
+    "  - On Ubuntu Linux, Exuberant Ctags is installed as `ctags-exuberant'
+    "    (and possibly `ctags' but that one can't be trusted :-)
     "  - On Debian Linux, Exuberant Ctags is installed as `exuberant-ctags'.
     "  - On Free-BSD, Exuberant Ctags is installed as `exctags'.
     " IIUC on Mac OS X the program /usr/bin/ctags is installed by default but
@@ -80,7 +81,7 @@ function! s:InitEasyTags(version)
     " some frustration the plug-in will search the path and consider every
     " possible location, meaning that as long as Exuberant Ctags is installed
     " in the $PATH the plug-in should find it automatically.
-    for program in xolox#misc#path#which('ctags', 'exuberant-ctags', 'exctags')
+    for program in xolox#misc#path#which('exuberant-ctags', 'ctags-exuberant', 'ctags', 'exctags')
       if s:CheckCtags(program, a:version)
         let g:easytags_cmd = program
         return 1
