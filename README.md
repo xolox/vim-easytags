@@ -125,11 +125,9 @@ Note: Like the `g:easytags_always_enabled` option, if you change this option it 
 
 ### The `g:easytags_updatetime_min` option
 
-Vim has a setting which influences how often the plug-in is automatically executed. When this setting is too low, the plug-in can break. For this reason the plug-in warns you when ['updatetime'][updatetime] is lower than 4000 milliseconds. If you really want the plug-in to be executed more than once every 4 seconds (without a warning) you can lower the minimum acceptable updatetime by setting this option (number of milliseconds).
+Vim has a setting which influences how often the plug-in is automatically executed. When this setting is too low, the plug-in can break. For this reason the plug-in compensates by keeping track of when it was last executed. You'll get one warning when the plug-in first notices the low value, after that it will shut up. The default value of this option is 4000 milliseconds (4 seconds).
 
-### The `g:easytags_updatetime_autodisable` option
-
-Other plug-ins may lower the ['updatetime'][updatetime] value in certain contexts, e.g. insert mode in the case of the [neocomplcache][neocomplcache] plug-in. By setting this option to 1 (true) you can configure the easytags plug-in so that it doesn't give warnings about the updatetime option but instead skip updating and highlighting while the updatetime is set too low. When the updatetime is restored to a reasonable value the plug-in resumes.
+If you really want the plug-in to be executed more than once every 4 seconds you can lower the minimum acceptable updatetime by setting this option (as the number of milliseconds) however note that subsecond granularity is not supported.
 
 ### The `g:easytags_auto_update` option
 

@@ -19,14 +19,13 @@ Contents ~
   6. The |g:easytags_always_enabled| option
   7. The |g:easytags_on_cursorhold| option
   8. The |g:easytags_updatetime_min| option
-  9. The |g:easytags_updatetime_autodisable| option
-  10. The |g:easytags_auto_update| option
-  11. The |g:easytags_auto_highlight| option
-  12. The |g:easytags_autorecurse| option
-  13. The |g:easytags_include_members| option
-  14. The |g:easytags_resolve_links| option
-  15. The |g:easytags_suppress_ctags_warning| option
-  16. The |g:easytags_ignored_syntax_groups| option
+  9. The |g:easytags_auto_update| option
+  10. The |g:easytags_auto_highlight| option
+  11. The |g:easytags_autorecurse| option
+  12. The |g:easytags_include_members| option
+  13. The |g:easytags_resolve_links| option
+  14. The |g:easytags_suppress_ctags_warning| option
+  15. The |g:easytags_ignored_syntax_groups| option
  5. Faster syntax highlighting using Python |easytags-faster-syntax-highlighting-using-python|
   1. The |g:easytags_python_enabled| option
   2. The |g:easytags_python_script| option
@@ -293,20 +292,15 @@ The *g:easytags_updatetime_min* option
 
 Vim has a setting which influences how often the plug-in is automatically
 executed. When this setting is too low, the plug-in can break. For this reason
-the plug-in warns you when |'updatetime'| is lower than 4000 milliseconds. If
-you really want the plug-in to be executed more than once every 4 seconds
-(without a warning) you can lower the minimum acceptable updatetime by setting
-this option (number of milliseconds).
+the plug-in compensates by keeping track of when it was last executed. You'll
+get one warning when the plug-in first notices the low value, after that it
+will shut up. The default value of this option is 4000 milliseconds (4
+seconds).
 
--------------------------------------------------------------------------------
-The *g:easytags_updatetime_autodisable* option
-
-Other plug-ins may lower the |'updatetime'| value in certain contexts, e.g.
-insert mode in the case of the neocomplcache [10] plug-in. By setting this
-option to 1 (true) you can configure the easytags plug-in so that it doesn't
-give warnings about the updatetime option but instead skip updating and
-highlighting while the updatetime is set too low. When the updatetime is
-restored to a reasonable value the plug-in resumes.
+If you really want the plug-in to be executed more than once every 4 seconds
+you can lower the minimum acceptable updatetime by setting this option (as the
+number of milliseconds) however note that subsecond granularity is not
+supported.
 
 -------------------------------------------------------------------------------
 The *g:easytags_auto_update* option
@@ -374,14 +368,14 @@ your vimrc script, a file type plug-in, etc.):
 -------------------------------------------------------------------------------
 The *g:easytags_resolve_links* option
 
-UNIX has symbolic links [11] and hard links [12], both of which conflict with
+UNIX has symbolic links [10] and hard links [11], both of which conflict with
 the concept of having one unique location for every identifier. With regards
 to hard links there's not much anyone can do, but because I use symbolic links
 quite a lot I've added this option. It's disabled by default since it has a
 small performance impact and might not do what unknowing users expect it to:
 When you enable this option the plug-in will resolve symbolic links in
 pathnames, which means your tags file will only contain entries with canonical
-pathnames [13]. To enable this option (which I strongly suggest doing when you
+pathnames [12]. To enable this option (which I strongly suggest doing when you
 run UNIX and use symbolic links) execute the following Vim command:
 >
     :let g:easytags_resolve_links = 1
@@ -465,11 +459,11 @@ modes (except of course for the 'Tag' suffix).
 Passing custom command line arguments to Exuberant Ctags ~
 
 You may want to run Exuberant Ctags with specific command line options, for
-example the code_complete [14] plug-in requires the signature field to be
+example the code_complete [13] plug-in requires the signature field to be
 present. To do this you can create a configuration file for Exuberant Ctags,
 e.g. '~/.ctags' on UNIX or '%USERPROFILE%\ctags.cnf' on Windows. The file
 should contain one command line option per line. See the Exuberant Ctags
-manual [15] for details.
+manual [14] for details.
 
 ===============================================================================
                                                       *easytags-troubleshooting*
@@ -569,7 +563,7 @@ project directories.
 -------------------------------------------------------------------------------
 The plug-in doesn't seem to work in Cygwin ~
 
-If you want to use the plug-in with Vim under Cygwin [16], you need to have
+If you want to use the plug-in with Vim under Cygwin [15], you need to have
 the Cygwin version of Ctags installed instead of the Windows version (thanks
 to Alex Zuroff for reporting this!).
 
@@ -580,13 +574,13 @@ Contact ~
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/easytags/ and http://github.com/xolox/vim-easytags.
-If you like this plug-in please vote for it on Vim Online [17].
+If you like this plug-in please vote for it on Vim Online [16].
 
 ===============================================================================
                                                               *easytags-license*
 License ~
 
-This software is licensed under the MIT license [18]. Copyright 2011 Peter
+This software is licensed under the MIT license [17]. Copyright 2011 Peter
 Odding <peter@peterodding.com>.
 
 ===============================================================================
@@ -602,14 +596,13 @@ References ~
 [7] http://peterodding.com/code/vim/shell/
 [8] http://en.wikipedia.org/wiki/Dynamic-link_library
 [9] https://npmjs.org/package/jsctags
-[10] http://www.vim.org/scripts/script.php?script_id=2620
-[11] http://en.wikipedia.org/wiki/Symbolic_link
-[12] http://en.wikipedia.org/wiki/Hard_link
-[13] http://en.wikipedia.org/wiki/Canonicalization
-[14] http://www.vim.org/scripts/script.php?script_id=1764
-[15] http://ctags.sourceforge.net/ctags.html#FILES
-[16] http://en.wikipedia.org/wiki/Cygwin
-[17] http://www.vim.org/scripts/script.php?script_id=3114
-[18] http://en.wikipedia.org/wiki/MIT_License
+[10] http://en.wikipedia.org/wiki/Symbolic_link
+[11] http://en.wikipedia.org/wiki/Hard_link
+[12] http://en.wikipedia.org/wiki/Canonicalization
+[13] http://www.vim.org/scripts/script.php?script_id=1764
+[14] http://ctags.sourceforge.net/ctags.html#FILES
+[15] http://en.wikipedia.org/wiki/Cygwin
+[16] http://www.vim.org/scripts/script.php?script_id=3114
+[17] http://en.wikipedia.org/wiki/MIT_License
 
 vim: ft=help

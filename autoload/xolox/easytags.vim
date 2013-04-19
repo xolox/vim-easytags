@@ -3,7 +3,7 @@
 " Last Change: April 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.0'
+let g:xolox#easytags#version = '3.1'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -33,25 +33,32 @@ function! xolox#easytags#register(global) " {{{2
     endif
   endif
 endfunction
+ 
+" The localtime() when the CursorHold event last fired.
+let s:last_automatic_run = 0
 
 function! xolox#easytags#autoload(event) " {{{2
   try
     if a:event =~? 'cursorhold'
       " Only for the CursorHold automatic command: check for unreasonable
       " &updatetime values. The minimum value 4000 is kind of arbitrary
-      " (apart from being Vim's default) so I made it configurable:
+      " (apart from being Vim's default) so I made it configurable.
       let updatetime_min = xolox#misc#option#get('easytags_updatetime_min', 4000)
       if &updatetime < updatetime_min
-        " Other plug-ins may lower &updatetime in certain contexts, e.g.
-        " insert mode in the case of the neocomplcache plug-in. The following
-        " option (disabled by default unless neocomplcache is loaded) silences
-        " the warning and makes the easytags plug-in skip the update and
-        " highlight. When the &updatetime is restored to a reasonable value
-        " the plug-in resumes.
-        if xolox#misc#option#get('easytags_updatetime_autodisable', exists('g:loaded_neocomplcache'))
-          return
+        if s:last_automatic_run == 0
+          " Warn once about the low &updatetime value.
+          call xolox#misc#msg#warn("easytags.vim %s: The 'updatetime' option has an unreasonably low value, so I'll start compensating (see the easytags_updatetime_min option).", g:xolox#easytags#version)
+          let s:last_automatic_run = localtime()
         else
-          call xolox#misc#msg#warn("easytags.vim %s: I'm being executed every %i milliseconds! Please :set updatetime=%i. To find where 'updatetime' was changed execute ':verb set ut?'", g:xolox#easytags#version, &updatetime, updatetime_min)
+          let next_scheduled_run = s:last_automatic_run + max([1, updatetime_min / 1000])
+          if localtime() < next_scheduled_run
+            " It's not our time yet; wait for the next event.
+            call xolox#misc#msg#debug("easytags.vim %s: Skipping this beat of 'updatetime' to compensate for low value.", g:xolox#easytags#version)
+            return
+          else
+            call xolox#misc#msg#debug("easytags.vim %s: This is our beat of 'updatetime'!", g:xolox#easytags#version)
+            let s:last_automatic_run = localtime()
+          endif
         endif
       endif
     endif
