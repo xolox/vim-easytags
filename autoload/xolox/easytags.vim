@@ -3,7 +3,7 @@
 " Last Change: April 21, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.3'
+let g:xolox#easytags#version = '3.1.4'
 
 call xolox#misc#compat#check('easytags', 1)
 
@@ -256,7 +256,7 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
       else
         call xolox#misc#timer#stop("easytags.vim %s: Created tags in %s.", g:xolox#easytags#version, a:starttime)
       endif
-      return []
+      return [[], 0]
     endif
   endif
   return [xolox#easytags#parse_entries(lines), has_updates]
