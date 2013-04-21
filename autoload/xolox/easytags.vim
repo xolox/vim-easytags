@@ -3,7 +3,7 @@
 " Last Change: April 21, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.4'
+let g:xolox#easytags#version = '3.1.5'
 
 call xolox#misc#compat#check('easytags', 1)
 
@@ -318,15 +318,18 @@ function! s:filter_merge_tags(filter_tags, tagsfile, output, context) " {{{3
     call filter(entries, join(filters, ' && '))
   endif
   let num_filtered = num_old_entries - len(entries)
-  " Merge old/new tags and write tags file.
+  " Merge the old and new tags.
   call extend(entries, a:output)
+  " Since we've already read the tags file we might as well cache the tagged
+  " files. We do so before saving the tags file so that the items in {entries}
+  " are not yet flattened by xolox#easytags#write_tagsfile().
+  let fname = s:canonicalize(a:tagsfile, a:context)
+  call s:cache_tagged_files_in(fname, getftime(fname), entries, a:context)
+  " Now we're ready to save the tags file.
   if !xolox#easytags#write_tagsfile(a:tagsfile, headers, entries)
     let msg = "Failed to write filtered tags file %s!"
     throw printf(msg, fnamemodify(a:tagsfile, ':~'))
   endif
-  " We've already read the tags file, might as well cache the tagged files :-)
-  let fname = s:canonicalize(a:tagsfile, a:context)
-  call s:cache_tagged_files_in(fname, getftime(fname), entries, a:context)
   return num_filtered
 endfunction
 
