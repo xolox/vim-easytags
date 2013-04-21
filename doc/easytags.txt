@@ -580,7 +580,7 @@ If you like this plug-in please vote for it on Vim Online [16].
                                                               *easytags-license*
 License ~
 
-This software is licensed under the MIT license [17]. Copyright 2011 Peter
+This software is licensed under the MIT license [17]. Copyright 2013 Peter
 Odding <peter@peterodding.com>.
 
 ===============================================================================

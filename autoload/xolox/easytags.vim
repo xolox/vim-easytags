@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 20, 2013
+" Last Change: April 21, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.2'
+let g:xolox#easytags#version = '3.1.3'
 
 call xolox#misc#compat#check('easytags', 1)
 
@@ -132,7 +132,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     endif
     " When :UpdateTags was executed manually we'll refresh the dynamic
     " syntax highlighting so that new tags are immediately visible.
-    if !a:silent
+    if !a:silent && xolox#misc#option#get('easytags_auto_highlight', 1)
       HighlightTags
     endif
     return 1
