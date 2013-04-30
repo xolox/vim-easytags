@@ -229,8 +229,9 @@ file).
 
 If you set |g:easytags_dynamic_files| to 2 the easytags plug-in will
 automatically create project specific tags based on the first name in the
-'tags' option. This disables the global tags file and file type specific tags
-files.
+'tags' option. In this mode the the global tags file or file type specific
+tags files are only used for directories where you don't have write
+permissions.
 
 The |'tags'| option is reevaluated each time the plug-in runs, so which tags
 file is selected can differ depending on the buffer and working directory.

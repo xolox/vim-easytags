@@ -3,7 +3,7 @@
 " Last Change: April 30, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.7'
+let g:xolox#easytags#version = '3.1.8'
 
 call xolox#misc#compat#check('easytags', 2)
 
@@ -651,6 +651,13 @@ function! xolox#easytags#get_tagsfile() " {{{2
     let tagsfile = get(tagfiles(), 0, '')
   elseif dynamic_files == 2
     let tagsfile = xolox#misc#option#eval_tags(&tags, 1)
+    let directory = fnamemodify(tagsfile, ':h')
+    if filewritable(directory) != 2
+      " If the directory of the dynamic tags file is not writable, we fall
+      " back to a file type specific tags file or the global tags file.
+      call xolox#misc#msg#warn("easytags.vim %s: Dynamic tags files enabled but %s not writable so falling back.", g:xolox#easytags#version, directory)
+      let tagsfile = ''
+    endif
   endif
   " Check if a file type specific tags file is useful?
   if empty(tagsfile) && !empty(g:easytags_by_filetype) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
