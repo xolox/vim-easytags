@@ -1,11 +1,11 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 28, 2013
+" Last Change: April 30, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.6'
+let g:xolox#easytags#version = '3.1.7'
 
-call xolox#misc#compat#check('easytags', 1)
+call xolox#misc#compat#check('easytags', 2)
 
 " Public interface through (automatic) commands. {{{1
 
