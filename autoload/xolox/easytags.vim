@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 30, 2013
+" Last Change: May 5, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.1.8'
+let g:xolox#easytags#version = '3.2'
 
 call xolox#misc#compat#check('easytags', 2)
 
@@ -68,7 +68,7 @@ function! xolox#easytags#autoload(event) " {{{2
     let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'
     " Don't execute this function for unsupported file types (doesn't load
     " the list of file types if updates and highlighting are both disabled).
-    if (do_update || do_highlight) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
+    if (do_update || do_highlight) && !empty(xolox#easytags#select_supported_filetypes(&ft))
       " Update entries for current file in tags file?
       if do_update
         let pathname = s:resolve(expand('%:p'))
@@ -161,7 +161,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   elseif g:easytags_ignored_filetypes != '' && &ft =~ g:easytags_ignored_filetypes
     if silent | return '' | endif
     throw "The " . string(&ft) . " file type is explicitly ignored."
-  elseif index(xolox#easytags#supported_filetypes(), &ft) == -1
+  elseif empty(xolox#easytags#select_supported_filetypes(&ft))
     if silent | return '' | endif
     throw "Exuberant Ctags doesn't support the " . string(&ft) . " file type!"
   endif
@@ -170,7 +170,8 @@ endfunction
 
 function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   let languages = xolox#misc#option#get('easytags_languages', {})
-  let ctags_language_name = xolox#easytags#to_ctags_ft(&filetype)
+  let applicable_filetypes = xolox#easytags#select_supported_filetypes(&ft)
+  let ctags_language_name = xolox#easytags#to_ctags_ft(applicable_filetypes[0])
   let language = get(languages, ctags_language_name, {})
   if empty(language)
     let program = xolox#misc#option#get('easytags_cmd')
@@ -207,7 +208,7 @@ function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
       if empty(language)
         " TODO Should --language-force distinguish between C and C++?
         " TODO --language-force doesn't make sense for JavaScript tags in HTML files?
-        let filetype = xolox#easytags#to_ctags_ft(&filetype)
+        let filetype = xolox#easytags#to_ctags_ft(applicable_filetypes[0])
         call add(cmdline, xolox#misc#escape#shell('--language-force=' . filetype))
       endif
       call add(cmdline, xolox#misc#escape#shell(a:cfile))
@@ -518,6 +519,17 @@ function! s:check_filetype(listing, cline)
   return xolox#easytags#to_vim_ft(a:cline)
 endfunction
 
+function! xolox#easytags#select_supported_filetypes(vim_ft) " {{{2
+  let supported_filetypes = xolox#easytags#supported_filetypes()
+  let applicable_filetypes = []
+  for ft in split(&filetype, '\.')
+    if index(supported_filetypes, ft) >= 0
+      call add(applicable_filetypes, ft)
+    endif
+  endfor
+  return applicable_filetypes
+endfunction
+
 function! xolox#easytags#read_tagsfile(tagsfile) " {{{2
   " I'm not sure whether this is by design or an implementation detail but
   " it's possible for the "!_TAG_FILE_SORTED" header to appear after one or
@@ -660,9 +672,10 @@ function! xolox#easytags#get_tagsfile() " {{{2
     endif
   endif
   " Check if a file type specific tags file is useful?
-  if empty(tagsfile) && !empty(g:easytags_by_filetype) && index(xolox#easytags#supported_filetypes(), &ft) >= 0
+  let applicable_filetypes = xolox#easytags#select_supported_filetypes(&ft)
+  if empty(tagsfile) && !empty(g:easytags_by_filetype) && !empty(applicable_filetypes)
     let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
-    let tagsfile = xolox#misc#path#merge(directory, &filetype)
+    let tagsfile = xolox#misc#path#merge(directory, applicable_filetypes[0])
   endif
   " Default to the global tags file?
   if empty(tagsfile)
@@ -780,7 +793,8 @@ function! s:highlight_with_python(syntax_group, tagkind) " {{{2
     let context = {}
     let context['tagsfiles'] = tagfiles()
     let context['syntaxgroup'] = a:syntax_group
-    let context['filetype'] = xolox#easytags#to_ctags_ft(&ft)
+    let applicable_filetypes = xolox#easytags#select_supported_filetypes(&ft)
+    let context['filetype'] = xolox#easytags#to_ctags_ft(applicable_filetypes[0])
     let context['tagkinds'] = get(a:tagkind, 'tagkinds', '')
     let context['prefix'] = get(a:tagkind, 'pattern_prefix', '')
     let context['suffix'] = get(a:tagkind, 'pattern_suffix', '')
@@ -823,6 +837,7 @@ call xolox#easytags#map_filetypes(exists('g:filetype_asp') ? g:filetype_asp : 'a
 let s:aliases = {}
 let s:canonical_aliases = {}
 call xolox#easytags#alias_filetypes('c', 'cpp', 'objc', 'objcpp')
+call xolox#easytags#alias_filetypes('html', 'htmldjango')
 
 " Enable line continuation.
 let s:cpo_save = &cpo
