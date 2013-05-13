@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 19, 2013
+" Last Change: May 13, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -58,12 +58,12 @@ function! s:InitEasyTags(version)
     " FIXME The code below that searches the $PATH is not used on Windows at
     " the moment because xolox#misc#path#which() generally produces absolute
     " paths and on Windows these absolute paths tend to contain spaces which
-    " makes xolox#shell#execute() fail. I've tried quoting the program name
-    " with double quotes but it fails just the same (it works with system()
-    " though). Anyway the problem of having multiple conflicting versions of
-    " Exuberant Ctags installed is not that relevant to Windows since it
-    " doesn't have a package management system. I still want to fix
-    " xolox#shell#execute() though.
+    " makes xolox#shell#execute_with_dll() fail. I've tried quoting the
+    " program name with double quotes but it fails just the same (it works
+    " with system() though). Anyway the problem of having multiple conflicting
+    " versions of Exuberant Ctags installed is not that relevant to Windows
+    " since it doesn't have a package management system. I still want to fix
+    " xolox#shell#execute_with_dll() though.
     if s:CheckCtags('ctags', a:version)
       let g:easytags_cmd = 'ctags'
       return 1
@@ -96,23 +96,15 @@ function! s:CheckCtags(name, version)
   " --list-languages option (and more).
   if executable(a:name)
     let command = a:name . ' --version'
-    try
-      let listing = join(xolox#shell#execute(command, 1), '\n')
-    catch /^Vim\%((\a\+)\)\=:E117/
-      " Ignore missing shell.vim plug-in.
-      let listing = system(command)
-    catch
-      " xolox#shell#execute() converts shell errors to exceptions and since
-      " we're checking whether one of several executables exists we don't want
-      " to throw an error when the first one doesn't!
-      return
-    endtry
-    let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
-    let g:easytags_ctags_version = matchstr(listing, pattern)
-    if g:easytags_ctags_version == 'Development'
-      return 1
-    else
-      return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+    let result = xolox#misc#os#exec({'command': command, 'check': 0})
+    if result['exit_code'] == 0
+      let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
+      let g:easytags_ctags_version = matchstr(result['stdout'][0], pattern)
+      if g:easytags_ctags_version == 'Development'
+        return 1
+      else
+        return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+      endif
     endif
   endif
 endfunction

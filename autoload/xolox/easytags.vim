@@ -1,11 +1,11 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 5, 2013
+" Last Change: May 13, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.2'
+let g:xolox#easytags#version = '3.3'
 
-call xolox#misc#compat#check('easytags', 2)
+call xolox#misc#compat#check('easytags', 3)
 
 " Public interface through (automatic) commands. {{{1
 
@@ -238,19 +238,8 @@ function! s:run_ctags(starttime, cfile, tagsfile, firstrun, cmdline) " {{{3
   let has_updates = 1
   if a:cmdline != ''
     call xolox#misc#msg#debug("easytags.vim %s: Executing %s.", g:xolox#easytags#version, a:cmdline)
-    try
-      let lines = xolox#shell#execute(a:cmdline, 1)
-      let has_updates = a:firstrun || s:has_updates(a:cfile, join(lines, "\n"))
-    catch /^Vim\%((\a\+)\)\=:E117/
-      " Ignore missing shell.vim plug-in.
-      let output = system(a:cmdline)
-      if v:shell_error
-        let msg = "Failed to update tags file %s: %s!"
-        throw printf(msg, fnamemodify(a:tagsfile, ':~'), strtrans(output))
-      endif
-      let lines = split(output, "\n")
-      let has_updates = a:firstrun || s:has_updates(a:cfile, output)
-    endtry
+    let lines = xolox#misc#os#exec({'command': a:cmdline})['stdout']
+    let has_updates = a:firstrun || s:has_updates(a:cfile, join(lines, "\n"))
     if a:firstrun
       if a:cfile != ''
         call xolox#misc#timer#stop("easytags.vim %s: Created tags for %s in %s.", g:xolox#easytags#version, expand('%:p:~'), a:starttime)
@@ -493,16 +482,7 @@ function! xolox#easytags#supported_filetypes() " {{{2
     let listing = []
     if !empty(g:easytags_cmd)
       let command = g:easytags_cmd . ' --list-languages'
-      try
-        let listing = xolox#shell#execute(command, 1)
-      catch /^Vim\%((\a\+)\)\=:E117/
-        " Ignore missing shell.vim plug-in.
-        let listing = split(system(command), "\n")
-        if v:shell_error
-          let msg = "Failed to get supported languages! (output: %s)"
-          throw printf(msg, strtrans(join(listing, "\n")))
-        endif
-      endtry
+      let listing = xolox#misc#os#exec({'command': command})['stdout']
     endif
     let s:supported_filetypes = map(copy(listing) + keys(xolox#misc#option#get('easytags_languages', {})), 's:check_filetype(listing, v:val)')
     let msg = "easytags.vim %s: Retrieved %i supported languages in %s."
