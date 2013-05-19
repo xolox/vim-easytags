@@ -193,19 +193,23 @@ If this is set and not false, it will suppress the warning on startup if ctags i
 
 This variable is a string of comma separated names of syntax groups in which dynamic highlighting is not applied. It defaults to `.*String.*,.*Comment.*,cIncluded`.
 
-## Faster syntax highlighting using Python
+## Customizing the easytags plug-in
 
-The Vim script implementation of dynamic syntax highlighting is quite slow on large tags files. When the Python Interface to Vim is enabled the easytags plug-in will therefor automatically use a Python script that performs dynamic syntax highlighting about twice as fast as the Vim script implementation. The following options are available to change the default configuration.
+Advanced users may wish to customize how the easytags plug-in works beyond the point of changing configuration defaults. This section contains some hints about this. If you have suggestions, please feel free to submit them.
 
-### The `g:easytags_python_enabled` option
+### Passing custom command line arguments to Exuberant Ctags
 
-To disable the Python implementation of dynamic syntax highlighting you can set this option to false (0).
+You may want to run Exuberant Ctags with specific command line options, for example the [code_complete] [code_complete] plug-in requires the signature field to be present. To do this you can create a configuration file for Exuberant Ctags, e.g. `~/.ctags` on UNIX or `%USERPROFILE%\ctags.cnf` on Windows. The file should contain one command line option per line. See the [Exuberant Ctags manual] [ctags_cfg] for details.
 
-### The `g:easytags_python_script` option
+### Update & highlight tags immediately after save
 
-This option defines the pathname of the script that contains the Python implementation of dynamic syntax highlighting.
+By default the easytags plug-in automatically updates & highlights tags for the current file after several seconds of inactivity. This is done to prevent the easytags plug-in from interrupting your workflow.
 
-## How to customize the highlighting colors?
+If you want the easytags plug-in to automatically update & highlight tags for the current file right after you save the file, you can add the following line to your [vimrc script] [vimrc]:
+
+    :autocmd BufWritePost * call xolox#easytags#autoload('BufWritePost')
+
+### How to customize the highlighting colors?
 
 The easytags plug-in defines new highlighting groups for dynamically highlighted tags. These groups are linked to Vim's default groups so that they're colored out of the box, but if you want you can change the styles. To do so use a `highlight` command such as the ones given a few paragraphs back. Of course you'll need to change the group name. Here are the group names used by the easytags plug-in:
 
@@ -223,9 +227,17 @@ The easytags plug-in defines new highlighting groups for dynamically highlighted
 
 As you can see each of these names ends in `Tag` to avoid conflicts with the syntax modes shipped with Vim. And about the singular/plural confusion: I've tried to match the existing highlighting groups defined by popular syntax modes (except of course for the `Tag` suffix).
 
-## Passing custom command line arguments to Exuberant Ctags
+## Faster syntax highlighting using Python
 
-You may want to run Exuberant Ctags with specific command line options, for example the [code_complete] [code_complete] plug-in requires the signature field to be present. To do this you can create a configuration file for Exuberant Ctags, e.g. `~/.ctags` on UNIX or `%USERPROFILE%\ctags.cnf` on Windows. The file should contain one command line option per line. See the [Exuberant Ctags manual] [ctags_cfg] for details.
+The Vim script implementation of dynamic syntax highlighting is quite slow on large tags files. When the Python Interface to Vim is enabled the easytags plug-in will therefor automatically use a Python script that performs dynamic syntax highlighting about twice as fast as the Vim script implementation. The following options are available to change the default configuration.
+
+### The `g:easytags_python_enabled` option
+
+To disable the Python implementation of dynamic syntax highlighting you can set this option to false (0).
+
+### The `g:easytags_python_script` option
+
+This option defines the pathname of the script that contains the Python implementation of dynamic syntax highlighting.
 
 ## Troubleshooting
 
