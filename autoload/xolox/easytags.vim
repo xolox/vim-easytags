@@ -3,7 +3,7 @@
 " Last Change: May 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.1'
+let g:xolox#easytags#version = '3.3.2'
 
 call xolox#misc#compat#check('easytags', 3)
 
@@ -53,8 +53,10 @@ function! xolox#easytags#autoload(event) " {{{2
         let updatetime_min = xolox#misc#option#get('easytags_updatetime_min', 4000)
         if &updatetime < updatetime_min
           if s:last_automatic_run == 0
-            " Warn once about the low &updatetime value.
-            call xolox#misc#msg#warn("easytags.vim %s: The 'updatetime' option has an unreasonably low value, so I'll start compensating (see the easytags_updatetime_min option).", g:xolox#easytags#version)
+            " Warn once about the low &updatetime value?
+            if xolox#misc#option#get('easytags_updatetime_warn', 1)
+              call xolox#misc#msg#warn("easytags.vim %s: The 'updatetime' option has an unreasonably low value, so I'll start compensating (see the easytags_updatetime_min option).", g:xolox#easytags#version)
+            endif
             let s:last_automatic_run = localtime()
           else
             let next_scheduled_run = s:last_automatic_run + max([1, updatetime_min / 1000])

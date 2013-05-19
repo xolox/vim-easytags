@@ -125,9 +125,21 @@ Note: Like the `g:easytags_always_enabled` option, if you change this option it 
 
 ### The `g:easytags_updatetime_min` option
 
-Vim has a setting which influences how often the plug-in is automatically executed. When this setting is too low, the plug-in can break. For this reason the plug-in compensates by keeping track of when it was last executed. You'll get one warning when the plug-in first notices the low value, after that it will shut up. The default value of this option is 4000 milliseconds (4 seconds).
+Vim's ['updatetime'] [updatetime] option controls how often the easytags plug-in is automatically executed. A lot of popular Vim plug-ins manipulate this option to control how often they are called. Unfortunately some of those plug-ins set ['updatetime'] [updatetime] to a very low value (less than a second) and this can break the easytags plug-in.
 
-If you really want the plug-in to be executed more than once every 4 seconds you can lower the minimum acceptable updatetime by setting this option (as the number of milliseconds) however note that subsecond granularity is not supported.
+Because of this the easytags plug-in compensates by keeping track of when it was last executed. You'll get one warning when the plug-in first notices a very low value of ['updatetime'] [updatetime], after that the plug-in will shut up (until you restart Vim) and simply compensate by not executing until its time has come. If you want to silence the warning message forever, see the `g:easytags_updatetime_warn` option.
+
+The default value of Vim's ['updatetime] [updatetime] option *and* the `g:easytags_updatetime_min` option is 4000 milliseconds (4 seconds).
+
+If you know what you're doing and you really want the easytags plug-in to be executed more than once every 4 seconds you can lower the minimum acceptable updatetime by setting `g:easytags_updatetime_min` to the number of milliseconds (an integer).
+
+Note that although `g:easytags_updatetime_min` counts in milliseconds, the easytags plug-in does not support subsecond granularity because it is limited by Vim's [localtime()] [localtime] function which has one-second resolution.
+
+### The `g:easytags_updatetime_warn` option
+
+Since the easytags plug-in now compensates for low ['updatetime'] [updatetime] values (see the `g:easytags_updatetime_min` option above) the warning message shown by the easytags plug-in has become kind of redundant (and probably annoying?). For now it can be completely disabled by setting `g:easytags_updatetime_warn` to 0 (false).
+
+When the feature that compensates for low ['updatetime'] [updatetime] values has proven to be a reliable workaround I will probably remove the warning message and the `g:easytags_updatetime_warn` option.
 
 ### The `g:easytags_auto_update` option
 
@@ -297,6 +309,7 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [hlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
 [jsctags]: https://npmjs.org/package/jsctags
+[localtime]: http://vimdoc.sourceforge.net/htmldoc/eval.html#localtime()
 [messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
 [neocomplcache]: http://www.vim.org/scripts/script.php?script_id=2620
 [shell]: http://peterodding.com/code/vim/shell/
