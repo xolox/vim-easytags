@@ -105,6 +105,16 @@ Note that the `g:easytags_dynamic_files` option takes precedence over this optio
 
 If you already have a global tags file you can create file type specific tags files from the global tags file using the command `:TagsByFileType`.
 
+### The `g:easytags_events` option
+
+This option can be used to customize the events that trigger the automatic updating and highlighting performed by the easytags plug-in. The `g:easytags_always_enabled` and `g:easytags_on_cursorhold` options are more user friendly but limited ways to accomplish the same thing.
+
+Here's an example: Say you want the easytags plug-in to automatically update & highlight tags for the current file right after you save the file. You can accomplish this by adding the following line to your [vimrc script] [vimrc]:
+
+    :let g:easytags_events = ['BufWritePost']
+
+Note that if you set `g:easytags_events` in your [vimrc script] [vimrc], the values of the options `g:easytags_always_enabled` and `g:easytags_on_cursorhold` will be ignored completely.
+
 ### The `g:easytags_always_enabled` option
 
 By default the plug-in automatically generates and highlights tags when you stop typing for a few seconds (this works using the [CursorHold] [cursorhold] automatic command). This means that when you edit a file, the dynamic highlighting won't appear until you pause for a moment. If you don't like this you can configure the plug-in to always enable dynamic highlighting:
@@ -207,7 +217,7 @@ By default the easytags plug-in automatically updates & highlights tags for the 
 
 If you want the easytags plug-in to automatically update & highlight tags for the current file right after you save the file, you can add the following line to your [vimrc script] [vimrc]:
 
-    :autocmd BufWritePost * call xolox#easytags#autoload('BufWritePost')
+    :let g:easytags_events = ['BufWritePost']
 
 ### How to customize the highlighting colors?
 

@@ -16,17 +16,18 @@ Contents ~
   3. The |g:easytags_file| option
   4. The |g:easytags_dynamic_files| option
   5. The |g:easytags_by_filetype| option
-  6. The |g:easytags_always_enabled| option
-  7. The |g:easytags_on_cursorhold| option
-  8. The |g:easytags_updatetime_min| option
-  9. The |g:easytags_updatetime_warn| option
-  10. The |g:easytags_auto_update| option
-  11. The |g:easytags_auto_highlight| option
-  12. The |g:easytags_autorecurse| option
-  13. The |g:easytags_include_members| option
-  14. The |g:easytags_resolve_links| option
-  15. The |g:easytags_suppress_ctags_warning| option
-  16. The |g:easytags_ignored_syntax_groups| option
+  6. The |g:easytags_events| option
+  7. The |g:easytags_always_enabled| option
+  8. The |g:easytags_on_cursorhold| option
+  9. The |g:easytags_updatetime_min| option
+  10. The |g:easytags_updatetime_warn| option
+  11. The |g:easytags_auto_update| option
+  12. The |g:easytags_auto_highlight| option
+  13. The |g:easytags_autorecurse| option
+  14. The |g:easytags_include_members| option
+  15. The |g:easytags_resolve_links| option
+  16. The |g:easytags_suppress_ctags_warning| option
+  17. The |g:easytags_ignored_syntax_groups| option
  5. Customizing the easytags plug-in              |customizing-easytags-plug-in|
   1. Passing custom command line arguments to Exuberant Ctags
   2. Update & highlight tags immediately after save
@@ -258,6 +259,24 @@ If you already have a global tags file you can create file type specific tags
 files from the global tags file using the command ':TagsByFileType'.
 
 -------------------------------------------------------------------------------
+The *g:easytags_events* option
+
+This option can be used to customize the events that trigger the automatic
+updating and highlighting performed by the easytags plug-in. The |g:easytags_always_enabled|
+and |g:easytags_on_cursorhold| options are more user friendly but limited ways
+to accomplish the same thing.
+
+Here's an example: Say you want the easytags plug-in to automatically update &
+highlight tags for the current file right after you save the file. You can
+accomplish this by adding the following line to your |vimrc| script:
+>
+    :let g:easytags_events = ['BufWritePost']
+
+Note that if you set |g:easytags_events| in your |vimrc| script, the values of
+the options |g:easytags_always_enabled| and |g:easytags_on_cursorhold| will be
+ignored completely.
+
+-------------------------------------------------------------------------------
 The *g:easytags_always_enabled* option
 
 By default the plug-in automatically generates and highlights tags when you
@@ -453,7 +472,7 @@ If you want the easytags plug-in to automatically update & highlight tags for
 the current file right after you save the file, you can add the following line
 to your |vimrc| script:
 >
-    :autocmd BufWritePost * call xolox#easytags#autoload('BufWritePost')
+    :let g:easytags_events = ['BufWritePost']
 
 -------------------------------------------------------------------------------
 How to customize the highlighting colors? ~
