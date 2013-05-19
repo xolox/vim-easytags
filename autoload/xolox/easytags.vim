@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: May 13, 2013
+" Last Change: May 19, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3'
+let g:xolox#easytags#version = '3.3.1'
 
 call xolox#misc#compat#check('easytags', 3)
 
@@ -41,34 +41,35 @@ let s:last_automatic_run = 0
 
 function! xolox#easytags#autoload(event) " {{{2
   try
-    if a:event =~? 'cursorhold'
-      " Only for the CursorHold automatic command: check for unreasonable
-      " &updatetime values. The minimum value 4000 is kind of arbitrary
-      " (apart from being Vim's default) so I made it configurable.
-      let updatetime_min = xolox#misc#option#get('easytags_updatetime_min', 4000)
-      if &updatetime < updatetime_min
-        if s:last_automatic_run == 0
-          " Warn once about the low &updatetime value.
-          call xolox#misc#msg#warn("easytags.vim %s: The 'updatetime' option has an unreasonably low value, so I'll start compensating (see the easytags_updatetime_min option).", g:xolox#easytags#version)
-          let s:last_automatic_run = localtime()
-        else
-          let next_scheduled_run = s:last_automatic_run + max([1, updatetime_min / 1000])
-          if localtime() < next_scheduled_run
-            " It's not our time yet; wait for the next event.
-            call xolox#misc#msg#debug("easytags.vim %s: Skipping this beat of 'updatetime' to compensate for low value.", g:xolox#easytags#version)
-            return
-          else
-            call xolox#misc#msg#debug("easytags.vim %s: This is our beat of 'updatetime'!", g:xolox#easytags#version)
-            let s:last_automatic_run = localtime()
-          endif
-        endif
-      endif
-    endif
     let do_update = xolox#misc#option#get('easytags_auto_update', 1)
     let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'
     " Don't execute this function for unsupported file types (doesn't load
     " the list of file types if updates and highlighting are both disabled).
     if (do_update || do_highlight) && !empty(xolox#easytags#select_supported_filetypes(&ft))
+      if a:event =~? 'cursorhold'
+        " Only for the CursorHold automatic command: check for unreasonable
+        " &updatetime values. The minimum value 4000 is kind of arbitrary
+        " (apart from being Vim's default) so I made it configurable.
+        let updatetime_min = xolox#misc#option#get('easytags_updatetime_min', 4000)
+        if &updatetime < updatetime_min
+          if s:last_automatic_run == 0
+            " Warn once about the low &updatetime value.
+            call xolox#misc#msg#warn("easytags.vim %s: The 'updatetime' option has an unreasonably low value, so I'll start compensating (see the easytags_updatetime_min option).", g:xolox#easytags#version)
+            let s:last_automatic_run = localtime()
+          else
+            let next_scheduled_run = s:last_automatic_run + max([1, updatetime_min / 1000])
+            if localtime() < next_scheduled_run
+              " It's not our time yet; wait for the next event.
+              call xolox#misc#msg#debug("easytags.vim %s: Skipping this beat of 'updatetime' to compensate for low value.", g:xolox#easytags#version)
+              " Shortcut to break out of xolox#easytags#autoload().
+              return
+            else
+              call xolox#misc#msg#debug("easytags.vim %s: This is our beat of 'updatetime'!", g:xolox#easytags#version)
+              let s:last_automatic_run = localtime()
+            endif
+          endif
+        endif
+      endif
       " Update entries for current file in tags file?
       if do_update
         let pathname = s:resolve(expand('%:p'))
