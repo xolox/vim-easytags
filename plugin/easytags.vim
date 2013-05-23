@@ -1,3 +1,9 @@
+" This Vim script was modified by a Python script that I use to manage the
+" inclusion of miscellaneous functions in the plug-ins that I publish to Vim
+" Online and GitHub. Please don't edit this file, instead make your changes on
+" the 'dev' branch of the git repository (thanks!). This file was generated on
+" May 23, 2013 at 20:08.
+
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
 " Last Change: May 13, 2013
@@ -15,7 +21,7 @@ endif
 " Configuration defaults and initialization. {{{1
 
 if !exists('g:easytags_file')
-  if xolox#misc#os#is_win()
+  if xolox#easytags#misc#os#is_win()
     let g:easytags_file = '~\_vimtags'
   else
     let g:easytags_file = '~/.vimtags'
@@ -54,9 +60,9 @@ function! s:InitEasyTags(version)
   if exists('g:easytags_cmd') && s:CheckCtags(g:easytags_cmd, a:version)
     return 1
   endif
-  if xolox#misc#os#is_win()
+  if xolox#easytags#misc#os#is_win()
     " FIXME The code below that searches the $PATH is not used on Windows at
-    " the moment because xolox#misc#path#which() generally produces absolute
+    " the moment because xolox#easytags#misc#path#which() generally produces absolute
     " paths and on Windows these absolute paths tend to contain spaces which
     " makes xolox#shell#execute_with_dll() fail. I've tried quoting the
     " program name with double quotes but it fails just the same (it works
@@ -81,7 +87,7 @@ function! s:InitEasyTags(version)
     " some frustration the plug-in will search the path and consider every
     " possible location, meaning that as long as Exuberant Ctags is installed
     " in the $PATH the plug-in should find it automatically.
-    for program in xolox#misc#path#which('exuberant-ctags', 'ctags-exuberant', 'ctags', 'exctags')
+    for program in xolox#easytags#misc#path#which('exuberant-ctags', 'ctags-exuberant', 'ctags', 'exctags')
       if s:CheckCtags(program, a:version)
         let g:easytags_cmd = program
         return 1
@@ -96,7 +102,7 @@ function! s:CheckCtags(name, version)
   " --list-languages option (and more).
   if executable(a:name)
     let command = a:name . ' --version'
-    let result = xolox#misc#os#exec({'command': command, 'check': 0})
+    let result = xolox#easytags#misc#os#exec({'command': command, 'check': 0})
     if result['exit_code'] == 0
       let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
       let g:easytags_ctags_version = matchstr(result['stdout'][0], pattern)
