@@ -8,7 +8,13 @@ There's just one problem: You have to manually keep your tags files up-to-date a
 
 ## Installation
 
-Unzip the most recent [ZIP archive] [download] file inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows). Now try it out: Edit any file type supported by Exuberant Ctags and within ten seconds the plug-in should create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the file you just edited! This means that whatever file you're editing in Vim (as long as it's on the local file system), tags will always be available by the time you need them!
+*Please note that the vim-easytags plug-in requires my vim-misc plug-in which is separately distributed.*
+
+Unzip the most recent ZIP archives of the [vim-easytags] [download-easytags] and [vim-misc] [download-misc] plug-ins inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows).
+
+If you prefer you can also use [Pathogen] [pathogen], [Vundle] [vundle] or a similar tool to install & update the [vim-easytags] [github-easytags] and [vim-misc] [github-misc] plug-ins using a local clone of the git repository.
+
+Now try it out: Edit any file type supported by Exuberant Ctags and within ten seconds the plug-in should create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the file you just edited! This means that whatever file you're editing in Vim (as long as it's on the local file system), tags will always be available by the time you need them!
 
 Additionally if the file you just opened is an AWK, C#, C, C++, Objective-C, Java, Lua, PHP, Python, Ruby, Shell, Tcl or Vim source file you should also notice that the function and type names defined in the file have been syntax highlighted.
 
@@ -325,15 +331,19 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [cursorhold]: http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold
 [cygwin]: http://en.wikipedia.org/wiki/Cygwin
 [dll]: http://en.wikipedia.org/wiki/Dynamic-link_library
-[download]: http://peterodding.com/code/vim/downloads/easytags.zip
+[download-easytags]: http://peterodding.com/code/vim/downloads/easytags.zip
+[download-misc]: http://peterodding.com/code/vim/downloads/misc.zip
 [e339]: http://vimdoc.sourceforge.net/htmldoc/message.html#E339
 [exctags]: http://ctags.sourceforge.net/
+[github-easytags]: http://github.com/xolox/vim-easytags
+[github-misc]: http://github.com/xolox/vim-misc
 [hlinks]: http://en.wikipedia.org/wiki/Hard_link
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
 [jsctags]: https://npmjs.org/package/jsctags
 [localtime]: http://vimdoc.sourceforge.net/htmldoc/eval.html#localtime()
 [messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
 [neocomplcache]: http://www.vim.org/scripts/script.php?script_id=2620
+[pathogen]: http://www.vim.org/scripts/script.php?script_id=2332
 [shell]: http://peterodding.com/code/vim/shell/
 [slinks]: http://en.wikipedia.org/wiki/Symbolic_link
 [syn_groups]: http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name
@@ -346,3 +356,4 @@ This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/M
 [vim_fts]: http://ftp.vim.org/vim/runtime/syntax/
 [vim_online]: http://www.vim.org/scripts/script.php?script_id=3114
 [vimrc]: http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc
+[vundle]: https://github.com/gmarik/vundle
