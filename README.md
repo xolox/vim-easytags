@@ -205,10 +205,6 @@ If this is set and not false, it will suppress the warning on startup if ctags i
 
     :let g:easytags_suppress_ctags_warning = 1
 
-### The `g:easytags_ignored_syntax_groups` option
-
-This variable is a string of comma separated names of syntax groups in which dynamic highlighting is not applied. It defaults to `.*String.*,.*Comment.*,cIncluded`.
-
 ## Customizing the easytags plug-in
 
 Advanced users may wish to customize how the easytags plug-in works beyond the point of changing configuration defaults. This section contains some hints about this. If you have suggestions, please feel free to submit them.

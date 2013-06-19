@@ -26,7 +26,6 @@ Contents ~
   14. The |g:easytags_include_members| option
   15. The |g:easytags_resolve_links| option
   16. The |g:easytags_suppress_ctags_warning| option
-  17. The |g:easytags_ignored_syntax_groups| option
  5. Customizing the easytags plug-in             |customizing-easytags-plug-in|
   1. Passing custom command line arguments to Exuberant Ctags |easytags-passing-custom-command-line-arguments-to-exuberant-ctags|
   2. Update & highlight tags immediately after save |easytags-update-highlight-tags-immediately-after-save|
@@ -443,13 +442,6 @@ is not found or not recent enough.
 >
   :let g:easytags_suppress_ctags_warning = 1
 <
--------------------------------------------------------------------------------
-The *g:easytags_ignored_syntax_groups* option
-
-This variable is a string of comma separated names of syntax groups in which
-dynamic highlighting is not applied. It defaults to
-'.*String.*,.*Comment.*,cIncluded'.
-
 ===============================================================================
                                                  *customizing-easytags-plug-in*
 Customizing the easytags plug-in ~

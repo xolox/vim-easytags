@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 19, 2013
+" Last Change: June 20, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.8'
+let g:xolox#easytags#version = '3.3.9'
 
 " Public interface through (automatic) commands. {{{1
 
@@ -383,7 +383,7 @@ function! xolox#easytags#highlight() " {{{2
             let matches = xolox#misc#list#unique(map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))'))
             let pattern = tagkind.pattern_prefix . '\%(' . join(matches, '\|') . '\)' . tagkind.pattern_suffix
             let template = 'syntax match %s /%s/ containedin=ALLBUT,%s'
-            let command = printf(template, hlgroup_tagged, escape(pattern, '/'), xolox#misc#option#get('easytags_ignored_syntax_groups'))
+            let command = printf(template, hlgroup_tagged, escape(pattern, '/'), xolox#easytags#syntax_groups_to_ignore())
             call xolox#misc#msg#debug("easytags.vim %s: Executing command '%s'.", g:xolox#easytags#version, command)
             try
               execute command
@@ -670,6 +670,32 @@ function! xolox#easytags#get_tagsfile() " {{{2
   return tagsfile
 endfunction
 
+function! xolox#easytags#syntax_groups_to_ignore() " {{{2
+  " Get a string matching the syntax groups where dynamic highlighting should
+  " *not* apply. This is complicated by the fact that Vim has a tendency to do
+  " this:
+  "
+  "     Vim(syntax):E409: Unknown group name: doxygen.*
+  "
+  " This happens when a group wildcard doesn't match *anything*. Why does Vim
+  " always have to make everything so complicated? :-(
+  let groups = ['.*String.*', '.*Comment.*']
+  for group_name in ['cIncluded', 'cCppOut2', 'cCppInElse2', 'cCppOutIf2']
+    if hlexists(group_name)
+      call add(groups, group_name)
+    endif
+  endfor
+  " Doxygen is an "add-on syntax script", it's usually used in combination:
+  "   :set syntax=c.doxygen
+  " It gets special treatment because it defines a dozen or so groups :-)
+  if hlexists('doxygenComment')
+    call add(groups, 'doxygen.*')
+  endif
+  return join(groups, ',')
+filetype
+
+endfunction
+
 " Public API for definition of file type specific dynamic syntax highlighting. {{{1
 
 function! xolox#easytags#define_tagkind(object) " {{{2
@@ -780,7 +806,7 @@ function! s:highlight_with_python(syntax_group, tagkind) " {{{2
     let context['prefix'] = get(a:tagkind, 'pattern_prefix', '')
     let context['suffix'] = get(a:tagkind, 'pattern_suffix', '')
     let context['filters'] = get(a:tagkind, 'python_filter', {})
-    let context['ignoresyntax'] = xolox#misc#option#get('easytags_ignored_syntax_groups')
+    let context['ignoresyntax'] = xolox#easytags#syntax_groups_to_ignore()
     " Call the Python function and intercept the output.
     try
       redir => commands
