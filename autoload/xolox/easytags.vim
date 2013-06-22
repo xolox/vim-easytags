@@ -3,7 +3,7 @@
 " Last Change: June 22, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.11'
+let g:xolox#easytags#version = '3.3.12'
 
 " Plug-in initialization. {{{1
 
@@ -54,25 +54,36 @@ function! xolox#easytags#check_ctags_compatible(name, min_version) " {{{2
   " This function makes sure it is because the easytags plug-in requires the
   " --list-languages option (and more).
   call xolox#misc#msg#debug("easytags.vim %s: Checking if Exuberant Ctags is installed as '%s'.", g:xolox#easytags#version, a:name)
-  if executable(a:name)
-    let command = a:name . ' --version'
-    let result = xolox#misc#os#exec({'command': command, 'check': 0})
-    if result['exit_code'] == 0
-      let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
-      let g:easytags_ctags_version = matchstr(get(result['stdout'], 0, ''), pattern)
-      call xolox#misc#msg#debug("easytags.vim %s: Executable '%s' reported version '%s'.", g:xolox#easytags#version, a:name, g:easytags_ctags_version)
-      if g:easytags_ctags_version == 'Development'
-        call xolox#misc#msg#debug("easytags.vim %s: Assuming development build is compatible ..", g:xolox#easytags#version, a:name)
-        return 1
-      elseif xolox#misc#version#at_least(a:min_version, g:easytags_ctags_version)
-        call xolox#misc#msg#debug("easytags.vim %s: Version is compatible! :-)", g:xolox#easytags#version)
-        return 1
-      else
-        call xolox#misc#msg#debug("easytags.vim %s: Version is not compatible! :-(", g:xolox#easytags#version)
-        return 0
-      endif
+  " Make sure the given program is executable.
+  if !executable(a:name)
+    call xolox#misc#msg#debug("easytags.vim %s: Program '%s' is not executable!", g:xolox#easytags#version, a:name)
+    return 0
+  endif
+  " Make sure the command exits without reporting an error.
+  let command = a:name . ' --version'
+  let result = xolox#misc#os#exec({'command': command, 'check': 0})
+  if result['exit_code'] != 0
+    call xolox#misc#msg#debug("easytags.vim %s: Command '%s' returned nonzero exit code %i!", g:xolox#easytags#version, a:name, result['exit_code'])
+  else
+    " Extract the version number from the output.
+    let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
+    let g:easytags_ctags_version = matchstr(get(result['stdout'], 0, ''), pattern)
+    " Deal with development builds.
+    if g:easytags_ctags_version == 'Development'
+      call xolox#misc#msg#debug("easytags.vim %s: Assuming development build is compatible ..", g:xolox#easytags#version, a:name)
+      return 1
+    endif
+    " Make sure the version is compatible.
+    if xolox#misc#version#at_least(a:min_version, g:easytags_ctags_version)
+      call xolox#misc#msg#debug("easytags.vim %s: Version is compatible! :-)", g:xolox#easytags#version)
+      return 1
+    else
+      call xolox#misc#msg#debug("easytags.vim %s: Version is not compatible! :-(", g:xolox#easytags#version)
     endif
   endif
+  call xolox#misc#msg#debug("easytags.vim %s: Standard output of command: %s", g:xolox#easytags#version, string(result['stdout']))
+  call xolox#misc#msg#debug("easytags.vim %s: Standard error of command: %s", g:xolox#easytags#version, string(result['stderr']))
+  return 0
 endfunction
 
 function! xolox#easytags#register(global) " {{{2
