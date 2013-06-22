@@ -1,11 +1,79 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 20, 2013
+" Last Change: June 22, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.9'
+let g:xolox#easytags#version = '3.3.10'
 
-" Public interface through (automatic) commands. {{{1
+" Plug-in initialization. {{{1
+
+function! xolox#easytags#initialize(min_version) " {{{2
+  " Check that the location of Exuberant Ctags has been configured or that the
+  " correct version of the program exists in one of its default locations.
+  if exists('g:easytags_cmd') && xolox#easytags#check_ctags_compatible(g:easytags_cmd, a:min_version)
+    return 1
+  endif
+  if xolox#misc#os#is_win()
+    " FIXME The code below that searches the $PATH is not used on Windows at
+    " the moment because xolox#misc#path#which() generally produces absolute
+    " paths and on Windows these absolute paths tend to contain spaces which
+    " makes xolox#shell#execute_with_dll() fail. I've tried quoting the
+    " program name with double quotes but it fails just the same (it works
+    " with system() though). Anyway the problem of having multiple conflicting
+    " versions of Exuberant Ctags installed is not that relevant to Windows
+    " since it doesn't have a package management system. I still want to fix
+    " xolox#shell#execute_with_dll() though.
+    if xolox#easytags#check_ctags_compatible('ctags', a:min_version)
+      let g:easytags_cmd = 'ctags'
+      return 1
+    endif
+  else
+    " Exuberant Ctags can be installed under several names:
+    "  - On Ubuntu Linux, Exuberant Ctags is installed as `ctags-exuberant'
+    "    (and possibly `ctags' but that one can't be trusted :-)
+    "  - On Debian Linux, Exuberant Ctags is installed as `exuberant-ctags'.
+    "  - On Free-BSD, Exuberant Ctags is installed as `exctags'.
+    " IIUC on Mac OS X the program /usr/bin/ctags is installed by default but
+    " unusable and when the user installs Exuberant Ctags in an alternative
+    " location, it doesn't come before /usr/bin/ctags in the search path. To
+    " solve this problem in a general way and to save every Mac user out there
+    " some frustration the plug-in will search the path and consider every
+    " possible location, meaning that as long as Exuberant Ctags is installed
+    " in the $PATH the plug-in should find it automatically.
+    for program in xolox#misc#path#which('exuberant-ctags', 'ctags-exuberant', 'ctags', 'exctags')
+      if xolox#easytags#check_ctags_compatible(program, a:min_version)
+        let g:easytags_cmd = program
+        return 1
+      endif
+    endfor
+  endif
+endfunction
+
+function! xolox#easytags#check_ctags_compatible(name, min_version) " {{{2
+  " Not every executable out there named `ctags' is in fact Exuberant Ctags.
+  " This function makes sure it is because the easytags plug-in requires the
+  " --list-languages option (and more).
+  call xolox#misc#msg#debug("easytags.vim %s: Checking if Exuberant Ctags is installed as '%s'.", g:xolox#easytags#version, a:name)
+  if executable(a:name)
+    let command = a:name . ' --version'
+    let result = xolox#misc#os#exec({'command': command, 'check': 0})
+    if result['exit_code'] == 0
+      let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
+      let g:easytags_ctags_version = matchstr(get(result['stdout'], 0, ''), pattern)
+      call xolox#misc#msg#debug("easytags.vim %s: Executable '%s' reported version '%s'.", g:xolox#easytags#version, a:name, g:easytags_ctags_version)
+      if g:easytags_ctags_version == 'Development'
+        call xolox#misc#msg#debug("easytags.vim %s: Assuming development build is compatible ..", g:xolox#easytags#version, a:name)
+        return 1
+      elseif xolox#misc#version#at_least(a:min_version, g:easytags_ctags_version)
+        call xolox#misc#msg#debug("easytags.vim %s: Version is compatible! :-)", g:xolox#easytags#version)
+        return 1
+      else
+        call xolox#misc#msg#debug("easytags.vim %s: Version is not compatible! :-(", g:xolox#easytags#version)
+        return 0
+      endif
+    endif
+  endif
+endfunction
 
 function! xolox#easytags#register(global) " {{{2
   " Parse the &tags option and get a list of all tags files *including
@@ -33,6 +101,8 @@ function! xolox#easytags#register(global) " {{{2
     endif
   endif
 endfunction
+
+" Public interface through (automatic) commands. {{{1
 
 " The localtime() when the CursorHold event last fired.
 let s:last_automatic_run = 0

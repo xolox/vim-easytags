@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 20, 2013
+" Last Change: June 22, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -48,96 +48,31 @@ if !exists('g:easytags_python_script')
   let g:easytags_python_script = expand('<sfile>:p:h') . '/../misc/easytags/highlight.py'
 endif
 
-function! s:InitEasyTags(version)
-  " Check that the location of Exuberant Ctags has been configured or that the
-  " correct version of the program exists in one of its default locations.
-  if exists('g:easytags_cmd') && s:CheckCtags(g:easytags_cmd, a:version)
-    return 1
-  endif
-  if xolox#misc#os#is_win()
-    " FIXME The code below that searches the $PATH is not used on Windows at
-    " the moment because xolox#misc#path#which() generally produces absolute
-    " paths and on Windows these absolute paths tend to contain spaces which
-    " makes xolox#shell#execute_with_dll() fail. I've tried quoting the
-    " program name with double quotes but it fails just the same (it works
-    " with system() though). Anyway the problem of having multiple conflicting
-    " versions of Exuberant Ctags installed is not that relevant to Windows
-    " since it doesn't have a package management system. I still want to fix
-    " xolox#shell#execute_with_dll() though.
-    if s:CheckCtags('ctags', a:version)
-      let g:easytags_cmd = 'ctags'
-      return 1
-    endif
-  else
-    " Exuberant Ctags can be installed under multiple names:
-    "  - On Ubuntu Linux, Exuberant Ctags is installed as `ctags-exuberant'
-    "    (and possibly `ctags' but that one can't be trusted :-)
-    "  - On Debian Linux, Exuberant Ctags is installed as `exuberant-ctags'.
-    "  - On Free-BSD, Exuberant Ctags is installed as `exctags'.
-    " IIUC on Mac OS X the program /usr/bin/ctags is installed by default but
-    " unusable and when the user installs Exuberant Ctags in an alternative
-    " location, it doesn't come before /usr/bin/ctags in the search path. To
-    " solve this problem in a general way and to save every Mac user out there
-    " some frustration the plug-in will search the path and consider every
-    " possible location, meaning that as long as Exuberant Ctags is installed
-    " in the $PATH the plug-in should find it automatically.
-    for program in xolox#misc#path#which('exuberant-ctags', 'ctags-exuberant', 'ctags', 'exctags')
-      if s:CheckCtags(program, a:version)
-        let g:easytags_cmd = program
-        return 1
-      endif
-    endfor
-  endif
-endfunction
-
-function! s:CheckCtags(name, version)
-  " Not every executable out there named `ctags' is in fact Exuberant Ctags.
-  " This function makes sure it is because the easytags plug-in requires the
-  " --list-languages option (and more).
-  if executable(a:name)
-    let command = a:name . ' --version'
-    let result = xolox#misc#os#exec({'command': command, 'check': 0})
-    if result['exit_code'] == 0
-      let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
-      let g:easytags_ctags_version = matchstr(result['stdout'][0], pattern)
-      if g:easytags_ctags_version == 'Development'
-        return 1
+" Make sure Exuberant Ctags >= 5.5 is installed.
+if !xolox#easytags#initialize('5.5')
+  " Did the user configure the plug-in to suppress the regular warning message?
+  if !(exists('g:easytags_suppress_ctags_warning') && g:easytags_suppress_ctags_warning)
+    " Explain to the user what went wrong:
+    if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
+      " Exuberant Ctags is not installed / could not be found.
+      let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags isn't installed!"
+      if executable('apt-get')
+        let s:msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
+        let s:msg .= " installing the package named `exuberant-ctags':"
+        let s:msg .= " sudo apt-get install exuberant-ctags"
       else
-        return s:VersionToNumber(g:easytags_ctags_version) >= a:version
+        let s:msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
       endif
-    endif
-  endif
-endfunction
-
-function! s:VersionToNumber(s)
-  let values = split(a:s, '\.')
-  if len(values) == 1
-    return values[0] * 10
-  elseif len(values) >= 2
-    return values[0] * 10 + values[1][0]
-  endif
-endfunction
-
-if !s:InitEasyTags(55)
-  if exists('g:easytags_suppress_ctags_warning') && g:easytags_suppress_ctags_warning
-    finish
-  endif
-  if !exists('g:easytags_ctags_version') || empty(g:easytags_ctags_version)
-    let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags isn't installed!"
-    if executable('apt-get')
-      let s:msg .= " On Ubuntu & Debian you can install Exuberant Ctags by"
-      let s:msg .= " installing the package named `exuberant-ctags':"
-      let s:msg .= " sudo apt-get install exuberant-ctags"
+      call xolox#misc#msg#warn(s:msg, g:xolox#easytags#version)
     else
-      let s:msg .= " Please download & install Exuberant Ctags from http://ctags.sf.net"
+      " The installed version is too old.
+      let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags 5.5"
+      let s:msg .= " or newer is required while you have version %s installed!"
+      call xolox#misc#msg#warn(s:msg, g:xolox#easytags#version, g:easytags_ctags_version)
     endif
-    echomsg printf(s:msg, g:xolox#easytags#version)
-  else
-    let s:msg = "easytags.vim %s: Plug-in not loaded because Exuberant Ctags 5.5"
-    let s:msg .= " or newer is required while you have version %s installed!"
-    echomsg printf(s:msg, g:xolox#easytags#version, g:easytags_ctags_version)
+    unlet s:msg
   endif
-  unlet s:msg
+  " Stop loading the plug-in; don't define the (automatic) commands.
   finish
 endif
 
