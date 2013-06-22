@@ -3,7 +3,7 @@
 " Last Change: June 22, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.10'
+let g:xolox#easytags#version = '3.3.11'
 
 " Plug-in initialization. {{{1
 
@@ -242,7 +242,7 @@ endfunction
 function! s:prep_cmdline(cfile, tagsfile, firstrun, arguments, context) " {{{3
   let languages = xolox#misc#option#get('easytags_languages', {})
   let applicable_filetypes = xolox#easytags#select_supported_filetypes(&ft)
-  let ctags_language_name = xolox#easytags#to_ctags_ft(applicable_filetypes[0])
+  let ctags_language_name = xolox#easytags#to_ctags_ft(get(applicable_filetypes, 0, ''))
   let language = get(languages, ctags_language_name, {})
   if empty(language)
     let program = xolox#misc#option#get('easytags_cmd')
