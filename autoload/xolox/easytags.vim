@@ -1052,11 +1052,17 @@ call xolox#easytags#define_tagkind({
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
+      \ 'hlgroup': 'javaInterface',
+      \ 'tagkinds': 'i'})
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'java',
       \ 'hlgroup': 'javaMethod',
       \ 'tagkinds': 'm'})
 
 highlight def link javaClass Identifier
 highlight def link javaMethod Function
+highlight def link javaInterface Identifier
 
 " C#. {{{2
 
