@@ -228,7 +228,7 @@ The easytags plug-in defines new highlighting groups for dynamically highlighted
  * **AWK**: `awkFunctionTag`
  * **C#:** `csClassOrStructTag`, `csMethodTag`
  * **C, C++, Objective C:** `cTypeTag`, `cEnumTag`, `cPreProcTag`, `cFunctionTag`, `cMemberTag`
- * **Java:** `javaClassTag`, `javaMethodTag`
+ * **Java:** `javaClassTag`, `javaInterfaceTag`, `javaMethodTag`
  * **Lua:** `luaFuncTag`
  * **PHP:** `phpFunctionsTag`, `phpClassesTag`
  * **Python:** `pythonFunctionTag`, `pythonMethodTag`, `pythonClassTag`

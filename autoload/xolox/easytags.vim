@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 22, 2013
+" Last Change: July 16, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.3.12'
+let g:xolox#easytags#version = '3.4'
 
 " Plug-in initialization. {{{1
 
@@ -1052,11 +1052,17 @@ call xolox#easytags#define_tagkind({
 
 call xolox#easytags#define_tagkind({
       \ 'filetype': 'java',
+      \ 'hlgroup': 'javaInterface',
+      \ 'tagkinds': 'i'})
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'java',
       \ 'hlgroup': 'javaMethod',
       \ 'tagkinds': 'm'})
 
 highlight def link javaClass Identifier
 highlight def link javaMethod Function
+highlight def link javaInterface Identifier
 
 " C#. {{{2
 
