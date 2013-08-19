@@ -647,7 +647,7 @@ easytags. If you like this plug-in please vote for it on Vim Online [21].
                                                              *easytags-license*
 License ~
 
-This software is licensed under the MIT license [22]. © 2013 Peter Odding
+This software is licensed under the MIT license [22]. ÂŠ 2013 Peter Odding
 <peter@peterodding.com>.
 
 ===============================================================================
