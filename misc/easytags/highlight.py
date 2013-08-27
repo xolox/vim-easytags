@@ -23,7 +23,7 @@ def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffi
     if filters:
         tagkinds = filters['kind']
     # Shallow parse tags files for matching identifiers.
-    pattern = '^([^\t]+)\t[^\t]+\t[^\t]+\t' + tagkinds + '\tlanguage:' + filetype
+    pattern = '^([^\t]+)\t[^\t]+\t[^\t]+\t' + tagkinds + '\tlanguage:' + filetype.replace('+', '\+')
     compiled_pattern = re.compile(pattern, re.IGNORECASE)
     matches = {}
     for fname in tagsfiles:
