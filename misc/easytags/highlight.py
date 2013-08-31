@@ -5,7 +5,7 @@ syntax highlighting by reimplementing tag file reading and :syntax command
 generation in Python with a focus on doing the least amount of work.
 
 Author: Peter Odding <peter@peterodding.com>
-Last Change: October 29, 2011
+Last Change: August 31, 2013
 URL: http://peterodding.com/code/vim/easytags
 '''
 
@@ -23,7 +23,7 @@ def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffi
     if filters:
         tagkinds = filters['kind']
     # Shallow parse tags files for matching identifiers.
-    pattern = '^([^\t]+)\t[^\t]+\t[^\t]+\t' + tagkinds + '\tlanguage:' + filetype
+    pattern = '^([^\t]+)\t[^\t]+\t[^\t]+\t' + tagkinds + '\tlanguage:' + re.escape(filetype)
     compiled_pattern = re.compile(pattern, re.IGNORECASE)
     matches = {}
     for fname in tagsfiles:
