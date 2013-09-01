@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 31, 2013
+" Last Change: September 1, 2013
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.4.2'
+let g:xolox#easytags#version = '3.4.3'
 
 " Plug-in initialization. {{{1
 
@@ -566,19 +566,21 @@ function! xolox#easytags#supported_filetypes() " {{{2
       let command = g:easytags_cmd . ' --list-languages'
       let listing = xolox#misc#os#exec({'command': command})['stdout']
     endif
-    let s:supported_filetypes = map(copy(listing) + keys(xolox#misc#option#get('easytags_languages', {})), 's:check_filetype(listing, v:val)')
+    let s:supported_filetypes = keys(xolox#misc#option#get('easytags_languages', {}))
+    for line in listing
+      if line =~ '\[disabled\]$'
+        " Ignore languages that have been explicitly disabled using `--languages=-Vim'.
+        continue
+      elseif line =~ '^\w\S*$'
+        call add(s:supported_filetypes, xolox#easytags#to_vim_ft(line))
+      elseif line =~ '\S'
+        call xolox#misc#msg#warn("easytags.vim %s: Failed to parse line of output from ctags --list-languages: %s", g:xolox#easytags#version, string(line))
+      endif
+    endfor
     let msg = "easytags.vim %s: Retrieved %i supported languages in %s."
     call xolox#misc#timer#stop(msg, g:xolox#easytags#version, len(s:supported_filetypes), starttime)
   endif
   return s:supported_filetypes
-endfunction
-
-function! s:check_filetype(listing, cline)
-  if a:cline !~ '^\w\S*$'
-    let msg = "Failed to get supported languages! (output: %s)"
-    throw printf(msg, strtrans(join(a:listing, "\n")))
-  endif
-  return xolox#easytags#to_vim_ft(a:cline)
 endfunction
 
 function! xolox#easytags#select_supported_filetypes(vim_ft) " {{{2
