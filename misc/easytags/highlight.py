@@ -5,7 +5,7 @@ syntax highlighting by reimplementing tag file reading and :syntax command
 generation in Python with a focus on doing the least amount of work.
 
 Author: Peter Odding <peter@peterodding.com>
-Last Change: August 31, 2013
+Last Change: March 8, 2014
 URL: http://peterodding.com/code/vim/easytags
 '''
 
@@ -39,7 +39,7 @@ def easytags_gensyncmd(tagsfiles, filetype, tagkinds, syntaxgroup, prefix, suffi
     counter, limit = 0, 1024 * 20
     to_escape = re.compile(r'[.*^$/\\~\[\]]')
     for ident in matches.keys():
-        escaped = to_escape.sub(r'\\\0', ident)
+        escaped = to_escape.sub(r'\\\g<0>', ident)
         patterns.append(escaped)
         counter += len(escaped)
         if counter > limit:
