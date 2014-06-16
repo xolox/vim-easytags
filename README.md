@@ -313,8 +313,8 @@ If you have questions, bug reports, suggestions, etc. the author can be contacte
 
 ## License
 
-This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).  
-© 2013 Peter Odding &lt;<peter@peterodding.com>&gt;.
+This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
+© 2014 Peter Odding &lt;<peter@peterodding.com>&gt;.
 
 
 [canon]: http://en.wikipedia.org/wiki/Canonicalization
