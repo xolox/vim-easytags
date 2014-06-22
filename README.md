@@ -62,6 +62,14 @@ The plug-in will try to determine the location where Exuberant Ctags is installe
 
 If you rely entirely on language-specific configuration and don't have a general ctags program, set this to the empty string.
 
+### The `g:easytags_async` option
+
+By default vim-easytags runs Exuberant Ctags and updates your tags file in the foreground, blocking Vim in the process. As your tags files get larger this becomes more annoying. It has been the number one complaint about vim-easytags since I published the first release online.
+
+In version 3.5 of the vim-easytags plug-in support for asynchronous tags file updates was added. It's not enabled by default yet because I want to make sure I'm not breaking the plug-in for the majority of users. However after I've gathered some feedback I definitely want to make this the default mode.
+
+By setting this option to true (1) you enable asynchronous tags file updates. Good luck! ;-)
+
 ### The `g:easytags_languages` option
 
 Exuberant Ctags supports many languages and can be extended via regular expression patterns, but for some languages separate tools with ctags-compatible output exist (e.g. [jsctags] [jsctags] for Javascript). To use these, the executable and its arguments must be configured:
@@ -76,9 +84,7 @@ Exuberant Ctags supports many languages and can be extended via regular expressi
     \   }
     \}
 
-Each key is a special language definition. The key is in the notation of ctags in lowercase; you still need to use `xolox#easytags#map_filetypes()` to map this to Vim's filetypes, if necessary.
-
-Above snippets shows the defaults; you only need to specify options that differ.
+Each key is a special language definition. The key is a Vim file type in lowercase. The above snippet shows the defaults; you only need to specify options that differ.
 
 ### The `g:easytags_file` option
 
@@ -141,21 +147,13 @@ Note: Like the `g:easytags_always_enabled` option, if you change this option it 
 
 ### The `g:easytags_updatetime_min` option
 
-Vim's ['updatetime'] [updatetime] option controls how often the easytags plug-in is automatically executed. A lot of popular Vim plug-ins manipulate this option to control how often they are called. Unfortunately some of those plug-ins set ['updatetime'] [updatetime] to a very low value (less than a second) and this can break the easytags plug-in.
-
-Because of this the easytags plug-in compensates by keeping track of when it was last executed. You'll get one warning when the plug-in first notices a very low value of ['updatetime'] [updatetime], after that the plug-in will shut up (until you restart Vim) and simply compensate by not executing until its time has come. If you want to silence the warning message forever, see the `g:easytags_updatetime_warn` option.
+Vim's ['updatetime'] [updatetime] option controls how often the easytags plug-in is automatically executed. A lot of popular Vim plug-ins manipulate this option to control how often they are called. Unfortunately some of those plug-ins set ['updatetime'] [updatetime] to a very low value (less than a second) and this can break the easytags plug-in. Because of this the easytags plug-in compensates by keeping track of when it was last executed.
 
 The default value of Vim's ['updatetime] [updatetime] option *and* the `g:easytags_updatetime_min` option is 4000 milliseconds (4 seconds).
 
 If you know what you're doing and you really want the easytags plug-in to be executed more than once every 4 seconds you can lower the minimum acceptable updatetime by setting `g:easytags_updatetime_min` to the number of milliseconds (an integer).
 
 Note that although `g:easytags_updatetime_min` counts in milliseconds, the easytags plug-in does not support subsecond granularity because it is limited by Vim's [localtime()] [localtime] function which has one-second resolution.
-
-### The `g:easytags_updatetime_warn` option
-
-Since the easytags plug-in now compensates for low ['updatetime'] [updatetime] values (see the `g:easytags_updatetime_min` option above) the warning message shown by the easytags plug-in has become kind of redundant (and probably annoying?). For now it can be completely disabled by setting `g:easytags_updatetime_warn` to 0 (false).
-
-When the feature that compensates for low ['updatetime'] [updatetime] values has proven to be a reliable workaround I will probably remove the warning message and the `g:easytags_updatetime_warn` option.
 
 ### The `g:easytags_auto_update` option
 
