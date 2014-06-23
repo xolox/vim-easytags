@@ -254,6 +254,9 @@ endfunction
 function! s:create_cache() " {{{1
   let cache = {'canonicalize_cache': {}, 'exists_cache': {}}
   function cache.canonicalize(pathname) dict
+    if a:pathname == ''
+      return ''
+    endif
     if !has_key(self, a:pathname)
       let self[a:pathname] = xolox#easytags#utils#canonicalize(a:pathname)
     endif
