@@ -173,7 +173,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
       let params['directory'] = xolox#misc#path#absolute(g:easytags_by_filetype)
       let params['filetypes'] = g:xolox#easytags#filetypes#ctags_to_vim
     else
-      let params['tagsfile'] = tagsfile
+      let params['tagsfile'] = (async ? fnamemodify(tagsfile, ':p') : tagsfile) " Need to pass full absolute path to the forked process.
     endif
     if async
       call xolox#misc#async#call({'function': 'xolox#easytags#update#with_vim', 'arguments': [params], 'callback': 'xolox#easytags#async_callback'})
