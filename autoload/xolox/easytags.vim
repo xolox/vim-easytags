@@ -117,7 +117,8 @@ endfunction
 
 function! xolox#easytags#autoload(event) " {{{2
   try
-    let do_update = xolox#misc#option#get('easytags_auto_update', 1)
+    let session_loading = xolox#easytags#session_is_loading() && a:event == 'BufReadPost'
+    let do_update = xolox#misc#option#get('easytags_auto_update', 1) && !session_loading
     let do_highlight = xolox#misc#option#get('easytags_auto_highlight', 1) && &eventignore !~? '\<syntax\>'
     " Don't execute this function for unsupported file types (doesn't load
     " the list of file types if updates and highlighting are both disabled).
@@ -406,6 +407,10 @@ function! xolox#easytags#async_callback(response) " {{{2
   else
     call xolox#misc#msg#warn("easytags.vim %s: Asynchronous tags file update failed! (%s at %s)", g:xolox#easytags#version, a:response['exception'], a:response['throwpoint'])
   endif
+endfunction
+
+function! xolox#easytags#session_is_loading() " {{{2
+  return exists('g:SessionLoad')
 endfunction
 
 function! xolox#easytags#disable_automatic_updates() " {{{2
