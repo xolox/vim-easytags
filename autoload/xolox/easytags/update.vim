@@ -222,6 +222,11 @@ function! xolox#easytags#update#write_tagsfile(tagsfile, headers, entries) " {{{
     call extend(lines, a:headers)
     call extend(lines, a:entries)
   endif
+  " Make sure the directory exists.
+  let directory = fnamemodify(a:tagsfile, ':h')
+  if !isdirectory(directory)
+    call mkdir(directory, 'p')
+  endif
   " Write the new contents to a temporary file and atomically rename the
   " temporary file into place while preserving the file's permissions.
   return xolox#misc#perm#update(a:tagsfile, lines)
