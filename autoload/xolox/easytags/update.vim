@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 22, 2014
+" Last Change: June 29, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This Vim auto-load script contains the parts of vim-easytags that are used
@@ -254,10 +254,13 @@ endfunction
 function! s:create_cache() " {{{1
   let cache = {'canonicalize_cache': {}, 'exists_cache': {}}
   function cache.canonicalize(pathname) dict
-    if !has_key(self, a:pathname)
-      let self[a:pathname] = xolox#easytags#utils#canonicalize(a:pathname)
+    if !empty(a:pathname)
+      if !has_key(self, a:pathname)
+        let self[a:pathname] = xolox#easytags#utils#canonicalize(a:pathname)
+      endif
+      return self[a:pathname]
     endif
-    return self[a:pathname]
+    return ''
   endfunction
   function cache.exists(pathname) dict
     if !has_key(self, a:pathname)
