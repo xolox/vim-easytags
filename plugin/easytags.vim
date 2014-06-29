@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 22, 2014
+" Last Change: June 29, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -122,6 +122,11 @@ augroup PluginEasyTags
   " After reloading a buffer the dynamic syntax highlighting is lost. The
   " following code makes sure the highlighting is refreshed afterwards.
   autocmd BufReadPost * unlet! b:easytags_last_highlighted
+  " During :vimgrep each searched buffer triggers an asynchronous tags file
+  " update resulting in races for the tags file. To avoid this we temporarily
+  " disable automatic tags file updates during :vimgrep.
+  "autocmd QuickFixCmdPre *vimgrep* call xolox#easytags#disable_automatic_updates()
+  "autocmd QuickFixCmdPost *vimgrep* call xolox#easytags#restore_automatic_updates()
 augroup END
 
 " Use vim-misc to register an event handler for Vim's CursorHold and

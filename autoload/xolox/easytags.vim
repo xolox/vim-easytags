@@ -408,6 +408,18 @@ function! xolox#easytags#async_callback(response) " {{{2
   endif
 endfunction
 
+function! xolox#easytags#disable_automatic_updates() " {{{2
+  let s:easytags_auto_update_save = xolox#misc#option#get('easytags_auto_update', 1)
+  let g:easytags_auto_update = 0
+endfunction
+
+function! xolox#easytags#restore_automatic_updates() " {{{2
+  if exists('s:easytags_auto_update_save')
+    let g:easytags_auto_update = s:easytags_auto_update_save
+    unlet s:easytags_auto_update_save
+  else
+endfunction
+
 " Public API for definition of file type specific dynamic syntax highlighting. {{{1
 
 function! xolox#easytags#define_tagkind(object) " {{{2
