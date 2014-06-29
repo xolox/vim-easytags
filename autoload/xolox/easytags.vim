@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 22, 2014
+" Last Change: June 29, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 let g:xolox#easytags#version = '3.5'
@@ -425,7 +425,7 @@ endfunction
 
 " Miscellaneous script-local functions. {{{1
 
-function! s:report_results(response, async) " {{{1
+function! s:report_results(response, async) " {{{2
   let actions = []
   if a:response['num_updated'] > 0
     call add(actions, printf('updated %i tags', a:response['num_updated']))
@@ -434,8 +434,10 @@ function! s:report_results(response, async) " {{{1
     call add(actions, printf('filtered %i invalid tags', a:response['num_filtered']))
   endif
   if !empty(actions)
+    let function = a:async ? 'xolox#misc#msg#debug' : 'xolox#misc#msg#info'
     let actions_string = xolox#misc#str#ucfirst(join(actions, ' and '))
-    call xolox#misc#msg#info("easytags.vim %s: %s in %s (%s).", g:xolox#easytags#version, actions_string, a:response['elapsed_time'], a:async ? 'asynchronously' : 'synchronously')
+    let command_type = a:async ? 'asynchronously' : 'synchronously'
+    call call(function, ["easytags.vim %s: %s in %s (%s).", g:xolox#easytags#version, actions_string, a:response['elapsed_time'], command_type])
   endif
 endfunction
 
