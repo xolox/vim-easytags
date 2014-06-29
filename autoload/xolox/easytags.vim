@@ -378,7 +378,7 @@ function! xolox#easytags#get_tagsfile() " {{{2
     let message = "The tags file %s isn't writable!"
     throw printf(message, fnamemodify(tagsfile, ':~'))
   endif
-  return tagsfile
+  return xolox#misc#path#absolute(tagsfile)
 endfunction
 
 function! xolox#easytags#syntax_groups_to_ignore() " {{{2
