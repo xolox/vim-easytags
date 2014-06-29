@@ -254,18 +254,24 @@ endfunction
 function! s:create_cache() " {{{1
   let cache = {'canonicalize_cache': {}, 'exists_cache': {}}
   function cache.canonicalize(pathname) dict
+    let cache = self['canonicalize_cache']
     if !empty(a:pathname)
-      if !has_key(self, a:pathname)
-        let self[a:pathname] = xolox#easytags#utils#canonicalize(a:pathname)
+      if !has_key(cache, a:pathname)
+        let cache[a:pathname] = xolox#easytags#utils#canonicalize(a:pathname)
       endif
-      return self[a:pathname]
+      return cache[a:pathname]
     endif
     return ''
   endfunction
   function cache.exists(pathname) dict
-    if !has_key(self, a:pathname)
-      let self[a:pathname] = filereadable(a:pathname)
+    let cache = self['exists_cache']
+    if !empty(a:pathname)
+      if !has_key(cache, a:pathname)
+        let cache[a:pathname] = filereadable(a:pathname)
+      endif
+      return cache[a:pathname]
     endif
+    return 0
   endfunction
   return cache
 endfunction
