@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 29, 2014
+" Last Change: June 30, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This Vim auto-load script contains the parts of vim-easytags that are used
@@ -222,8 +222,9 @@ function! xolox#easytags#update#write_tagsfile(tagsfile, headers, entries) " {{{
     call extend(lines, a:headers)
     call extend(lines, a:entries)
   endif
-  let tempname = a:tagsfile . '.easytags.tmp'
-  return writefile(lines, tempname) == 0 && rename(tempname, a:tagsfile) == 0
+  " Write the new contents to a temporary file and atomically rename the
+  " temporary file into place while preserving the file's permissions.
+  return xolox#misc#perm#update(a:tagsfile, lines)
 endfunction
 
 function! s:enumerate(list)
