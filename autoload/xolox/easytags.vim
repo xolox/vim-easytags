@@ -327,7 +327,11 @@ function! xolox#easytags#highlight() " {{{2
           endif
         endif
       endfor
-      redraw
+      " Avoid flashing each highlighted buffer in front of the user when
+      " loading a session.
+      if !xolox#easytags#session_is_loading()
+        redraw
+      endif
       let bufname = expand('%:p:~')
       if bufname == ''
         let bufname = 'unnamed buffer #' . bufnr('%')
