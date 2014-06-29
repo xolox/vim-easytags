@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 29, 2014
+" Last Change: June 30, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 let g:xolox#easytags#version = '3.5'
@@ -301,7 +301,7 @@ function! xolox#easytags#highlight() " {{{2
           if !exists('taglist')
             " Get the list of tags when we need it and remember the results.
             let ctags_filetypes = xolox#easytags#filetypes#find_ctags_aliases(filetype)
-            let filetypes_pattern = printf('^\(%s\)$', join(map(ctags_filetypes, 'xolox#misc#pattern#escape(v:val)'), '\|'))
+            let filetypes_pattern = printf('^\(%s\)$', join(map(ctags_filetypes, 'xolox#misc#escape#pattern(v:val)'), '\|'))
             let taglist = filter(taglist('.'), "get(v:val, 'language', '') =~? filetypes_pattern")
           endif
           " Filter a copy of the list of tags to the relevant kinds.
