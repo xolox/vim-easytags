@@ -125,8 +125,8 @@ augroup PluginEasyTags
   " During :vimgrep each searched buffer triggers an asynchronous tags file
   " update resulting in races for the tags file. To avoid this we temporarily
   " disable automatic tags file updates during :vimgrep.
-  "autocmd QuickFixCmdPre *vimgrep* call xolox#easytags#disable_automatic_updates()
-  "autocmd QuickFixCmdPost *vimgrep* call xolox#easytags#restore_automatic_updates()
+  autocmd QuickFixCmdPre *vimgrep* call xolox#easytags#disable_automatic_updates()
+  autocmd QuickFixCmdPost *vimgrep* call xolox#easytags#restore_automatic_updates()
 augroup END
 
 " Use vim-misc to register an event handler for Vim's CursorHold and
