@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 30, 2014
+" Last Change: July 1, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 let g:xolox#easytags#version = '3.5'
@@ -426,7 +426,7 @@ function! xolox#easytags#restore_automatic_updates() " {{{2
   if exists('s:easytags_auto_update_save')
     let g:easytags_auto_update = s:easytags_auto_update_save
     unlet s:easytags_auto_update_save
-  else
+  endif
 endfunction
 
 " Public API for definition of file type specific dynamic syntax highlighting. {{{1
