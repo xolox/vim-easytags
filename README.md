@@ -313,8 +313,10 @@ If you have questions, bug reports, suggestions, etc. the author can be contacte
 
 ## License
 
-This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
-© 2014 Peter Odding &lt;<peter@peterodding.com>&gt;.
+This software is licensed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).  
+© 2014 Peter Odding &lt;<peter@peterodding.com>&gt; and Ingo Karkat.
+
+Thanks go out to everyone who has helped to improve the vim-easytags plug-in (whether through pull requests, bug reports or personal e-mails).
 
 
 [canon]: http://en.wikipedia.org/wiki/Canonicalization
