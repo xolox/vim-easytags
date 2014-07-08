@@ -1,6 +1,6 @@
 " Vim plug-in
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 19, 2013
+" Last Change: June 29, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 " Requires: Exuberant Ctags (http://ctags.sf.net)
 
@@ -41,12 +41,12 @@ if !exists('g:easytags_by_filetype')
 endif
 
 if !exists('g:easytags_events')
-  let g:easytags_events = []
+  let g:easytags_events = ['BufWritePost']
   if !exists('g:easytags_on_cursorhold') || g:easytags_on_cursorhold
     call extend(g:easytags_events, ['CursorHold', 'CursorHoldI'])
   endif
   if exists('g:easytags_always_enabled') && g:easytags_always_enabled
-    call extend(g:easytags_events, ['BufReadPost', 'BufWritePost', 'FocusGained', 'ShellCmdPost', 'ShellFilterPost'])
+    call extend(g:easytags_events, ['BufReadPost', 'FocusGained', 'ShellCmdPost', 'ShellFilterPost'])
   endif
 endif
 
@@ -99,7 +99,7 @@ call xolox#easytags#register(1)
 
 command! -bar -bang -nargs=* -complete=file UpdateTags call xolox#easytags#update(0, <q-bang> == '!', [<f-args>])
 command! -bar HighlightTags call xolox#easytags#highlight()
-command! -bang TagsByFileType call xolox#easytags#by_filetype(<q-bang> == '!')
+command! -bang TagsByFileType call xolox#easytags#update#convert_by_filetype(<q-bang> == '!')
 
 " Automatic commands. {{{1
 
@@ -111,7 +111,9 @@ augroup PluginEasyTags
   autocmd VimEnter * call xolox#easytags#register(1)
   " Define the automatic commands to perform updating/highlighting.
   for s:eventname in g:easytags_events
-    execute 'autocmd' s:eventname '* call xolox#easytags#autoload(' string(s:eventname) ')'
+    if s:eventname !~? 'cursorhold'
+      execute 'autocmd' s:eventname '* call xolox#easytags#autoload(' string(s:eventname) ')'
+    endif
   endfor
   " Define an automatic command to register file type specific tags files?
   if !empty(g:easytags_by_filetype)
@@ -120,7 +122,19 @@ augroup PluginEasyTags
   " After reloading a buffer the dynamic syntax highlighting is lost. The
   " following code makes sure the highlighting is refreshed afterwards.
   autocmd BufReadPost * unlet! b:easytags_last_highlighted
+  " During :vimgrep each searched buffer triggers an asynchronous tags file
+  " update resulting in races for the tags file. To avoid this we temporarily
+  " disable automatic tags file updates during :vimgrep.
+  autocmd QuickFixCmdPre *vimgrep* call xolox#easytags#disable_automatic_updates()
+  autocmd QuickFixCmdPost *vimgrep* call xolox#easytags#restore_automatic_updates()
 augroup END
+
+" Use vim-misc to register an event handler for Vim's CursorHold and
+" CursorHoldI events which is rate limited so that our event handler is never
+" called more than once every interval.
+if index(g:easytags_events, 'CursorHold') >= 0
+  call xolox#misc#cursorhold#register({'function': 'xolox#easytags#autoload', 'arguments': ['CursorHold'], 'interval': xolox#misc#option#get('easytags_updatetime_min', 4000)/1000})
+endif
 
 " }}}1
 
