@@ -3,7 +3,9 @@
 " Last Change: July 9, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.2'
+let g:xolox#easytags#version = '3.6.3'
+let g:xolox#easytags#default_pattern_prefix = '\C\<'
+let g:xolox#easytags#default_pattern_suffix = '\>'
 
 " Plug-in initialization. {{{1
 
@@ -314,8 +316,10 @@ function! xolox#easytags#highlight() " {{{2
           if matches != []
             " Convert matched tags to :syntax commands and execute them.
             let use_keywords_when = xolox#misc#option#get('easytags_syntax_keyword', 'auto')
-            let tagkind_has_patterns = !(empty(tagkind.pattern_prefix) && empty(tagkind.pattern_suffix))
-            if use_keywords_when == 'always' || (use_keywords_when == 'auto' && !tagkind_has_patterns)
+            let has_default_pattern_prefix = (tagkind.pattern_prefix == g:xolox#easytags#default_pattern_prefix)
+            let has_default_pattern_suffix = (tagkind.pattern_suffix == g:xolox#easytags#default_pattern_suffix)
+            let has_non_default_patterns = !(has_default_pattern_prefix && has_default_pattern_suffix)
+            if use_keywords_when == 'always' || (use_keywords_when == 'auto' && !has_non_default_patterns)
               " Vim's ":syntax keyword" command doesn't use the regular
               " expression engine and the resulting syntax highlighting is
               " therefor much faster. Because of this we use the syntax
@@ -490,10 +494,10 @@ endfunction
 
 function! xolox#easytags#define_tagkind(object) " {{{2
   if !has_key(a:object, 'pattern_prefix')
-    let a:object.pattern_prefix = ''
+    let a:object.pattern_prefix = g:xolox#easytags#default_pattern_prefix
   endif
   if !has_key(a:object, 'pattern_suffix')
-    let a:object.pattern_suffix = ''
+    let a:object.pattern_suffix = g:xolox#easytags#default_pattern_suffix
   endif
   if !has_key(s:tagkinds, a:object.filetype)
     let s:tagkinds[a:object.filetype] = []
