@@ -3,7 +3,7 @@
 " Last Change: July 9, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.1'
+let g:xolox#easytags#version = '3.6.2'
 
 " Plug-in initialization. {{{1
 
@@ -375,9 +375,32 @@ endfunction
 function! s:is_keyword_compatible(tag)
   let name = get(a:tag, 'name', '')
   if !empty(name)
-    return name =~ '^\k\+$' && len(name) <= 80
+    " Make sure the tag contains only `keyword characters' (included in the
+    " &iskeyword option) and is not longer than 80 characters (these
+    " limitations are documented under :help :syn-keyword).
+    if name =~ '^\k\+$' && len(name) <= 80
+      " Make sure the tag doesn't conflict with one of the named options
+      " accepted by the `:syntax keyword' command (using these named options
+      " improperly, e.g. without a mandatory argument, will raise an error).
+      return !has_key(s:invalid_keywords, name)
   endif
+  return 0
 endfunction
+
+" These are documented under :help E395, except for "contains" which is not
+" documented as being forbidden but when used definitely triggers an error.
+let s:invalid_keywords = {
+      \ 'cchar': 1,
+      \ 'conceal': 1,
+      \ 'contained': 1,
+      \ 'containedin': 1,
+      \ 'contains': 1,
+      \ 'nextgroup': 1,
+      \ 'skipempty': 1,
+      \ 'skipnl': 1,
+      \ 'skipwhite': 1,
+      \ 'transparent': 1,
+      \ }
 
 " Public supporting functions (might be useful to others). {{{1
 
