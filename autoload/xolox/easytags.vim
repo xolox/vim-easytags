@@ -3,7 +3,7 @@
 " Last Change: July 9, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6'
+let g:xolox#easytags#version = '3.6.1'
 
 " Plug-in initialization. {{{1
 
@@ -322,15 +322,15 @@ function! xolox#easytags#highlight() " {{{2
               " keyword command when 1) we can do so without sacrificing
               " accuracy or 2) the user explicitly chose to sacrifice
               " accuracy in order to make the highlighting faster.
-              let keywords = []
+              let keywords = {}
               for tag in matches
                 if s:is_keyword_compatible(tag)
-                  call add(keywords, tag.name)
+                  let keywords[tag.name] = 1
                 endif
               endfor
               if !empty(keywords)
                 let template = 'syntax keyword %s %s containedin=ALLBUT,%s'
-                let command = printf(template, hlgroup_tagged, join(keywords), xolox#easytags#syntax_groups_to_ignore())
+                let command = printf(template, hlgroup_tagged, join(keys(keywords)), xolox#easytags#syntax_groups_to_ignore())
                 call xolox#misc#msg#debug("easytags.vim %s: Executing command '%s'.", g:xolox#easytags#version, command)
                 execute command
                 " Remove the tags that we just highlighted from the list of
