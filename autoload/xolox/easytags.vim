@@ -1,11 +1,21 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 9, 2014
+" Last Change: July 19, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.3'
+let g:xolox#easytags#version = '3.6.4'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
+
+if !exists('s:timers_initialized')
+  let g:xolox#easytags#update_timer = xolox#misc#timer#resumable()
+  let g:xolox#easytags#highlight_timer = xolox#misc#timer#resumable()
+  let g:xolox#easytags#syntax_match_timer = xolox#misc#timer#resumable()
+  let g:xolox#easytags#syntax_keyword_timer = xolox#misc#timer#resumable()
+  let g:xolox#easytags#syntax_filter_stage_1_timer = xolox#misc#timer#resumable()
+  let g:xolox#easytags#syntax_filter_stage_2_timer = xolox#misc#timer#resumable()
+  let s:timers_initialized = 1
+endif
 
 " Plug-in initialization. {{{1
 
@@ -155,6 +165,7 @@ endfunction
 
 function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
   let async = xolox#misc#option#get('easytags_async', 0)
+  call g:xolox#easytags#update_timer.start()
   try
     let have_args = !empty(a:filenames)
     let starttime = xolox#misc#timer#start()
@@ -162,7 +173,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     let tagsfile = xolox#easytags#get_tagsfile()
     let command_line = s:prep_cmdline(cfile, tagsfile, a:filenames)
     if empty(command_line)
-      return
+      return 0
     endif
     " Pack all of the information required to update the tags in
     " a Vim dictionary which is easy to serialize to a string.
@@ -191,6 +202,8 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     return 1
   catch
     call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:xolox#easytags#version, v:exception, v:throwpoint)
+  finally
+    call g:xolox#easytags#update_timer.stop()
   endtry
 endfunction
 
@@ -279,6 +292,7 @@ endfunction
 function! xolox#easytags#highlight() " {{{2
   " TODO This is a mess; Re-implement Python version in Vim script, benchmark, remove Python version.
   try
+    call g:xolox#easytags#highlight_timer.start()
     " Treat C++ and Objective-C as plain C.
     let filetype = xolox#easytags#filetypes#canonicalize(&filetype)
     let tagkinds = get(s:tagkinds, filetype, [])
@@ -304,7 +318,9 @@ function! xolox#easytags#highlight() " {{{2
             " Get the list of tags when we need it and remember the results.
             let ctags_filetypes = xolox#easytags#filetypes#find_ctags_aliases(filetype)
             let filetypes_pattern = printf('^\(%s\)$', join(map(ctags_filetypes, 'xolox#misc#escape#pattern(v:val)'), '\|'))
+            call g:xolox#easytags#syntax_filter_stage_1_timer.start()
             let taglist = filter(taglist('.'), "get(v:val, 'language', '') =~? filetypes_pattern")
+            call g:xolox#easytags#syntax_filter_stage_1_timer.stop()
           endif
           " Filter a copy of the list of tags to the relevant kinds.
           if has_key(tagkind, 'tagkinds')
@@ -312,7 +328,9 @@ function! xolox#easytags#highlight() " {{{2
           else
             let filter = tagkind.vim_filter
           endif
+          call g:xolox#easytags#syntax_filter_stage_2_timer.start()
           let matches = filter(copy(taglist), filter)
+          call g:xolox#easytags#syntax_filter_stage_2_timer.stop()
           if matches != []
             " Convert matched tags to :syntax commands and execute them.
             let use_keywords_when = xolox#misc#option#get('easytags_syntax_keyword', 'auto')
@@ -326,6 +344,7 @@ function! xolox#easytags#highlight() " {{{2
               " keyword command when 1) we can do so without sacrificing
               " accuracy or 2) the user explicitly chose to sacrifice
               " accuracy in order to make the highlighting faster.
+              call g:xolox#easytags#syntax_keyword_timer.start()
               let keywords = {}
               for tag in matches
                 if s:is_keyword_compatible(tag)
@@ -341,8 +360,10 @@ function! xolox#easytags#highlight() " {{{2
                 " tags that still need to be highlighted.
                 call filter(matches, "!s:is_keyword_compatible(v:val)")
               endif
+              call g:xolox#easytags#syntax_keyword_timer.stop()
             endif
             if !empty(matches)
+              call g:xolox#easytags#syntax_match_timer.start()
               let matches = xolox#misc#list#unique(map(matches, 'xolox#misc#escape#pattern(get(v:val, "name"))'))
               let pattern = tagkind.pattern_prefix . '\%(' . join(matches, '\|') . '\)' . tagkind.pattern_suffix
               let template = 'syntax match %s /%s/ containedin=ALLBUT,%s'
@@ -354,6 +375,7 @@ function! xolox#easytags#highlight() " {{{2
                 let msg = "easytags.vim %s: Failed to highlight %i %s tags because pattern is too big! (%i KB)"
                 call xolox#misc#msg#warn(msg, g:xolox#easytags#version, len(matches), tagkind.hlgroup, len(pattern) / 1024)
               endtry
+              call g:xolox#easytags#syntax_match_timer.stop()
             endif
           endif
         endif
@@ -373,6 +395,8 @@ function! xolox#easytags#highlight() " {{{2
     endif
   catch
     call xolox#misc#msg#warn("easytags.vim %s: %s (at %s)", g:xolox#easytags#version, v:exception, v:throwpoint)
+  finally
+    call g:xolox#easytags#highlight_timer.stop()
   endtry
 endfunction
 
@@ -488,6 +512,17 @@ function! xolox#easytags#restore_automatic_updates() " {{{2
     let g:easytags_auto_update = s:easytags_auto_update_save
     unlet s:easytags_auto_update_save
   endif
+endfunction
+
+function! xolox#easytags#why_so_slow() " {{{2
+  let message = [printf("easytags.vim %s: Timings since you started Vim:",  g:xolox#easytags#version)]
+  call add(message, printf(" - %s seconds updating tags", g:xolox#easytags#update_timer.format()))
+  call add(message, printf(" - %s seconds highlighting tags", g:xolox#easytags#highlight_timer.format()))
+  call add(message, printf(" - %s seconds highlighting tags using ':syntax match')", g:xolox#easytags#syntax_match_timer.format()))
+  call add(message, printf(" - %s seconds highlighting tags using ':syntax keyword')", g:xolox#easytags#syntax_keyword_timer.format()))
+  call add(message, printf(" - %s seconds filtering tags for highlighting (stage 1)", g:xolox#easytags#syntax_filter_stage_1_timer.format()))
+  call add(message, printf(" - %s seconds filtering tags for highlighting (stage 2)", g:xolox#easytags#syntax_filter_stage_2_timer.format()))
+  echo join(message, "\n")
 endfunction
 
 " Public API for definition of file type specific dynamic syntax highlighting. {{{1

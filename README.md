@@ -265,6 +265,23 @@ This option defines the pathname of the script that contains the Python implemen
 
 ## Troubleshooting
 
+## vim-easytags is slow!
+
+Yes, I know. I'm trying to make it faster but that's far from trivial. In the process of trying to speed up vim-easytags I've added reporting of elapsed time in several ways. If Vim seems very slow and you suspect this plug-in might be the one to blame, increase Vim's verbosity level:
+
+    :set vbs=1
+
+Every time the plug-in executes it will time how long the execution takes and add the results to Vim's message history, which you can view by executing the [:messages] [messages] command. If you want a more fine grained impression of the time spent by vim-easytags on various operations you can call the `xolox#easytags#why_so_slow()` function:
+
+    :call xolox#easytags#why_so_slow()
+    easytags.vim 3.6.4: Timings since you started Vim:
+     - 0.094937 seconds updating tags
+     - 1.850201 seconds highlighting tags
+     - 0.035167 seconds highlighting tags using ':syntax match')
+     - 0.493910 seconds highlighting tags using ':syntax keyword')
+     - 0.413160 seconds filtering tags for highlighting (stage 1)
+     - 0.141747 seconds filtering tags for highlighting (stage 2)
+
 ### `:HighlightTags` only works for the tags file created by `:UpdateTags`
 
 If you want to create tags files and have their tags highlighted by the `easytags.vim` plug-in then you'll have to create the tags file with certain arguments to Exuberant Ctags:
@@ -298,12 +315,6 @@ If this doesn't print the location where you installed Exuberant Ctags it means 
 Once or twice now in several years I've experienced Exuberant Ctags getting into an infinite loop when given garbage input. In my case this happened by accident a few days ago :-|. Because my plug-in executes `ctags` in the foreground this will block Vim indefinitely! If this happens you might be able to kill `ctags` by pressing [Control-C] [ctrl_c] but if that doesn't work you can also kill it without stopping Vim using a task manager or the `pkill` command (available on most UNIX systems):
 
     $ pkill -KILL ctags
-
-If Vim seems very slow and you suspect this plug-in might be the one to blame, increase Vim's verbosity level:
-
-    :set vbs=1
-
-Every time the plug-in executes it will time how long the execution takes and add the results to Vim's message history, which you can view by executing the [:messages] [messages] command.
 
 ### Failed to highlight tags because pattern is too big!
 

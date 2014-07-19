@@ -35,14 +35,15 @@ Contents ~
   1. The |g:easytags_python_enabled| option
   2. The |g:easytags_python_script| option
  7. Troubleshooting                                  |easytags-troubleshooting|
+ 8. vim-easytags is slow!                                |vim-easytags-is-slow|
   1. |:HighlightTags| only works for the tags file created by |:UpdateTags| |easytags-highlighttags-only-works-for-tags-file-created-by-updatetags|
   2. The plug-in complains that Exuberant Ctags isn't installed |easytags-plug-in-complains-that-exuberant-ctags-isnt-installed|
   3. Vim locks up while the plug-in is running |easytags-vim-locks-up-while-plug-in-is-running|
   4. Failed to highlight tags because pattern is too big! |easytags-failed-to-highlight-tags-because-pattern-is-too-big|
   5. The plug-in doesn't seem to work in Cygwin |easytags-plug-in-doesnt-seem-to-work-in-cygwin|
- 8. Contact                                                  |easytags-contact|
- 9. License                                                  |easytags-license|
- 10. References                                           |easytags-references|
+ 9. Contact                                                  |easytags-contact|
+ 10. License                                                 |easytags-license|
+ 11. References                                           |easytags-references|
 
 ===============================================================================
                                                         *easytags-introduction*
@@ -556,6 +557,32 @@ implementation of dynamic syntax highlighting.
                                                      *easytags-troubleshooting*
 Troubleshooting ~
 
+===============================================================================
+                                                         *vim-easytags-is-slow*
+vim-easytags is slow! ~
+
+Yes, I know. I'm trying to make it faster but that's far from trivial. In the
+process of trying to speed up vim-easytags I've added reporting of elapsed time
+in several ways. If Vim seems very slow and you suspect this plug-in might be
+the one to blame, increase Vim's verbosity level:
+>
+  :set vbs=1
+<
+Every time the plug-in executes it will time how long the execution takes and
+add the results to Vim's message history, which you can view by executing the
+|:messages| command. If you want a more fine grained impression of the time
+spent by vim-easytags on various operations you can call the
+'xolox#easytags#why_so_slow()' function:
+>
+  :call xolox#easytags#why_so_slow()
+  easytags.vim 3.6.4: Timings since you started Vim:
+   - 0.094937 seconds updating tags
+   - 1.850201 seconds highlighting tags
+   - 0.035167 seconds highlighting tags using ':syntax match')
+   - 0.493910 seconds highlighting tags using ':syntax keyword')
+   - 0.413160 seconds filtering tags for highlighting (stage 1)
+   - 0.141747 seconds filtering tags for highlighting (stage 2)
+<
 -------------------------------------------------------------------------------
         *easytags-highlighttags-only-works-for-tags-file-created-by-updatetags*
 :HighlightTags only works for the tags file created by :UpdateTags ~
@@ -618,15 +645,6 @@ command (available on most UNIX systems):
 >
   $ pkill -KILL ctags
 <
-If Vim seems very slow and you suspect this plug-in might be the one to blame,
-increase Vim's verbosity level:
->
-  :set vbs=1
-<
-Every time the plug-in executes it will time how long the execution takes and
-add the results to Vim's message history, which you can view by executing the
-|:messages| command.
-
 -------------------------------------------------------------------------------
                  *easytags-failed-to-highlight-tags-because-pattern-is-too-big*
 Failed to highlight tags because pattern is too big! ~
