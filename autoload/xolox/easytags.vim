@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: July 19, 2014
+" Last Change: August 8, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 let g:xolox#easytags#version = '3.6.4'
@@ -448,15 +448,24 @@ function! xolox#easytags#get_tagsfile() " {{{2
       let tagsfile = ''
     endif
   endif
+  if !empty(tagsfile)
+    call xolox#misc#msg#debug("easytags.vim %s: Selected dynamic tags file %s.", g:xolox#easytags#version, tagsfile)
+  endif
   " Check if a file type specific tags file is useful?
   let vim_file_type = xolox#easytags#filetypes#canonicalize(&filetype)
   if empty(tagsfile) && !empty(g:easytags_by_filetype) && !empty(vim_file_type)
     let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
     let tagsfile = xolox#misc#path#merge(directory, vim_file_type)
+    if !empty(tagsfile)
+      call xolox#misc#msg#debug("easytags.vim %s: Selected file type specific tags file %s.", g:xolox#easytags#version, tagsfile)
+    endif
   endif
   " Default to the global tags file?
   if empty(tagsfile)
     let tagsfile = expand(xolox#misc#option#get('easytags_file'))
+    if !empty(tagsfile)
+      call xolox#misc#msg#debug("easytags.vim %s: Selected global tags file %s.", g:xolox#easytags#version, tagsfile)
+    endif
   endif
   " If the tags file exists, make sure it is writable!
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
