@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 30, 2014
+" Last Change: August 8, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This Vim auto-load script contains the parts of vim-easytags that are used
@@ -151,7 +151,12 @@ function! xolox#easytags#update#read_tagsfile(tagsfile) " {{{1
   let headers = []
   let entries = []
   let num_invalid = 0
-  for line in readfile(a:tagsfile)
+  if filereadable(a:tagsfile)
+    let lines = readfile(a:tagsfile)
+  else
+    let lines = []
+  endif
+  for line in lines
     if line =~# '^!_TAG_'
       call add(headers, line)
     else

@@ -3,7 +3,7 @@
 " Last Change: August 8, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.4'
+let g:xolox#easytags#version = '3.6.6'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
