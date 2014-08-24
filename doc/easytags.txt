@@ -27,6 +27,7 @@ Contents ~
   15. The |g:easytags_include_members| option
   16. The |g:easytags_resolve_links| option
   17. The |g:easytags_suppress_ctags_warning| option
+  18. The |g:easytags_suppress_report| option
  5. Customizing the easytags plug-in             |customizing-easytags-plug-in|
   1. Passing custom command line arguments to Exuberant Ctags |easytags-passing-custom-command-line-arguments-to-exuberant-ctags|
   2. Update & highlight tags immediately after save |easytags-update-highlight-tags-immediately-after-save|
@@ -467,6 +468,14 @@ If this is set and not false, it will suppress the warning on startup if ctags
 is not found or not recent enough.
 >
   :let g:easytags_suppress_ctags_warning = 1
+<
+-------------------------------------------------------------------------------
+The *g:easytags_suppress_report* option
+
+If this is set and not false, it will suppress the report displayed on tag
+updates.
+>
+  :let g:easytags_suppress_report = 1
 <
 ===============================================================================
                                                  *customizing-easytags-plug-in*

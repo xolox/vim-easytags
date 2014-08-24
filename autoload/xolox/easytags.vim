@@ -192,7 +192,9 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     if async
       call xolox#misc#async#call({'function': 'xolox#easytags#update#with_vim', 'arguments': [params], 'callback': 'xolox#easytags#async_callback'})
     else
-      call s:report_results(xolox#easytags#update#with_vim(params), 0)
+      if !(exists('g:easytags_suppress_report') && g:easytags_suppress_report)
+        call s:report_results(xolox#easytags#update#with_vim(params), 0)
+      endif
       " When :UpdateTags was executed manually we'll refresh the dynamic
       " syntax highlighting so that new tags are immediately visible.
       if !a:silent && xolox#misc#option#get('easytags_auto_highlight', 1)
@@ -500,10 +502,12 @@ function! xolox#easytags#syntax_groups_to_ignore() " {{{2
 endfunction
 
 function! xolox#easytags#async_callback(response) " {{{2
-  if has_key(a:response, 'result')
-    call s:report_results(a:response['result'], 1)
-  else
-    call xolox#misc#msg#warn("easytags.vim %s: Asynchronous tags file update failed! (%s at %s)", g:xolox#easytags#version, a:response['exception'], a:response['throwpoint'])
+  if !(exists('g:easytags_suppress_report') && g:easytags_suppress_report)
+    if has_key(a:response, 'result')
+      call s:report_results(a:response['result'], 1)
+    else
+      call xolox#misc#msg#warn("easytags.vim %s: Asynchronous tags file update failed! (%s at %s)", g:xolox#easytags#version, a:response['exception'], a:response['throwpoint'])
+    endif
   endif
 endfunction
 

@@ -217,6 +217,12 @@ If this is set and not false, it will suppress the warning on startup if ctags i
 
     :let g:easytags_suppress_ctags_warning = 1
 
+### The `g:easytags_suppress_report` option
+
+If this is set and not false, it will suppress the report displayed on tag updates.
+
+    :let g:easytags_suppress_report = 1
+
 ## Customizing the easytags plug-in
 
 Advanced users may wish to customize how the easytags plug-in works beyond the point of changing configuration defaults. This section contains some hints about this. If you have suggestions, please feel free to submit them.
