@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: August 8, 2014
+" Last Change: September 14, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.6'
+let g:xolox#easytags#version = '3.6.7'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -552,18 +552,20 @@ endfunction
 " Miscellaneous script-local functions. {{{1
 
 function! s:report_results(response, async) " {{{2
-  let actions = []
-  if a:response['num_updated'] > 0
-    call add(actions, printf('updated %i tags', a:response['num_updated']))
-  endif
-  if a:response['num_filtered'] > 0
-    call add(actions, printf('filtered %i invalid tags', a:response['num_filtered']))
-  endif
-  if !empty(actions)
-    let function = a:async ? 'xolox#misc#msg#debug' : 'xolox#misc#msg#info'
-    let actions_string = xolox#misc#str#ucfirst(join(actions, ' and '))
-    let command_type = a:async ? 'asynchronously' : 'synchronously'
-    call call(function, ["easytags.vim %s: %s in %s (%s).", g:xolox#easytags#version, actions_string, a:response['elapsed_time'], command_type])
+  if !xolox#misc#option#get('easytags_suppress_report', 0)
+    let actions = []
+    if a:response['num_updated'] > 0
+      call add(actions, printf('updated %i tags', a:response['num_updated']))
+    endif
+    if a:response['num_filtered'] > 0
+      call add(actions, printf('filtered %i invalid tags', a:response['num_filtered']))
+    endif
+    if !empty(actions)
+      let function = a:async ? 'xolox#misc#msg#debug' : 'xolox#misc#msg#info'
+      let actions_string = xolox#misc#str#ucfirst(join(actions, ' and '))
+      let command_type = a:async ? 'asynchronously' : 'synchronously'
+      call call(function, ["easytags.vim %s: %s in %s (%s).", g:xolox#easytags#version, actions_string, a:response['elapsed_time'], command_type])
+    endif
   endif
 endfunction
 
