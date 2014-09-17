@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: September 14, 2014
+" Last Change: September 17, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.6.7'
+let g:xolox#easytags#version = '3.7'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -825,6 +825,16 @@ call xolox#easytags#define_tagkind({
       \ 'tagkinds': 'p'})
 
 highlight def link tclCommandTag Operator
+
+" Perl. {{{2
+
+call xolox#easytags#define_tagkind({
+      \ 'filetype': 'perl',
+      \ 'hlgroup': 'perlFunctionTag',
+      \ 'tagkinds': '[s]',
+      \ 'pattern_prefix': '\%(\<sub\s\+\)\@<!\<'})
+
+highlight def link perlFunctionTag Operator
 
 " }}}
 
