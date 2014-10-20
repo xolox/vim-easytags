@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: June 20, 2014
+" Last Change: October 20, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This submodule of the vim-easytags plug-in translates between back and forth
@@ -110,8 +110,22 @@ endfunction
 
 " }}}1
 
-" Define the default file type groups.
-call xolox#easytags#filetypes#add_group('c', 'cpp', 'objc', 'objcpp')
+" Define the default file type groups. It's important that C normalizes to C++
+" because of the following points:
+"
+"  - Vim and Exuberant Ctags consistently treat *.h files as C++. I guess this
+"    is because A) the filename extension is ambiguous and B) C++ is a
+"    superset of C so the mapping makes sense.
+"
+"  - Because of the above point, when you use file type specific tags files
+"    and you're editing C source code you'll be missing everything defined in
+"    your *.h files. Depending on your programming style those tags might be
+"    redundant or they might not be.
+"
+" To solve this dilemma the vim-easytags plug-in groups the C and C++ file
+" types together and tells Exuberant Ctags to treat it all as C++ because C++
+" is a superset of C.
+call xolox#easytags#filetypes#add_group('cpp', 'c')
 call xolox#easytags#filetypes#add_group('html', 'htmldjango')
 
 " Define the default file type mappings.
