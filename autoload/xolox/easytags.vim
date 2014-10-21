@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 20, 2014
+" Last Change: October 21, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 let g:xolox#easytags#version = '3.8'
@@ -293,7 +293,6 @@ function! xolox#easytags#highlight() " {{{2
   " TODO This is a mess; Re-implement Python version in Vim script, benchmark, remove Python version.
   try
     call g:xolox#easytags#highlight_timer.start()
-    " Treat C++ and Objective-C as plain C.
     let filetype = xolox#easytags#filetypes#canonicalize(&filetype)
     let tagkinds = get(s:tagkinds, filetype, [])
     if exists('g:syntax_on') && !empty(tagkinds) && !exists('b:easytags_nohl')
@@ -634,25 +633,28 @@ call xolox#easytags#define_tagkind({
       \ 'hlgroup': 'luaFunc',
       \ 'tagkinds': 'f'})
 
-" C. {{{2
+" C and C++. {{{2
+"
+" C and C++ are both treated as C++, for details refer
+" to https://github.com/xolox/vim-easytags/issues/91.
 
 call xolox#easytags#define_tagkind({
-      \ 'filetype': 'c',
+      \ 'filetype': 'cpp',
       \ 'hlgroup': 'cType',
       \ 'tagkinds': '[cgstu]'})
 
 call xolox#easytags#define_tagkind({
-      \ 'filetype': 'c',
+      \ 'filetype': 'cpp',
       \ 'hlgroup': 'cEnum',
       \ 'tagkinds': 'e'})
 
 call xolox#easytags#define_tagkind({
-      \ 'filetype': 'c',
+      \ 'filetype': 'cpp',
       \ 'hlgroup': 'cPreProc',
       \ 'tagkinds': 'd'})
 
 call xolox#easytags#define_tagkind({
-      \ 'filetype': 'c',
+      \ 'filetype': 'cpp',
       \ 'hlgroup': 'cFunction',
       \ 'tagkinds': '[fp]'})
 
@@ -661,7 +663,7 @@ highlight def link cFunction Function
 
 if xolox#misc#option#get('easytags_include_members', 0)
   call xolox#easytags#define_tagkind({
-        \ 'filetype': 'c',
+        \ 'filetype': 'cpp',
         \ 'hlgroup': 'cMember',
         \ 'tagkinds': 'm'})
  highlight def link cMember Identifier
