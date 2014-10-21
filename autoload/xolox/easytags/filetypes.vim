@@ -75,7 +75,8 @@ endfunction
 function! xolox#easytags#filetypes#find_ctags_aliases(canonical_vim_filetype) " {{{1
   " Find Exuberant Ctags languages that correspond to a canonical, supported Vim file type.
   if has_key(s:filetype_groups, a:canonical_vim_filetype)
-    let filetypes = copy(s:filetype_groups[a:canonical_vim_filetype])
+    let filetypes = [a:canonical_vim_filetype]
+    call extend(filetypes, s:filetype_groups[a:canonical_vim_filetype])
     return map(filetypes, 'xolox#easytags#filetypes#to_ctags(v:val)')
   else
     return [xolox#easytags#filetypes#to_ctags(a:canonical_vim_filetype)]
