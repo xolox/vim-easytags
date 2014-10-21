@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 20, 2014
+" Last Change: October 21, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This submodule of the vim-easytags plug-in translates between back and forth
@@ -31,9 +31,10 @@ let s:filetype_groups = {}
 function! xolox#easytags#filetypes#add_group(...) " {{{1
   " Define a group of Vim file types whose tags should be stored together.
   let canonical_filetype = tolower(a:1)
-  let s:filetype_groups[canonical_filetype] = a:000[1:]
-  for ft in s:filetype_groups[canonical_filetype]
-    let s:canonical_filetypes[tolower(ft)] = canonical_filetype
+  let other_filetypes = map(a:000[1:], 'tolower(v:val)')
+  let s:filetype_groups[canonical_filetype] = other_filetypes
+  for ft in other_filetypes
+    let s:canonical_filetypes[ft] = canonical_filetype
   endfor
 endfunction
 
