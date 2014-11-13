@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 3, 2014
+" Last Change: November 13, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.8.3'
+let g:xolox#easytags#version = '3.9'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -239,15 +239,17 @@ function! s:prep_cmdline(cfile, tagsfile, arguments) " {{{3
   let custom_languages = xolox#misc#option#get('easytags_languages', {})
   let language = get(custom_languages, vim_file_type, {})
   if empty(language)
-    let program = xolox#misc#option#get('easytags_cmd')
-    let cmdline = [program, '--fields=+l', '--c-kinds=+p', '--c++-kinds=+p']
+    let cmdline = [xolox#easytags#ctags_command()]
+    call add(cmdline, '--fields=+l')
+    call add(cmdline, '--c-kinds=+p')
+    call add(cmdline, '--c++-kinds=+p')
     call add(cmdline, '--sort=no')
     call add(cmdline, '-f-')
     if xolox#misc#option#get('easytags_include_members', 0)
       call add(cmdline, '--extra=+q')
     endif
   else
-    let program = get(language, 'cmd', xolox#misc#option#get('easytags_cmd'))
+    let program = get(language, 'cmd', xolox#easytags#ctags_command())
     if empty(program)
       call xolox#misc#msg#warn("easytags.vim %s: No 'cmd' defined for language '%s', and also no global default!", g:xolox#easytags#version, vim_file_type)
       return
@@ -430,6 +432,20 @@ let s:invalid_keywords = {
       \ }
 
 " Public supporting functions (might be useful to others). {{{1
+
+function! xolox#easytags#ctags_command() " {{{2
+  let program = xolox#misc#option#get('easytags_cmd')
+  if !empty(program)
+    let options = xolox#misc#option#get('easytags_opts')
+    if !empty(options)
+      let command_line = [program]
+      call extend(command_line, map(copy(options), 'xolox#misc#escape#shell(v:val)'))
+      let program = join(command_line)
+    endif
+    return program
+  endif
+  return ''
+endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
   let tagsfile = ''

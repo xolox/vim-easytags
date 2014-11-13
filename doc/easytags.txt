@@ -11,23 +11,24 @@ Contents ~
   2. The |:HighlightTags| command
  4. Options                                                  |easytags-options|
   1. The |g:easytags_cmd| option
-  2. The |g:easytags_async| option
-  3. The |g:easytags_syntax_keyword| option
-  4. The |g:easytags_languages| option
-  5. The |g:easytags_file| option
-  6. The |g:easytags_dynamic_files| option
-  7. The |g:easytags_by_filetype| option
-  8. The |g:easytags_events| option
-  9. The |g:easytags_always_enabled| option
-  10. The |g:easytags_on_cursorhold| option
-  11. The |g:easytags_updatetime_min| option
-  12. The |g:easytags_auto_update| option
-  13. The |g:easytags_auto_highlight| option
-  14. The |g:easytags_autorecurse| option
-  15. The |g:easytags_include_members| option
-  16. The |g:easytags_resolve_links| option
-  17. The |g:easytags_suppress_ctags_warning| option
-  18. The |g:easytags_suppress_report| option
+  2. The |g:easytags_opts| option
+  3. The |g:easytags_async| option
+  4. The |g:easytags_syntax_keyword| option
+  5. The |g:easytags_languages| option
+  6. The |g:easytags_file| option
+  7. The |g:easytags_dynamic_files| option
+  8. The |g:easytags_by_filetype| option
+  9. The |g:easytags_events| option
+  10. The |g:easytags_always_enabled| option
+  11. The |g:easytags_on_cursorhold| option
+  12. The |g:easytags_updatetime_min| option
+  13. The |g:easytags_auto_update| option
+  14. The |g:easytags_auto_highlight| option
+  15. The |g:easytags_autorecurse| option
+  16. The |g:easytags_include_members| option
+  17. The |g:easytags_resolve_links| option
+  18. The |g:easytags_suppress_ctags_warning| option
+  19. The |g:easytags_suppress_report| option
  5. Customizing the easytags plug-in             |customizing-easytags-plug-in|
   1. Passing custom command line arguments to Exuberant Ctags |easytags-passing-custom-command-line-arguments-to-exuberant-ctags|
   2. Update & highlight tags immediately after save |easytags-update-highlight-tags-immediately-after-save|
@@ -185,6 +186,15 @@ you've installed Exuberant Ctags, e.g.:
 <
 If you rely entirely on language-specific configuration and don't have a
 general ctags program, set this to the empty string.
+
+-------------------------------------------------------------------------------
+The *g:easytags_opts* option
+
+If you need to pass custom command line option(s) to the program specified by
+|g:easytags_cmd| you can set this option to a list of strings to be passed to
+Exuberant Ctags. Make sure to only use options that are valid in any context,
+for example the concatenation of |g:easytags_cmd|, |g:easytags_opts| and
+'--list-languages' should work as expected.
 
 -------------------------------------------------------------------------------
 The *g:easytags_async* option

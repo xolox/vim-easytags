@@ -62,6 +62,10 @@ The plug-in will try to determine the location where Exuberant Ctags is installe
 
 If you rely entirely on language-specific configuration and don't have a general ctags program, set this to the empty string.
 
+### The `g:easytags_opts` option
+
+If you need to pass custom command line option(s) to the program specified by `g:easytags_cmd` you can set this option to a list of strings to be passed to Exuberant Ctags. Make sure to only use options that are valid in any context, for example the concatenation of `g:easytags_cmd`, `g:easytags_opts` and `--list-languages` should work as expected.
+
 ### The `g:easytags_async` option
 
 By default vim-easytags runs Exuberant Ctags and updates your tags file in the foreground, blocking Vim in the process. As your tags files get larger this becomes more annoying. It has been the number one complaint about vim-easytags since I published the first release online.

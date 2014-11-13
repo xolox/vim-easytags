@@ -1,6 +1,6 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: October 21, 2014
+" Last Change: November 13, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
 " This submodule of the vim-easytags plug-in translates between back and forth
@@ -87,10 +87,11 @@ function! s:discover_supported_filetypes() " {{{1
   " Initialize predefined groups & mappings and discover supported file types.
   if !s:discovered_filetypes
     " Discover the file types supported by Exuberant Ctags?
-    if !empty(g:easytags_cmd)
+    let command_line = xolox#easytags#ctags_command()
+    if !empty(command_line)
       let starttime = xolox#misc#timer#start()
-      let command = g:easytags_cmd . ' --list-languages'
-      for line in xolox#misc#os#exec({'command': command})['stdout']
+      let command_line .= ' --list-languages'
+      for line in xolox#misc#os#exec({'command': command_line})['stdout']
         if line =~ '\[disabled\]$'
           " Ignore languages that have been explicitly disabled using `--languages=-Vim'.
           continue
