@@ -198,9 +198,9 @@ for example the concatenation of |g:easytags_cmd|, |g:easytags_opts| and
 >
   :let g:easytags_opts = ['--options=$VIM\ctags\ctags.cnf']
 <
-The example above (based on [issue 98] [98]) overrides the location of
-Exuberant Ctags' configuration file. As you can see the command line option(s)
-may contain environment variables, these will be expanded before passing the
+The example above (based on issue 98 [14]) overrides the location of Exuberant
+Ctags' configuration file. As you can see the command line option(s) may
+contain environment variables, these will be expanded before passing the
 options to Exuberant Ctags (to make sure it works in all environments).
 
 -------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ The *g:easytags_languages* option
 
 Exuberant Ctags supports many languages and can be extended via regular
 expression patterns, but for some languages separate tools with ctags-
-compatible output exist (e.g. jsctags [14] for Javascript). To use these, the
+compatible output exist (e.g. jsctags [15] for Javascript). To use these, the
 executable and its arguments must be configured:
 >
   let g:easytags_languages = {
@@ -466,14 +466,14 @@ type plug-in, etc.):
 -------------------------------------------------------------------------------
 The *g:easytags_resolve_links* option
 
-UNIX has symbolic links [15] and hard links [16], both of which conflict with
+UNIX has symbolic links [16] and hard links [17], both of which conflict with
 the concept of having one unique location for every identifier. With regards to
 hard links there's not much anyone can do, but because I use symbolic links
 quite a lot I've added this option. It's disabled by default since it has a
 small performance impact and might not do what unknowing users expect it to:
 When you enable this option the plug-in will resolve symbolic links in
 pathnames, which means your tags file will only contain entries with canonical
-pathnames [17]. To enable this option (which I strongly suggest doing when you
+pathnames [18]. To enable this option (which I strongly suggest doing when you
 run UNIX and use symbolic links) execute the following Vim command:
 >
   :let g:easytags_resolve_links = 1
@@ -507,11 +507,11 @@ about this. If you have suggestions, please feel free to submit them.
 Passing custom command line arguments to Exuberant Ctags ~
 
 You may want to run Exuberant Ctags with specific command line options, for
-example the code_complete [18] plug-in requires the signature field to be
+example the code_complete [19] plug-in requires the signature field to be
 present. To do this you can create a configuration file for Exuberant Ctags,
 e.g. '~/.ctags' on UNIX or '%USERPROFILE%\ctags.cnf' on Windows. The file
 should contain one command line option per line. See the Exuberant Ctags manual
-[19] for details.
+[20] for details.
 
 -------------------------------------------------------------------------------
                         *easytags-update-highlight-tags-immediately-after-save*
@@ -700,7 +700,7 @@ directories.
                                *easytags-plug-in-doesnt-seem-to-work-in-cygwin*
 The plug-in doesn't seem to work in Cygwin ~
 
-If you want to use the plug-in with Vim under Cygwin [20], you need to have the
+If you want to use the plug-in with Vim under Cygwin [21], you need to have the
 Cygwin version of Ctags installed instead of the Windows version (thanks to
 Alex Zuroff for reporting this!).
 
@@ -711,13 +711,13 @@ Contact ~
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/easytags/ and http://github.com/xolox/vim-
-easytags. If you like this plug-in please vote for it on Vim Online [21].
+easytags. If you like this plug-in please vote for it on Vim Online [22].
 
 ===============================================================================
                                                              *easytags-license*
 License ~
 
-This software is licensed under the MIT license [22]. ÂŠ 2014 Peter Odding
+This software is licensed under the MIT license [23]. ÂŠ 2014 Peter Odding
 <peter@peterodding.com> and Ingo Karkat.
 
 Thanks go out to everyone who has helped to improve the vim-easytags plug-in
@@ -740,14 +740,15 @@ References ~
 [11] http://github.com/xolox/vim-misc
 [12] http://peterodding.com/code/vim/shell/
 [13] http://en.wikipedia.org/wiki/Dynamic-link_library
-[14] https://npmjs.org/package/jsctags
-[15] http://en.wikipedia.org/wiki/Symbolic_link
-[16] http://en.wikipedia.org/wiki/Hard_link
-[17] http://en.wikipedia.org/wiki/Canonicalization
-[18] http://www.vim.org/scripts/script.php?script_id=1764
-[19] http://ctags.sourceforge.net/ctags.html#FILES
-[20] http://en.wikipedia.org/wiki/Cygwin
-[21] http://www.vim.org/scripts/script.php?script_id=3114
-[22] http://en.wikipedia.org/wiki/MIT_License
+[14] https://github.com/xolox/vim-easytags/issues/98
+[15] https://npmjs.org/package/jsctags
+[16] http://en.wikipedia.org/wiki/Symbolic_link
+[17] http://en.wikipedia.org/wiki/Hard_link
+[18] http://en.wikipedia.org/wiki/Canonicalization
+[19] http://www.vim.org/scripts/script.php?script_id=1764
+[20] http://ctags.sourceforge.net/ctags.html#FILES
+[21] http://en.wikipedia.org/wiki/Cygwin
+[22] http://www.vim.org/scripts/script.php?script_id=3114
+[23] http://en.wikipedia.org/wiki/MIT_License
 
 vim: ft=help
