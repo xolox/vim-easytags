@@ -64,7 +64,11 @@ If you rely entirely on language-specific configuration and don't have a general
 
 ### The `g:easytags_opts` option
 
-If you need to pass custom command line option(s) to the program specified by `g:easytags_cmd` you can set this option to a list of strings to be passed to Exuberant Ctags. Make sure to only use options that are valid in any context, for example the concatenation of `g:easytags_cmd`, `g:easytags_opts` and `--list-languages` should work as expected.
+If you need to pass custom command line option(s) to the program specified by `g:easytags_cmd` you can set this option to a list of strings to be passed to Exuberant Ctags. Make sure to only use options that are valid in any context, for example the concatenation of `g:easytags_cmd`, `g:easytags_opts` and `--list-languages` should work as expected. Here's an example:
+
+    :let g:easytags_opts = ['--options=$VIM\ctags\ctags.cnf']
+
+The example above (based on [issue 98] [98]) overrides the location of Exuberant Ctags' configuration file. As you can see the command line option(s) may contain environment variables, these will be expanded before passing the options to Exuberant Ctags (to make sure it works in all environments).
 
 ### The `g:easytags_async` option
 

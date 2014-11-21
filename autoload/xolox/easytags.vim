@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 13, 2014
+" Last Change: November 21, 2014
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.9'
+let g:xolox#easytags#version = '3.9.1'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -439,7 +439,7 @@ function! xolox#easytags#ctags_command() " {{{2
     let options = xolox#misc#option#get('easytags_opts')
     if !empty(options)
       let command_line = [program]
-      call extend(command_line, map(copy(options), 'xolox#misc#escape#shell(v:val)'))
+      call extend(command_line, map(copy(options), 'xolox#misc#escape#shell(expand(v:val))'))
       let program = join(command_line)
     endif
     return program
