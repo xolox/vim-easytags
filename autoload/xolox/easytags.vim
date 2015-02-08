@@ -170,8 +170,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     let have_args = !empty(a:filenames)
     let starttime = xolox#misc#timer#start()
     let cfile = s:check_cfile(a:silent, a:filter_tags, have_args)
-    let tagsfile = xolox#easytags#get_tagsfile()
-    let command_line = s:prep_cmdline(cfile, tagsfile, a:filenames)
+    let command_line = s:prep_cmdline(cfile, a:filenames)
     if empty(command_line)
       return 0
     endif
@@ -183,11 +182,14 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     let params['default_filetype'] = xolox#easytags#filetypes#canonicalize(&filetype)
     let params['filter_tags'] = a:filter_tags || async
     let params['have_args'] = have_args
-    if !empty(g:easytags_by_filetype)
+    let dynamic_tagsfile = xolox#easytags#get_dynamic_tagsfile()
+    if !empty(dynamic_tagsfile)
+      let params['tagsfile'] = dynamic_tagsfile
+    elseif !empty(g:easytags_by_filetype)
       let params['directory'] = xolox#misc#path#absolute(g:easytags_by_filetype)
       let params['filetypes'] = g:xolox#easytags#filetypes#ctags_to_vim
     else
-      let params['tagsfile'] = tagsfile
+      let params['tagsfile'] = xolox#easytags#get_global_tagsfile()
     endif
     if async
       call xolox#misc#async#call({'function': 'xolox#easytags#update#with_vim', 'arguments': [params], 'callback': 'xolox#easytags#async_callback'})
@@ -234,7 +236,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   return cfile
 endfunction
 
-function! s:prep_cmdline(cfile, tagsfile, arguments) " {{{3
+function! s:prep_cmdline(cfile, arguments) " {{{3
   let vim_file_type = xolox#easytags#filetypes#canonicalize(&filetype)
   let custom_languages = xolox#misc#option#get('easytags_languages', {})
   let language = get(custom_languages, vim_file_type, {})
@@ -447,7 +449,7 @@ function! xolox#easytags#ctags_command() " {{{2
   return ''
 endfunction
 
-function! xolox#easytags#get_tagsfile() " {{{2
+function xolox#easytags#get_dynamic_tagsfile() " {{{2
   let tagsfile = ''
   " Look for a suitable project specific tags file?
   let dynamic_files = xolox#misc#option#get('easytags_dynamic_files', 0)
@@ -463,12 +465,23 @@ function! xolox#easytags#get_tagsfile() " {{{2
       let tagsfile = ''
     endif
   endif
+  " If the tags file exists, make sure it is writable!
+  if filereadable(tagsfile) && filewritable(tagsfile) != 1
+    let message = "The dynamic tags file %s isn't writable!"
+    throw printf(message, fnamemodify(tagsfile, ':~'))
+  endif
   if !empty(tagsfile)
     call xolox#misc#msg#debug("easytags.vim %s: Selected dynamic tags file %s.", g:xolox#easytags#version, tagsfile)
-  endif
+    return xolox#misc#path#absolute(tagsfile)
+  end
+  return ''
+endfunction
+
+function xolox#easytags#get_global_tagsfile() " {{{2
+  let tagsfile = ''
   " Check if a file type specific tags file is useful?
   let vim_file_type = xolox#easytags#filetypes#canonicalize(&filetype)
-  if empty(tagsfile) && !empty(g:easytags_by_filetype) && !empty(vim_file_type)
+  if !empty(g:easytags_by_filetype) && !empty(vim_file_type)
     let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
     let tagsfile = xolox#misc#path#merge(directory, vim_file_type)
     if !empty(tagsfile)
@@ -484,10 +497,23 @@ function! xolox#easytags#get_tagsfile() " {{{2
   endif
   " If the tags file exists, make sure it is writable!
   if filereadable(tagsfile) && filewritable(tagsfile) != 1
-    let message = "The tags file %s isn't writable!"
+    let message = "The global tags file %s isn't writable!"
     throw printf(message, fnamemodify(tagsfile, ':~'))
   endif
-  return xolox#misc#path#absolute(tagsfile)
+  if !empty(tagsfile)
+    return xolox#misc#path#absolute(tagsfile)
+  endif
+  return ''
+endfunction
+
+function! xolox#easytags#get_tagsfile() " {{{2
+  " Try to get a dynamic tags file
+  let tagsfile = xolox#easytags#get_dynamic_tagsfile()
+  " Otherwise get a global tags file
+  if empty(tagsfile)
+    let tagsfile = xolox#easytags#get_global_tagsfile()
+  endif
+  return tagsfile
 endfunction
 
 function! xolox#easytags#syntax_groups_to_ignore() " {{{2
