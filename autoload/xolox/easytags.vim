@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: November 21, 2014
+" Last Change: March 15, 2015
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.9.1'
+let g:xolox#easytags#version = '3.10'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -104,7 +104,7 @@ function! xolox#easytags#register(global) " {{{2
   let tagfiles = xolox#misc#option#split_tags(&tags)
   let expanded = map(copy(tagfiles), 'resolve(expand(v:val))')
   " Add the filename to the &tags option when the user hasn't done so already.
-  let tagsfile = a:global ? g:easytags_file : xolox#easytags#get_tagsfile()
+  let tagsfile = a:global ? g:easytags_file : xolox#easytags#get_file_type_specific_tagsfile()
   if index(expanded, xolox#misc#path#absolute(tagsfile)) == -1
     " This is a real mess because of bugs in Vim?! :let &tags = '...' doesn't
     " work on UNIX and Windows, :set tags=... doesn't work on Windows. What I
@@ -170,8 +170,7 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     let have_args = !empty(a:filenames)
     let starttime = xolox#misc#timer#start()
     let cfile = s:check_cfile(a:silent, a:filter_tags, have_args)
-    let tagsfile = xolox#easytags#get_tagsfile()
-    let command_line = s:prep_cmdline(cfile, tagsfile, a:filenames)
+    let command_line = s:prep_cmdline(cfile, a:filenames)
     if empty(command_line)
       return 0
     endif
@@ -183,11 +182,14 @@ function! xolox#easytags#update(silent, filter_tags, filenames) " {{{2
     let params['default_filetype'] = xolox#easytags#filetypes#canonicalize(&filetype)
     let params['filter_tags'] = a:filter_tags || async
     let params['have_args'] = have_args
-    if !empty(g:easytags_by_filetype)
+    let dynamic_tagsfile = xolox#easytags#get_dynamic_tagsfile()
+    if !empty(dynamic_tagsfile)
+      let params['tagsfile'] = dynamic_tagsfile
+    elseif !empty(g:easytags_by_filetype)
       let params['directory'] = xolox#misc#path#absolute(g:easytags_by_filetype)
       let params['filetypes'] = g:xolox#easytags#filetypes#ctags_to_vim
     else
-      let params['tagsfile'] = tagsfile
+      let params['tagsfile'] = xolox#easytags#get_global_tagsfile()
     endif
     if async
       call xolox#misc#async#call({'function': 'xolox#easytags#update#with_vim', 'arguments': [params], 'callback': 'xolox#easytags#async_callback'})
@@ -234,7 +236,7 @@ function! s:check_cfile(silent, filter_tags, have_args) " {{{3
   return cfile
 endfunction
 
-function! s:prep_cmdline(cfile, tagsfile, arguments) " {{{3
+function! s:prep_cmdline(cfile, arguments) " {{{3
   let vim_file_type = xolox#easytags#filetypes#canonicalize(&filetype)
   let custom_languages = xolox#misc#option#get('easytags_languages', {})
   let language = get(custom_languages, vim_file_type, {})
@@ -252,7 +254,7 @@ function! s:prep_cmdline(cfile, tagsfile, arguments) " {{{3
     let program = get(language, 'cmd', xolox#easytags#ctags_command())
     if empty(program)
       call xolox#misc#msg#warn("easytags.vim %s: No 'cmd' defined for language '%s', and also no global default!", g:xolox#easytags#version, vim_file_type)
-      return
+      return ''
     endif
     let cmdline = [program] + get(language, 'args', [])
     call add(cmdline, xolox#misc#escape#shell(get(language, 'stdout_opt', '-f-')))
@@ -448,6 +450,36 @@ function! xolox#easytags#ctags_command() " {{{2
 endfunction
 
 function! xolox#easytags#get_tagsfile() " {{{2
+  " Get the absolute pathname of the tags file to use. This function
+  " automatically selects the best choice from the following options (in
+  " descending order of preference):
+  "
+  " 1. Dynamic tags files (see `xolox#easytags#get_dynamic_tagsfile()`).
+  " 2. File type specific tags files (see `xolox#easytags#get_file_type_specific_tagsfile()`).
+  " 3. The global tags file (see `xolox#easytags#get_global_tagsfile()`).
+  "
+  " Returns the absolute pathname of the selected tags file.
+  "
+  " This function is no longer used by the vim-easytags plug-in itself because
+  " the vim-easytags plug-in needs to differentiate between the different
+  " types of tags files in every place where it deals with tags files. Because
+  " this is an externally callable function it is unclear to me if other code
+  " depends on it, this is the reason why I haven't removed it yet.
+  let tagsfile = xolox#easytags#get_dynamic_tagsfile()
+  if empty(tagsfile)
+    let tagsfile = xolox#easytags#get_file_type_specific_tagsfile()
+  endif
+  if empty(tagsfile)
+    let tagsfile = xolox#easytags#get_global_tagsfile()
+  endif
+  return tagsfile
+endfunction
+
+function! xolox#easytags#get_dynamic_tagsfile() " {{{2
+  " Get the pathname of the dynamic tags file to use. If the user configured
+  " dynamic tags files this function returns the pathname of the applicable
+  " dynamic tags file (which may not exist yet), otherwise it returns an empty
+  " string.
   let tagsfile = ''
   " Look for a suitable project specific tags file?
   let dynamic_files = xolox#misc#option#get('easytags_dynamic_files', 0)
@@ -458,36 +490,51 @@ function! xolox#easytags#get_tagsfile() " {{{2
     let directory = fnamemodify(tagsfile, ':h')
     if filewritable(directory) != 2
       " If the directory of the dynamic tags file is not writable, we fall
-      " back to a file type specific tags file or the global tags file.
+      " back to another type of tags file.
       call xolox#misc#msg#warn("easytags.vim %s: Dynamic tags files enabled but %s not writable so falling back.", g:xolox#easytags#version, directory)
       let tagsfile = ''
     endif
   endif
   if !empty(tagsfile)
-    call xolox#misc#msg#debug("easytags.vim %s: Selected dynamic tags file %s.", g:xolox#easytags#version, tagsfile)
+    return s:select_tags_file(tagsfile, 'dynamic')
   endif
-  " Check if a file type specific tags file is useful?
+  return ''
+endfunction
+
+function! xolox#easytags#get_file_type_specific_tagsfile() " {{{2
+  " Get the pathname of the file type specific tags file to use. If the user
+  " configured file type specific tags files this function returns the
+  " pathname of the applicable file type specific tags file (which may not
+  " exist yet), otherwise it returns an empty string.
   let vim_file_type = xolox#easytags#filetypes#canonicalize(&filetype)
-  if empty(tagsfile) && !empty(g:easytags_by_filetype) && !empty(vim_file_type)
+  if !empty(g:easytags_by_filetype) && !empty(vim_file_type)
     let directory = xolox#misc#path#absolute(g:easytags_by_filetype)
     let tagsfile = xolox#misc#path#merge(directory, vim_file_type)
     if !empty(tagsfile)
-      call xolox#misc#msg#debug("easytags.vim %s: Selected file type specific tags file %s.", g:xolox#easytags#version, tagsfile)
+      return s:select_tags_file(tagsfile, 'file type specific')
     endif
   endif
-  " Default to the global tags file?
-  if empty(tagsfile)
-    let tagsfile = expand(xolox#misc#option#get('easytags_file'))
-    if !empty(tagsfile)
-      call xolox#misc#msg#debug("easytags.vim %s: Selected global tags file %s.", g:xolox#easytags#version, tagsfile)
-    endif
+  return ''
+endfunction
+
+function! xolox#easytags#get_global_tagsfile() " {{{2
+  " Get the pathname of the global tags file. Returns the absolute pathname of
+  " the global tags file.
+  let tagsfile = xolox#misc#option#get('easytags_file')
+  return s:select_tags_file(expand(tagsfile), 'global')
+endfunction
+
+function! s:select_tags_file(tagsfile, kind) " {{{2
+  " If the selected tags file exists, make sure its writable. Also provide the
+  " user with feedback about the tags file selection process.
+  if filereadable(a:tagsfile) && filewritable(a:tagsfile) != 1
+    let message = "The %s tags file %s isn't writable!"
+    throw printf(message, a:kind, fnamemodify(a:tagsfile, ':~'))
   endif
-  " If the tags file exists, make sure it is writable!
-  if filereadable(tagsfile) && filewritable(tagsfile) != 1
-    let message = "The tags file %s isn't writable!"
-    throw printf(message, fnamemodify(tagsfile, ':~'))
-  endif
-  return xolox#misc#path#absolute(tagsfile)
+  " Provide the user with feedback about the tags file selection process.
+  call xolox#misc#msg#debug("easytags.vim %s: Selected %s tags file %s.", g:xolox#easytags#version, a:kind, a:tagsfile)
+  " Canonicalize the tags file's pathname.
+  return xolox#misc#path#absolute(a:tagsfile)
 endfunction
 
 function! xolox#easytags#syntax_groups_to_ignore() " {{{2
