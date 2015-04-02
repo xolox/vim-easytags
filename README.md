@@ -8,11 +8,7 @@ There's just one problem: You have to manually keep your tags files up-to-date a
 
 ## Installation
 
-*Please note that the vim-easytags plug-in requires my vim-misc plug-in which is separately distributed.*
-
-Unzip the most recent ZIP archives of the [vim-easytags] [download-easytags] and [vim-misc] [download-misc] plug-ins inside your Vim profile directory (usually this is `~/.vim` on UNIX and `%USERPROFILE%\vimfiles` on Windows), restart Vim and execute the command `:helptags ~/.vim/doc` (use `:helptags ~\vimfiles\doc` instead on Windows).
-
-If you prefer you can also use [Pathogen] [pathogen], [Vundle] [vundle] or a similar tool to install and update the [vim-easytags] [github-easytags] and [vim-misc] [github-misc] plug-ins using a local clone of the git repository.
+Please refer to the [installation instructions] [howto-install] available on GitHub.
 
 Now try it out: Edit any file type supported by Exuberant Ctags and within ten seconds the plug-in should create/update your tags file (`~/.vimtags` on UNIX, `~/_vimtags` on Windows) with the tags defined in the file you just edited! This means that whatever file you're editing in Vim (as long as it's on the local file system), tags will always be available by the time you need them!
 
@@ -368,19 +364,15 @@ Thanks go out to everyone who has helped to improve the vim-easytags plug-in (wh
 [cursorhold]: http://vimdoc.sourceforge.net/htmldoc/autocmd.html#CursorHold
 [cygwin]: http://en.wikipedia.org/wiki/Cygwin
 [dll]: http://en.wikipedia.org/wiki/Dynamic-link_library
-[download-easytags]: http://peterodding.com/code/vim/downloads/easytags.zip
-[download-misc]: http://peterodding.com/code/vim/downloads/misc.zip
 [e339]: http://vimdoc.sourceforge.net/htmldoc/message.html#E339
 [exctags]: http://ctags.sourceforge.net/
-[github-easytags]: http://github.com/xolox/vim-easytags
-[github-misc]: http://github.com/xolox/vim-misc
 [hlinks]: http://en.wikipedia.org/wiki/Hard_link
+[howto-install]: https://github.com/xolox/vim-easytags/blob/master/INSTALL.md
 [ide]: http://en.wikipedia.org/wiki/Integrated_development_environment
 [jsctags]: https://npmjs.org/package/jsctags
 [localtime]: http://vimdoc.sourceforge.net/htmldoc/eval.html#localtime()
 [messages]: http://vimdoc.sourceforge.net/htmldoc/message.html#:messages
 [neocomplcache]: http://www.vim.org/scripts/script.php?script_id=2620
-[pathogen]: http://www.vim.org/scripts/script.php?script_id=2332
 [shell]: http://peterodding.com/code/vim/shell/
 [slinks]: http://en.wikipedia.org/wiki/Symbolic_link
 [syn_groups]: http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name
@@ -393,4 +385,3 @@ Thanks go out to everyone who has helped to improve the vim-easytags plug-in (wh
 [vim_fts]: http://ftp.vim.org/vim/runtime/syntax/
 [vim_online]: http://www.vim.org/scripts/script.php?script_id=3114
 [vimrc]: http://vimdoc.sourceforge.net/htmldoc/starting.html#vimrc
-[vundle]: https://github.com/gmarik/vundle

@@ -76,17 +76,7 @@ see if it would work -- surprisingly well I'm happy to report!
                                                         *easytags-installation*
 Installation ~
 
-_Please note that the vim-easytags plug-in requires my vim-misc plug-in which
-is separately distributed._
-
-Unzip the most recent ZIP archives of the vim-easytags [6] and vim-misc [7]
-plug-ins inside your Vim profile directory (usually this is '~/.vim' on UNIX
-and '%USERPROFILE%\vimfiles' on Windows), restart Vim and execute the command
-':helptags ~/.vim/doc' (use ':helptags ~\vimfiles\doc' instead on Windows).
-
-If you prefer you can also use Pathogen [8], Vundle [9] or a similar tool to
-install and update the vim-easytags [10] and vim-misc [11] plug-ins using a
-local clone of the git repository.
+Please refer to the installation instructions [6] available on GitHub.
 
 Now try it out: Edit any file type supported by Exuberant Ctags and within ten
 seconds the plug-in should create/update your tags file ('~/.vimtags' on UNIX,
@@ -116,7 +106,7 @@ A note about Windows ~
 
 On Windows the |system()| function used by 'easytags.vim' causes a command
 prompt window to pop up while Exuberant Ctags is executing. If this bothers you
-then you can install my shell.vim [12] plug-in which includes a DLL [13] that
+then you can install my shell.vim [7] plug-in which includes a DLL [8] that
 works around this issue. Once you've installed both plug-ins it should work out
 of the box! Please let me know if this doesn't work for you.
 
@@ -198,7 +188,7 @@ for example the concatenation of |g:easytags_cmd|, |g:easytags_opts| and
 >
   :let g:easytags_opts = ['--options=$VIM\ctags\ctags.cnf']
 <
-The example above (based on issue 98 [14]) overrides the location of Exuberant
+The example above (based on issue 98 [9]) overrides the location of Exuberant
 Ctags' configuration file. As you can see the command line option(s) may
 contain environment variables, these will be expanded before passing the
 options to Exuberant Ctags (to make sure it works in all environments).
@@ -220,7 +210,7 @@ By setting this option to true (1) you enable asynchronous tags file updates.
 Good luck! ;-)
 
 Note that asynchronous updates on Windows currently require the installation of
-my vim-shell [12] plug-in (for obscure technical reasons that I want to fix but
+my vim-shell [7] plug-in (for obscure technical reasons that I want to fix but
 don't know how yet).
 
 -------------------------------------------------------------------------------
@@ -254,7 +244,7 @@ The *g:easytags_languages* option
 
 Exuberant Ctags supports many languages and can be extended via regular
 expression patterns, but for some languages separate tools with ctags-
-compatible output exist (e.g. jsctags [15] for Javascript). To use these, the
+compatible output exist (e.g. jsctags [10] for Javascript). To use these, the
 executable and its arguments must be configured:
 >
   let g:easytags_languages = {
@@ -466,14 +456,14 @@ type plug-in, etc.):
 -------------------------------------------------------------------------------
 The *g:easytags_resolve_links* option
 
-UNIX has symbolic links [16] and hard links [17], both of which conflict with
+UNIX has symbolic links [11] and hard links [12], both of which conflict with
 the concept of having one unique location for every identifier. With regards to
 hard links there's not much anyone can do, but because I use symbolic links
 quite a lot I've added this option. It's disabled by default since it has a
 small performance impact and might not do what unknowing users expect it to:
 When you enable this option the plug-in will resolve symbolic links in
 pathnames, which means your tags file will only contain entries with canonical
-pathnames [18]. To enable this option (which I strongly suggest doing when you
+pathnames [13]. To enable this option (which I strongly suggest doing when you
 run UNIX and use symbolic links) execute the following Vim command:
 >
   :let g:easytags_resolve_links = 1
@@ -507,11 +497,11 @@ about this. If you have suggestions, please feel free to submit them.
 Passing custom command line arguments to Exuberant Ctags ~
 
 You may want to run Exuberant Ctags with specific command line options, for
-example the code_complete [19] plug-in requires the signature field to be
+example the code_complete [14] plug-in requires the signature field to be
 present. To do this you can create a configuration file for Exuberant Ctags,
 e.g. '~/.ctags' on UNIX or '%USERPROFILE%\ctags.cnf' on Windows. The file
 should contain one command line option per line. See the Exuberant Ctags manual
-[20] for details.
+[15] for details.
 
 -------------------------------------------------------------------------------
                         *easytags-update-highlight-tags-immediately-after-save*
@@ -700,7 +690,7 @@ directories.
                                *easytags-plug-in-doesnt-seem-to-work-in-cygwin*
 The plug-in doesn't seem to work in Cygwin ~
 
-If you want to use the plug-in with Vim under Cygwin [21], you need to have the
+If you want to use the plug-in with Vim under Cygwin [16], you need to have the
 Cygwin version of Ctags installed instead of the Windows version (thanks to
 Alex Zuroff for reporting this!).
 
@@ -711,13 +701,13 @@ Contact ~
 If you have questions, bug reports, suggestions, etc. the author can be
 contacted at peter@peterodding.com. The latest version is available at
 http://peterodding.com/code/vim/easytags/ and http://github.com/xolox/vim-
-easytags. If you like this plug-in please vote for it on Vim Online [22].
+easytags. If you like this plug-in please vote for it on Vim Online [17].
 
 ===============================================================================
                                                              *easytags-license*
 License ~
 
-This software is licensed under the MIT license [23]. © 2015 Peter Odding
+This software is licensed under the MIT license [18]. © 2015 Peter Odding
 <peter@peterodding.com> and Ingo Karkat.
 
 Thanks go out to everyone who has helped to improve the vim-easytags plug-in
@@ -732,23 +722,18 @@ References ~
 [3] http://en.wikipedia.org/wiki/Ctags
 [4] http://ftp.vim.org/vim/runtime/syntax/
 [5] http://ctags.sourceforge.net/languages.html
-[6] http://peterodding.com/code/vim/downloads/easytags.zip
-[7] http://peterodding.com/code/vim/downloads/misc.zip
-[8] http://www.vim.org/scripts/script.php?script_id=2332
-[9] https://github.com/gmarik/vundle
-[10] http://github.com/xolox/vim-easytags
-[11] http://github.com/xolox/vim-misc
-[12] http://peterodding.com/code/vim/shell/
-[13] http://en.wikipedia.org/wiki/Dynamic-link_library
-[14] https://github.com/xolox/vim-easytags/issues/98
-[15] https://npmjs.org/package/jsctags
-[16] http://en.wikipedia.org/wiki/Symbolic_link
-[17] http://en.wikipedia.org/wiki/Hard_link
-[18] http://en.wikipedia.org/wiki/Canonicalization
-[19] http://www.vim.org/scripts/script.php?script_id=1764
-[20] http://ctags.sourceforge.net/ctags.html#FILES
-[21] http://en.wikipedia.org/wiki/Cygwin
-[22] http://www.vim.org/scripts/script.php?script_id=3114
-[23] http://en.wikipedia.org/wiki/MIT_License
+[6] https://github.com/xolox/vim-easytags/blob/master/INSTALL.md
+[7] http://peterodding.com/code/vim/shell/
+[8] http://en.wikipedia.org/wiki/Dynamic-link_library
+[9] https://github.com/xolox/vim-easytags/issues/98
+[10] https://npmjs.org/package/jsctags
+[11] http://en.wikipedia.org/wiki/Symbolic_link
+[12] http://en.wikipedia.org/wiki/Hard_link
+[13] http://en.wikipedia.org/wiki/Canonicalization
+[14] http://www.vim.org/scripts/script.php?script_id=1764
+[15] http://ctags.sourceforge.net/ctags.html#FILES
+[16] http://en.wikipedia.org/wiki/Cygwin
+[17] http://www.vim.org/scripts/script.php?script_id=3114
+[18] http://en.wikipedia.org/wiki/MIT_License
 
 vim: ft=help
