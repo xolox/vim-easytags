@@ -151,7 +151,7 @@ By default the plug-in automatically generates and highlights tags when you stop
 
     :let g:easytags_always_enabled = 1
 
-Be warned that after setting this option you'll probably notice why it's disabled by default: Every time you edit a file in Vim, the plug-in will first run Exuberant Ctags and then highlight the tags, and this slows Vim down quite a lot. I have some ideas on how to improve this latency by running Exuberant Ctags in the background so stay tuned!
+Be warned that after setting this option you'll probably notice why it's disabled by default: Every time you edit a file in Vim, the plug-in will first run Exuberant Ctags and then highlight the tags, and this slows Vim down quite a lot. To make this less of a problem you can use the `g:easytags_async` option.
 
 Note: If you change this option it won't apply until you restart Vim, so you'll have to set this option in your [vimrc script] [vimrc].
 
