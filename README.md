@@ -179,11 +179,15 @@ By default the plug-in automatically updates and highlights your tags when you s
 
     :let g:easytags_auto_update = 0
 
+This disables all _automatic_ tags file updates (regardless of how they were enabled) where automatic means _initiated by a Vim automatic command_.
+
 ### The `g:easytags_auto_highlight` option
 
 By default the plug-in automatically updates and highlights your tags when you stop typing for a moment. If you want to disable automatic highlighting while keeping automatic updating enabled you can set this option to false:
 
     :let g:easytags_auto_highlight = 0
+
+This disables all _automatic_ tags highlighting (regardless of how it was enabled) where automatic means _initiated by a Vim automatic command_.
 
 ### The `g:easytags_autorecurse` option
 
