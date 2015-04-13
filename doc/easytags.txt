@@ -291,8 +291,8 @@ words: If a project specific tags file is found it will be used, otherwise the
 plug-in falls back to the global tags file (or a file type specific tags file).
 
 If you set |g:easytags_dynamic_files| to 2 the easytags plug-in will
-automatically create project specific tags based on the first name in the
-'tags' option. In this mode the the global tags file or file type specific tags
+automatically create a project specific tags file based on the first name in the
+'tags' option. In this mode the global tags file or file type specific tags
 files are only used for directories where you don't have write permissions.
 
 The |'tags'| option is reevaluated each time the plug-in runs, so which tags
