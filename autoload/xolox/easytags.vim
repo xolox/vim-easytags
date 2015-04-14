@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: March 15, 2015
+" Last Change: April 14, 2015
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.10'
+let g:xolox#easytags#version = '3.10.1'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 

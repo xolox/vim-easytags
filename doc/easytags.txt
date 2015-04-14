@@ -292,9 +292,14 @@ plug-in falls back to the global tags file (or a file type specific tags file).
 
 If you set |g:easytags_dynamic_files| to 2 the easytags plug-in will
 automatically create a project specific tags file based on the first name in
-the 'tags' option. In this mode the global tags file and/or file type specific
-tags files are only used for directories where you don't have write
+the |'tags'| option. In this mode the global tags file and/or file type
+specific tags files are only used for directories where you don't have write
 permissions.
+
+When you set |g:easytags_dynamic_files| to 2 new tags files are created in the
+same directory as the file you're editing. If you want the tags files to be
+created in your working directory instead then change Vim's |'cpoptions'|
+option to include the lowercase letter 'd'.
 
 The |'tags'| option is reevaluated each time the plug-in runs, so which tags
 file is selected can differ depending on the buffer and working directory.
