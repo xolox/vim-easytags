@@ -1,9 +1,9 @@
 " Vim script
 " Author: Peter Odding <peter@peterodding.com>
-" Last Change: April 14, 2015
+" Last Change: July 1, 2015
 " URL: http://peterodding.com/code/vim/easytags/
 
-let g:xolox#easytags#version = '3.10.1'
+let g:xolox#easytags#version = '3.11'
 let g:xolox#easytags#default_pattern_prefix = '\C\<'
 let g:xolox#easytags#default_pattern_suffix = '\>'
 
@@ -78,7 +78,7 @@ function! xolox#easytags#check_ctags_compatible(name, min_version) " {{{2
     call xolox#misc#msg#debug("easytags.vim %s: Command '%s' returned nonzero exit code %i!", g:xolox#easytags#version, a:name, result['exit_code'])
   else
     " Extract the version number from the output.
-    let pattern = 'Exuberant Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
+    let pattern = '\(Exuberant\|Universal\) Ctags \zs\(\d\+\(\.\d\+\)*\|Development\)'
     let g:easytags_ctags_version = matchstr(get(result['stdout'], 0, ''), pattern)
     " Deal with development builds.
     if g:easytags_ctags_version == 'Development'
